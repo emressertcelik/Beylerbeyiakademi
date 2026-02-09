@@ -1,0 +1,3158 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Beylerbeyi SK - Altyapı Yönetim Sistemi</title>
+    <style>
+/* Beylerbeyi SK CSS - Kısa versiyon */
+:root {
+  --beylerbeyi-red: #C8102E;
+  --beylerbeyi-green: #006B3F;
+  --beylerbeyi-dark: #1a1a1a;
+  --beylerbeyi-gold: #FFD700;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Segoe UI', sans-serif;
+  background: linear-gradient(135deg, var(--beylerbeyi-red), var(--beylerbeyi-dark));
+  min-height: 100vh;
+  padding: 20px;
+}
+
+.container { max-width: 1400px; margin: 0 auto; }
+
+.header {
+  background: white;
+  padding: 20px 30px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.header-left { display: flex; align-items: center; gap: 15px; }
+.header-logo { width: 50px; height: 50px; object-fit: contain; }
+.header h2 { color: var(--beylerbeyi-red); font-size: 24px; }
+
+.user-info { display: flex; align-items: center; gap: 15px; }
+.user-badge {
+  background: var(--beylerbeyi-red);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.content {
+  background: white;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  min-height: 500px;
+}
+
+.login-container {
+  max-width: 400px;
+  margin: 80px auto;
+  background: white;
+  padding: 40px;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+}
+
+.login-header { text-align: center; margin-bottom: 30px; }
+.login-header img { width: 100px; height: 100px; margin-bottom: 15px; }
+.login-header h1 { color: var(--beylerbeyi-red); font-size: 22px; margin-bottom: 5px; }
+.login-header .subtitle { color: #666; font-size: 14px; }
+
+.form-group { margin-bottom: 20px; }
+.form-group label { display: block; margin-bottom: 8px; color: #333; font-weight: 600; font-size: 14px; }
+
+input, select, textarea {
+  width: 100%;
+  padding: 12px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: inherit;
+}
+
+input:focus, select:focus { outline: none; border-color: var(--beylerbeyi-red); }
+
+button {
+  width: 100%;
+  padding: 12px;
+  background: var(--beylerbeyi-red);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+button:hover { background: #a00d25; }
+button:disabled { background: #ccc; cursor: not-allowed; }
+
+.btn-secondary { background: var(--beylerbeyi-green); width: auto; padding: 8px 16px; font-size: 13px; }
+.btn-danger { background: #dc3545; }
+.action-btn { width: auto; padding: 6px 12px; font-size: 12px; margin: 0 3px; }
+
+.tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 25px;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.tab {
+  padding: 12px 24px;
+  background: none;
+  border: none;
+  color: #666;
+  border-bottom: 3px solid transparent;
+  cursor: pointer;
+  width: auto;
+  font-weight: 600;
+}
+
+.tab.active { color: var(--beylerbeyi-red); border-bottom-color: var(--beylerbeyi-red); }
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+.season-selector { margin-bottom: 20px; display: flex; gap: 10px; flex-wrap: wrap; }
+
+.season-btn {
+  padding: 10px 20px;
+  background: #f5f5f5;
+  border: 2px solid #e0e0e0;
+  border-radius: 20px;
+  cursor: pointer;
+  font-weight: 600;
+  color: #666;
+  width: auto;
+}
+
+.season-btn.active { background: var(--beylerbeyi-red); color: white; border-color: var(--beylerbeyi-red); }
+
+.team-filter { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+
+.team-badge {
+  padding: 10px 20px;
+  background: #f5f5f5;
+  border: 2px solid #e0e0e0;
+  border-radius: 20px;
+  cursor: pointer;
+  font-weight: 600;
+  color: #666;
+}
+
+.team-badge.active { background: var(--beylerbeyi-red); color: white; }
+.team-badge .count { background: rgba(255,255,255,0.3); padding: 2px 8px; border-radius: 10px; margin-left: 5px; font-size: 12px; }
+
+.players-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.player-card {
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  overflow: hidden;
+  cursor: pointer;
+  background: white;
+}
+
+.player-card:hover { border-color: var(--beylerbeyi-red); box-shadow: 0 8px 16px rgba(200,16,46,0.2); }
+
+.player-card-header {
+  background: var(--beylerbeyi-red);
+  padding: 12px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.player-card-header h4 { color: white; font-size: 15px; margin: 0; }
+
+.position-badge {
+  background: var(--beylerbeyi-green);
+  color: white;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.player-photo {
+  width: 100%;
+  height: 200px;
+  background: #f5f5f5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.player-photo img { width: 100%; height: 100%; object-fit: cover; }
+
+.player-photo-placeholder {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: var(--beylerbeyi-red);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  font-weight: 800;
+}
+
+.player-card-body { padding: 15px; }
+.player-card .info { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 13px; color: #666; }
+.player-card .info strong { color: #333; }
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 15px;
+  margin-bottom: 25px;
+}
+
+.stat-card {
+  background: var(--beylerbeyi-red);
+  color: white;
+  padding: 20px;
+  border-radius: 12px;
+  text-align: center;
+}
+
+.stat-card h3 { font-size: 32px; margin-bottom: 5px; }
+.stat-card p { font-size: 13px; opacity: 0.9; }
+.stat-card.green { background: var(--beylerbeyi-green); }
+.stat-card.gold { background: var(--beylerbeyi-gold); color: #333; }
+.stat-card.dark { background: var(--beylerbeyi-dark); }
+
+.modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.7);
+  z-index: 1000;
+  overflow-y: auto;
+}
+
+.modal-content {
+  background: white;
+  max-width: 900px;
+  margin: 30px auto;
+  padding: 30px;
+  border-radius: 12px;
+  position: relative;
+}
+
+.close-modal {
+  position: absolute;
+  top: 15px;
+  right: 20px;
+  font-size: 28px;
+  color: #999;
+  cursor: pointer;
+  background: none;
+  border: none;
+  width: auto;
+  padding: 0;
+}
+
+.close-modal:hover { color: var(--beylerbeyi-red); }
+
+table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+th, td { padding: 12px; text-align: left; border-bottom: 1px solid #e0e0e0; font-size: 14px; }
+thead th { background: var(--beylerbeyi-red); color: white; font-weight: 600; }
+tbody tr:hover { background: #f8f8f8; }
+
+.eval-section {
+  background: #f8f9fa;
+  padding: 20px;
+  border-radius: 12px;
+  border-left: 4px solid var(--beylerbeyi-red);
+  margin-bottom: 20px;
+}
+
+.eval-section h4 { color: var(--beylerbeyi-dark); margin-bottom: 15px; font-size: 15px; }
+
+.error-message { background: #fff3cd; border: 1px solid #ffc107; color: #856404; padding: 12px; border-radius: 8px; margin-bottom: 15px; display: none; }
+.success-message { background: #d4edda; border: 1px solid #28a745; color: #155724; padding: 12px; border-radius: 8px; margin-bottom: 15px; display: none; }
+
+.hidden { display: none !important; }
+.text-center { text-align: center; }
+.loading { text-align: center; padding: 40px; color: #666; }
+
+.demo-users {
+  background: #fff8e1;
+  border: 2px solid var(--beylerbeyi-gold);
+  padding: 20px;
+  border-radius: 12px;
+  margin-top: 25px;
+}
+
+.demo-users h4 { color: var(--beylerbeyi-dark); margin-bottom: 12px; }
+.demo-users p { color: #666; font-size: 14px; margin: 8px 0; }
+
+@media (max-width: 768px) {
+  .header { flex-direction: column; }
+  .players-grid { grid-template-columns: 1fr; }
+  .stats-grid { grid-template-columns: 1fr; }
+}
+
+    </style>
+</head>
+<body>
+<div id="loginScreen" class="login-container">
+        <div class="login-header">
+            <img id="loginLogo" src="" alt="Beylerbeyi SK">
+            <h1>Beylerbeyi Spor Kulübü</h1>
+            <p class="subtitle">Altyapı Futbol Akademisi Yönetim Sistemi</p>
+        </div>
+        
+        <div id="errorMessage" class="error-message"></div>
+        
+        <div class="form-group">
+            <label for="username">Kullanıcı Adı</label>
+            <input type="text" id="username" placeholder="Kullanıcı adınızı girin" autocomplete="username">
+        </div>
+        
+        <div class="form-group">
+            <label for="password">Şifre</label>
+            <input type="password" id="password" placeholder="Şifrenizi girin" autocomplete="current-password">
+        </div>
+        
+        <button onclick="login()">Giriş Yap</button>
+
+        <div class="demo-users">
+            <h4>📋 Demo Hesaplar</h4>
+            <p><strong>Admin:</strong> admin / admin123</p>
+            <p><strong>U13 Antrenörü:</strong> coach_u13 / coach123</p>
+            <p><strong>U15 Antrenörü:</strong> coach_u15 / coach123</p>
+            <p><strong>Oyuncu:</strong> player_aziz / player123</p>
+            <p><strong>Yönetici:</strong> manager / manager123</p>
+        </div>
+    </div>
+
+    <!-- ==========================================
+         DASHBOARD
+         ========================================== -->
+    <div id="dashboard" class="container" style="display: none;">
+        
+        <!-- Header -->
+        <div class="header">
+            <div class="header-left">
+                <img id="headerLogo" src="" alt="Beylerbeyi SK" class="header-logo">
+                <h2 id="dashboardTitle">Dashboard</h2>
+            </div>
+            <div class="user-info">
+                <span class="user-badge" id="userBadge">Kullanıcı</span>
+                <button onclick="logout()" class="btn-secondary">Çıkış Yap</button>
+            </div>
+        </div>
+
+        <!-- Content -->
+        <div class="content">
+            
+            <!-- Success/Error Messages -->
+            <div id="successMessage" class="success-message"></div>
+            
+            <!-- ==========================================
+                 ADMIN VIEW
+                 ========================================== -->
+            <div id="adminView" style="display: none;">
+                <!-- Sezon Seçici -->
+                <div id="adminSeasonContainer" class="season-selector"></div>
+                
+                <!-- İstatistik Kartları -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3 id="adminTotalPlayers">0</h3>
+                        <p>Toplam Oyuncu</p>
+                    </div>
+                    <div class="stat-card green">
+                        <h3 id="adminTotalTeams">0</h3>
+                        <p>Takım Sayısı</p>
+                    </div>
+                    <div class="stat-card gold">
+                        <h3 id="adminTotalCoaches">0</h3>
+                        <p>Antrenör Sayısı</p>
+                    </div>
+                    <div class="stat-card dark">
+                        <h3 id="adminActiveSeasons">0</h3>
+                        <p>Aktif Sezon</p>
+                    </div>
+                </div>
+
+                <!-- Tabs -->
+                <div class="tabs">
+                    <button class="tab active" onclick="switchTab('adminPlayers')">Oyuncular</button>
+                    <button class="tab" onclick="switchTab('adminTeams')">Takımlar</button>
+                    <button class="tab" onclick="switchTab('adminCoaches')">Antrenörler</button>
+                </div>
+
+                <!-- Oyuncular Tab -->
+                <div id="adminPlayersTab" class="tab-content active">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h3>Tüm Oyuncular</h3>
+                        <button onclick="showAddPlayerModal()" class="btn-secondary">+ Yeni Oyuncu Ekle</button>
+                    </div>
+                    
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Fotoğraf</th>
+                                <th>Ad Soyad</th>
+                                <th>Yaş Grubu</th>
+                                <th>Pozisyon</th>
+                                <th>İşlemler</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adminPlayersList"></tbody>
+                    </table>
+                </div>
+
+                <!-- Takımlar Tab -->
+                <div id="adminTeamsTab" class="tab-content">
+                    <h3>Takım Yönetimi</h3>
+                    <p class="info-message">Takım yönetimi modülü geliştiriliyor...</p>
+                </div>
+
+                <!-- Antrenörler Tab -->
+                <div id="adminCoachesTab" class="tab-content">
+                    <h3>Antrenör Yönetimi</h3>
+                    <p class="info-message">Antrenör yönetimi modülü geliştiriliyor...</p>
+                </div>
+            </div>
+
+            <!-- ==========================================
+                 COACH VIEW (ANTRENÖR)
+                 ========================================== -->
+            <div id="coachView" style="display: none;">
+                <!-- Sezon Seçici -->
+                <div id="coachSeasonContainer" class="season-selector"></div>
+                
+                <!-- İstatistik Kartları -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3 id="coachTotalPlayers">0</h3>
+                        <p>Oyuncu</p>
+                    </div>
+                    <div class="stat-card green">
+                        <h3 id="coachTotalMatches">0</h3>
+                        <p>Toplam Maç</p>
+                    </div>
+                    <div class="stat-card gold">
+                        <h3 id="coachTotalGoals">0</h3>
+                        <p>Toplam Gol</p>
+                    </div>
+                    <div class="stat-card dark">
+                        <h3 id="coachTotalAssists">0</h3>
+                        <p>Toplam Asist</p>
+                    </div>
+                </div>
+
+                <!-- Tabs -->
+                <div class="tabs">
+                    <button class="tab active">Oyuncular</button>
+                </div>
+
+                <!-- Oyuncular -->
+                <div class="tab-content active">
+                    <h3 style="margin-bottom: 20px;">Kayıtlı Oyuncular</h3>
+                    
+                    <!-- Yaş Grubu Filtresi -->
+                    <div id="ageGroupFilter" class="team-filter"></div>
+                    
+                    <!-- Oyuncu Grid -->
+                    <div id="playersGrid" class="players-grid"></div>
+                </div>
+            </div>
+
+            <!-- ==========================================
+                 PLAYER VIEW (OYUNCU)
+                 ========================================== -->
+            <div id="playerView" style="display: none;">
+                <!-- Sezon Seçici -->
+                <div id="playerSeasonContainer" class="season-selector"></div>
+                
+                <!-- Oyuncu İçeriği -->
+                <div id="playerContent"></div>
+            </div>
+
+            <!-- ==========================================
+                 MANAGER VIEW (YÖNETİCİ)
+                 ========================================== -->
+            <div id="managerView" style="display: none;">
+                <!-- Sezon Seçici -->
+                <div id="managerSeasonContainer" class="season-selector"></div>
+                
+                <h3 style="margin-bottom: 25px;">Yönetici Raporları</h3>
+                
+                <!-- İstatistik Kartları -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3 id="mgrTotalPlayers">0</h3>
+                        <p>Toplam Oyuncu</p>
+                    </div>
+                    <div class="stat-card green">
+                        <h3 id="mgrTeamGoals">0</h3>
+                        <p>Takım Gol</p>
+                    </div>
+                    <div class="stat-card gold">
+                        <h3 id="mgrTeamAssists">0</h3>
+                        <p>Takım Asist</p>
+                    </div>
+                    <div class="stat-card dark">
+                        <h3 id="mgrTopScorer">-</h3>
+                        <p>En Golcü</p>
+                    </div>
+                </div>
+
+                <!-- Raporlar -->
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 25px; margin-top: 30px;">
+                    
+                    <!-- Pozisyon Dağılımı -->
+                    <div class="eval-section">
+                        <h4>📊 Pozisyon Dağılımı</h4>
+                        <div id="positionDistribution"></div>
+                    </div>
+
+                    <!-- En İyi Performanslar -->
+                    <div class="eval-section">
+                        <h4>🏆 En İyi Performans</h4>
+                        <div id="topPerformers"></div>
+                    </div>
+
+                    <!-- Disiplin Raporu -->
+                    <div class="eval-section">
+                        <h4>🟨 Disiplin Raporu</h4>
+                        <div id="disciplineReport"></div>
+                    </div>
+
+                    <!-- Yaş Grubu Dağılımı -->
+                    <div class="eval-section">
+                        <h4>👥 Yaş Grubu Dağılımı</h4>
+                        <div id="ageGroupDistribution"></div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ==========================================
+         MODALS
+         ========================================== -->
+    
+    <!-- Oyuncu Detay Modal -->
+    <div id="playerModal" class="modal">
+        <div class="modal-content">
+            <button class="close-modal" onclick="closePlayerModal()">&times;</button>
+            <div id="playerModalContent"></div>
+        </div>
+    </div>
+
+    <!-- Oyuncu Ekle/Düzenle Modal -->
+    <div id="addPlayerModal" class="modal">
+        <div class="modal-content">
+            <button class="close-modal" onclick="closeAddPlayerModal()">&times;</button>
+            <h2 id="playerFormTitle">Yeni Oyuncu Ekle</h2>
+            <form id="playerForm" onsubmit="savePlayer(event)">
+                <input type="hidden" id="playerFormId">
+                
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                    <div class="form-group">
+                        <label for="playerName">Ad Soyad *</label>
+                        <input type="text" id="playerName" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="playerBirthYear">Doğum Yılı *</label>
+                        <input type="number" id="playerBirthYear" min="2000" max="2020" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="playerAgeGroup">Yaş Grubu *</label>
+                        <select id="playerAgeGroup" required></select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="playerPosition">Pozisyon *</label>
+                        <select id="playerPosition" required></select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="playerHeight">Boy (cm)</label>
+                        <input type="number" id="playerHeight" min="100" max="250">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="playerWeight">Kilo (kg)</label>
+                        <input type="number" id="playerWeight" min="30" max="150">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="playerFoot">Ayak</label>
+                        <select id="playerFoot">
+                            <option value="Sağ">Sağ</option>
+                            <option value="Sol">Sol</option>
+                            <option value="İki Ayak">İki Ayak</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="playerPreviousClub">Önceki Kulüp</label>
+                        <input type="text" id="playerPreviousClub">
+                    </div>
+                </div>
+                
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                    <button type="submit">Kaydet</button>
+                    <button type="button" class="btn-secondary" onclick="closeAddPlayerModal()">İptal</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ==========================================
+         JAVASCRIPT
+         ========================================== -->
+    
+    <!-- Data -->
+    
+<script>
+
+// ===== DATA.JS =====
+// ==========================================
+// BEYLERBEYI SK - MERKEZİ VERİ YAPISI
+// ==========================================
+
+// ==========================================
+// SEZONLAR (Free text DEĞİL - tanımlı liste)
+// ==========================================
+const SEASONS = [
+  { id: '2025-2026', name: '2025-2026 Sezonu', active: false, startYear: 2025, endYear: 2026 },
+  { id: '2024-2025', name: '2024-2025 Sezonu', active: true, startYear: 2024, endYear: 2025 },
+  { id: '2023-2024', name: '2023-2024 Sezonu', active: false, startYear: 2023, endYear: 2024 },
+  { id: '2022-2023', name: '2022-2023 Sezonu', active: false, startYear: 2022, endYear: 2023 }
+];
+
+// ==========================================
+// YAŞ GRUPLARI (Yaş aralıkları ile)
+// ==========================================
+const AGE_GROUPS = [
+  { id: 'U11', name: 'U11', displayName: 'U11 (10-11 yaş)', minAge: 10, maxAge: 11 },
+  { id: 'U13', name: 'U13', displayName: 'U13 (12-13 yaş)', minAge: 12, maxAge: 13 },
+  { id: 'U15', name: 'U15', displayName: 'U15 (14-15 yaş)', minAge: 14, maxAge: 15 },
+  { id: 'U17', name: 'U17', displayName: 'U17 (16-17 yaş)', minAge: 16, maxAge: 17 },
+  { id: 'U19', name: 'U19', displayName: 'U19 (18-19 yaş)', minAge: 18, maxAge: 19 }
+];
+
+// ==========================================
+// POZİSYONLAR (Kaleci/Saha oyuncusu ayrımı)
+// ==========================================
+const POSITIONS = [
+  // Kaleci
+  { id: 'GK', name: 'Kaleci', shortName: 'KLC', isGoalkeeper: true, category: 'Defans' },
+  
+  // Defans
+  { id: 'RB', name: 'Sağ Bek', shortName: 'SB', isGoalkeeper: false, category: 'Defans' },
+  { id: 'LB', name: 'Sol Bek', shortName: 'SOB', isGoalkeeper: false, category: 'Defans' },
+  { id: 'CB', name: 'Stoper', shortName: 'STP', isGoalkeeper: false, category: 'Defans' },
+  { id: 'RWB', name: 'Sağ Kanat Bek', shortName: 'SKB', isGoalkeeper: false, category: 'Defans' },
+  { id: 'LWB', name: 'Sol Kanat Bek', shortName: 'SOKB', isGoalkeeper: false, category: 'Defans' },
+  
+  // Orta Saha
+  { id: 'CDM', name: 'Defansif Orta Saha', shortName: 'DOS', isGoalkeeper: false, category: 'Orta Saha' },
+  { id: 'CM', name: 'Orta Saha', shortName: 'OS', isGoalkeeper: false, category: 'Orta Saha' },
+  { id: 'CAM', name: 'Ofansif Orta Saha', shortName: 'OOS', isGoalkeeper: false, category: 'Orta Saha' },
+  { id: 'RM', name: 'Sağ Orta Saha', shortName: 'SOS', isGoalkeeper: false, category: 'Orta Saha' },
+  { id: 'LM', name: 'Sol Orta Saha', shortName: 'SOOS', isGoalkeeper: false, category: 'Orta Saha' },
+  
+  // Hücum
+  { id: 'RW', name: 'Sağ Kanat', shortName: 'SK', isGoalkeeper: false, category: 'Hücum' },
+  { id: 'LW', name: 'Sol Kanat', shortName: 'SOK', isGoalkeeper: false, category: 'Hücum' },
+  { id: 'ST', name: 'Santrafor', shortName: 'ST', isGoalkeeper: false, category: 'Hücum' },
+  { id: 'CF', name: 'Forvet', shortName: 'FV', isGoalkeeper: false, category: 'Hücum' }
+];
+
+// ==========================================
+// KULLANICILAR (Demo - Yetkilendirme ile)
+// ==========================================
+const USERS = {
+  // Admin - Tüm yetkilere sahip
+  admin: {
+    id: 'admin',
+    username: 'admin',
+    password: 'admin123',
+    role: 'admin',
+    name: 'Sistem Yöneticisi',
+    email: 'admin@beylerbeyi.com',
+    ageGroups: ['U11', 'U13', 'U15', 'U17', 'U19'], // Tüm yaş grupları
+    permissions: {
+      viewAllPlayers: true,
+      editAllPlayers: true,
+      deletePlayer: true,
+      manageCoaches: true,
+      manageSeasons: true,
+      manageTeams: true,
+      viewReports: true
+    }
+  },
+  
+  // U13 Antrenörü - Sadece U13
+  coach_u13: {
+    id: 'coach_u13',
+    username: 'coach_u13',
+    password: 'coach123',
+    role: 'coach',
+    name: 'Mehmet Yılmaz',
+    email: 'mehmet@beylerbeyi.com',
+    ageGroups: ['U13'], // Sadece U13 yetkisi
+    permissions: {
+      viewAllPlayers: false,
+      editAllPlayers: false,
+      deletePlayer: false,
+      manageCoaches: false,
+      manageSeasons: false,
+      manageTeams: false,
+      viewReports: false
+    }
+  },
+  
+  // U15 Antrenörü - Sadece U15
+  coach_u15: {
+    id: 'coach_u15',
+    username: 'coach_u15',
+    password: 'coach123',
+    role: 'coach',
+    name: 'Hasan Demir',
+    email: 'hasan@beylerbeyi.com',
+    ageGroups: ['U15'], // Sadece U15 yetkisi
+    permissions: {
+      viewAllPlayers: false,
+      editAllPlayers: false,
+      deletePlayer: false,
+      manageCoaches: false,
+      manageSeasons: false,
+      manageTeams: false,
+      viewReports: false
+    }
+  },
+  
+  // Baş Antrenör - Birden fazla yaş grubu
+  head_coach: {
+    id: 'head_coach',
+    username: 'head_coach',
+    password: 'coach123',
+    role: 'coach',
+    name: 'Ali Kaya',
+    email: 'ali@beylerbeyi.com',
+    ageGroups: ['U15', 'U17'], // U15 ve U17 yetkisi
+    permissions: {
+      viewAllPlayers: false,
+      editAllPlayers: false,
+      deletePlayer: false,
+      manageCoaches: false,
+      manageSeasons: false,
+      manageTeams: false,
+      viewReports: false
+    }
+  },
+  
+  // Oyuncu - Sadece kendi verilerini görür
+  player_aziz: {
+    id: 'player_aziz',
+    username: 'aziz',
+    password: 'player123',
+    role: 'player',
+    name: 'Aziz Poyraz Duman',
+    email: 'aziz@beylerbeyi.com',
+    playerId: 1, // players dizisindeki ID
+    ageGroups: [],
+    permissions: {
+      viewAllPlayers: false,
+      editAllPlayers: false,
+      deletePlayer: false,
+      manageCoaches: false,
+      manageSeasons: false,
+      manageTeams: false,
+      viewReports: false
+    }
+  },
+  
+  // Yönetici - Tüm raporları görebilir
+  manager: {
+    id: 'manager',
+    username: 'manager',
+    password: 'manager123',
+    role: 'manager',
+    name: 'Ahmet Öztürk',
+    email: 'ahmet@beylerbeyi.com',
+    ageGroups: ['U11', 'U13', 'U15', 'U17', 'U19'], // Tüm yaş grupları
+    permissions: {
+      viewAllPlayers: true,
+      editAllPlayers: false,
+      deletePlayer: false,
+      manageCoaches: false,
+      manageSeasons: false,
+      manageTeams: false,
+      viewReports: true
+    }
+  }
+};
+
+// ==========================================
+// OYUNCULAR (Sezon bazlı istatistikler)
+// ==========================================
+let players = [
+  {
+    id: 1,
+    name: 'Aziz Poyraz Duman',
+    birthYear: 2011,
+    ageGroup: 'U15',
+    position: 'GK', // Kaleci
+    height: 175,
+    weight: 65,
+    foot: 'Sağ',
+    previousClub: 'Beylerbeyi 1911',
+    photo: null, // Base64 veya URL
+    joinDate: '2020-09-01',
+    active: true,
+    
+    // Sezon bazlı istatistikler
+    seasonStats: {
+      '2024-2025': {
+        matches: 5,
+        minutes: 450,
+        goals: 0, // Kaleci için kullanılmaz
+        assists: 0,
+        yellowCards: 0,
+        redCards: 0,
+        // Kaleciye özel
+        cleanSheets: 2,
+        goalsConceded: 11,
+        saves: 34
+      },
+      '2023-2024': {
+        matches: 8,
+        minutes: 720,
+        goals: 0,
+        assists: 0,
+        yellowCards: 1,
+        redCards: 0,
+        cleanSheets: 3,
+        goalsConceded: 15,
+        saves: 52
+      }
+    },
+    
+    // Fiziksel değerlendirme (1-10)
+    physical: {
+      sprintSpeed: 6.0,
+      endurance: 7.5,
+      agility: 8.0,
+      balance: 7.5,
+      strength: 7.0,
+      jumping: 7.5,
+      lastUpdated: '2024-12-15'
+    },
+    
+    // Taktik değerlendirme (1-10)
+    tactical: {
+      gameUnderstanding: 8.0,
+      positionKnowledge: 8.5,
+      decisionMaking: 7.5,
+      transitions: 7.0,
+      spacingTiming: 7.5,
+      lastUpdated: '2024-12-15'
+    },
+    
+    // Mental değerlendirme (1-10)
+    mental: {
+      discipline: 8.0,
+      workRate: 8.0,
+      learningAttitude: 8.5,
+      confidence: 7.5,
+      competitiveness: 8.0,
+      teamHarmony: 9.0,
+      pressurePerformance: 7.0,
+      lastUpdated: '2024-12-15'
+    },
+    
+    // Sağlık bilgileri
+    health: {
+      pastInjuries: [],
+      recurringIssues: 'Yok',
+      rehabStatus: 'Aktif',
+      loadTolerance: 'İyi',
+      lastCheckup: '2024-11-20'
+    },
+    
+    // Kariyer geçmişi
+    careerHistory: [
+      { team: 'Beylerbeyi 1911', years: '2020-2024', role: 'Altyapı Oyuncusu', ageGroup: 'U13' },
+      { team: 'Beylerbeyi 1911', years: '2024-Devam', role: 'Altyapı Oyuncusu', ageGroup: 'U15' }
+    ],
+    
+    // Notlar (Antrenör yorumları)
+    notes: [
+      {
+        date: '2024-12-10',
+        author: 'Hasan Demir',
+        text: 'Refleksleri çok iyi. Ayak oyunu geliştirmeli.',
+        season: '2024-2025'
+      }
+    ]
+  },
+  
+  {
+    id: 2,
+    name: 'Emre Bozkurt',
+    birthYear: 2011,
+    ageGroup: 'U15',
+    position: 'RB', // Sağ Bek
+    height: 174,
+    weight: 65,
+    foot: 'Sağ',
+    previousClub: 'Fenerbahçe',
+    photo: null,
+    joinDate: '2023-08-15',
+    active: true,
+    
+    seasonStats: {
+      '2024-2025': {
+        matches: 11,
+        minutes: 1016,
+        goals: 1,
+        assists: 1,
+        yellowCards: 2,
+        redCards: 0
+      },
+      '2023-2024': {
+        matches: 6,
+        minutes: 540,
+        goals: 0,
+        assists: 2,
+        yellowCards: 1,
+        redCards: 0
+      }
+    },
+    
+    physical: {
+      sprintSpeed: 7.5,
+      endurance: 8.0,
+      agility: 7.0,
+      balance: 7.5,
+      strength: 7.5,
+      jumping: 6.5,
+      lastUpdated: '2024-12-15'
+    },
+    
+    tactical: {
+      gameUnderstanding: 7.5,
+      positionKnowledge: 8.0,
+      decisionMaking: 7.0,
+      transitions: 8.0,
+      spacingTiming: 7.5,
+      lastUpdated: '2024-12-15'
+    },
+    
+    mental: {
+      discipline: 7.5,
+      workRate: 8.5,
+      learningAttitude: 8.0,
+      confidence: 7.5,
+      competitiveness: 8.0,
+      teamHarmony: 8.0,
+      pressurePerformance: 7.5,
+      lastUpdated: '2024-12-15'
+    },
+    
+    health: {
+      pastInjuries: ['Ayak burkulması - 2023-10'],
+      recurringIssues: 'Yok',
+      rehabStatus: 'Aktif',
+      loadTolerance: 'İyi',
+      lastCheckup: '2024-11-18'
+    },
+    
+    careerHistory: [
+      { team: 'Fenerbahçe', years: '2018-2023', role: 'Altyapı Oyuncusu', ageGroup: 'U13' },
+      { team: 'Beylerbeyi 1911', years: '2023-Devam', role: 'Altyapı Oyuncusu', ageGroup: 'U15' }
+    ],
+    
+    notes: []
+  },
+  
+  {
+    id: 3,
+    name: 'Mehmet Can Yılmaz',
+    birthYear: 2013,
+    ageGroup: 'U13',
+    position: 'ST', // Santrafor
+    height: 168,
+    weight: 58,
+    foot: 'Sağ',
+    previousClub: 'Beşiktaş',
+    photo: null,
+    joinDate: '2024-01-10',
+    active: true,
+    
+    seasonStats: {
+      '2024-2025': {
+        matches: 9,
+        minutes: 720,
+        goals: 12,
+        assists: 4,
+        yellowCards: 1,
+        redCards: 0
+      }
+    },
+    
+    physical: {
+      sprintSpeed: 8.5,
+      endurance: 7.0,
+      agility: 8.0,
+      balance: 7.5,
+      strength: 6.5,
+      jumping: 7.0,
+      lastUpdated: '2024-12-10'
+    },
+    
+    tactical: {
+      gameUnderstanding: 7.0,
+      positionKnowledge: 7.5,
+      decisionMaking: 7.0,
+      transitions: 7.5,
+      spacingTiming: 7.0,
+      lastUpdated: '2024-12-10'
+    },
+    
+    mental: {
+      discipline: 7.0,
+      workRate: 8.0,
+      learningAttitude: 8.5,
+      confidence: 8.0,
+      competitiveness: 9.0,
+      teamHarmony: 7.5,
+      pressurePerformance: 7.5,
+      lastUpdated: '2024-12-10'
+    },
+    
+    health: {
+      pastInjuries: [],
+      recurringIssues: 'Yok',
+      rehabStatus: 'Aktif',
+      loadTolerance: 'Çok İyi',
+      lastCheckup: '2024-12-05'
+    },
+    
+    careerHistory: [
+      { team: 'Beşiktaş', years: '2021-2023', role: 'Altyapı Oyuncusu', ageGroup: 'U11' },
+      { team: 'Beylerbeyi 1911', years: '2024-Devam', role: 'Altyapı Oyuncusu', ageGroup: 'U13' }
+    ],
+    
+    notes: [
+      {
+        date: '2024-12-08',
+        author: 'Mehmet Yılmaz',
+        text: 'Gol pozisyonlarını çok iyi değerlendiriyor. Fizik olarak gelişmeli.',
+        season: '2024-2025'
+      }
+    ]
+  }
+];
+
+// ==========================================
+// TAKIMLAR (Yaş grubu bazlı)
+// ==========================================
+let teams = [
+  {
+    id: 1,
+    name: 'Beylerbeyi U15',
+    ageGroup: 'U15',
+    season: '2024-2025',
+    league: 'İstanbul U15 Süper Lig',
+    coach: 'Hasan Demir',
+    
+    // Kadro
+    squad: [1, 2], // Player ID'leri
+    
+    // Puan durumu
+    standings: {
+      position: 4,
+      played: 12,
+      won: 8,
+      drawn: 2,
+      lost: 2,
+      goalsFor: 28,
+      goalsAgainst: 15,
+      goalDifference: 13,
+      points: 26
+    },
+    
+    // Maç fikstürü
+    fixtures: [
+      {
+        id: 1,
+        matchday: 1,
+        date: '2024-09-15',
+        time: '14:00',
+        opponent: 'Fenerbahçe U15',
+        homeAway: 'away',
+        venue: 'Fenerbahçe Dereağzı Tesisleri',
+        result: {
+          played: true,
+          goalsFor: 2,
+          goalsAgainst: 3,
+          scorers: ['Emre Bozkurt'],
+          yellowCards: 1,
+          redCards: 0
+        }
+      },
+      {
+        id: 2,
+        matchday: 2,
+        date: '2024-09-22',
+        time: '15:00',
+        opponent: 'Galatasaray U15',
+        homeAway: 'home',
+        venue: 'Beylerbeyi Sahası',
+        result: {
+          played: true,
+          goalsFor: 3,
+          goalsAgainst: 1,
+          scorers: ['Mehmet Can Yılmaz (2)', 'Emre Bozkurt'],
+          yellowCards: 0,
+          redCards: 0
+        }
+      },
+      {
+        id: 3,
+        matchday: 3,
+        date: '2024-09-29',
+        time: '14:00',
+        opponent: 'Beşiktaş U15',
+        homeAway: 'away',
+        venue: 'Beşiktaş Nevzat Demir Tesisleri',
+        result: {
+          played: false,
+          goalsFor: null,
+          goalsAgainst: null
+        }
+      }
+    ]
+  },
+  
+  {
+    id: 2,
+    name: 'Beylerbeyi U13',
+    ageGroup: 'U13',
+    season: '2024-2025',
+    league: 'İstanbul U13 1. Lig',
+    coach: 'Mehmet Yılmaz',
+    
+    squad: [3],
+    
+    standings: {
+      position: 2,
+      played: 10,
+      won: 7,
+      drawn: 2,
+      lost: 1,
+      goalsFor: 32,
+      goalsAgainst: 12,
+      goalDifference: 20,
+      points: 23
+    },
+    
+    fixtures: []
+  }
+];
+
+// ==========================================
+// LOGO (Base64 veya URL)
+// ==========================================
+const BEYLERBEYI_LOGO = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48Y2lyY2xlIGN4PSI1MCIgY3k9IjUwIiByPSI0NSIgZmlsbD0iI0M4MTAyRSIvPjxwYXRoIGQ9Ik0zNSw0NSBMNjUsNDUgTDUwLDcwIFoiIGZpbGw9IndoaXRlIi8+PHRleHQgeD0iNTAiIHk9IjM1IiBmb250LXNpemU9IjE2IiBmaWxsPSJ3aGl0ZSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC13ZWlnaHQ9ImJvbGQiPkJTSzwvdGV4dD48L3N2Zz4=';
+
+// ==========================================
+// DEFAULT AVATAR
+// ==========================================
+const DEFAULT_AVATAR = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48Y2lyY2xlIGN4PSIxMDAiIGN5PSIxMDAiIHI9IjEwMCIgZmlsbD0iI2U1ZTVlNSIvPjxjaXJjbGUgY3g9IjEwMCIgY3k9Ijc1IiByPSIzNSIgZmlsbD0iIzk5OSIvPjxlbGxpcHNlIGN4PSIxMDAiIGN5PSIxNzAiIHJ4PSI1NSIgcnk9IjQwIiBmaWxsPSIjOTk5Ii8+PC9zdmc+';
+
+
+// ===== HELPERS.JS =====
+// ==========================================
+// HELPER FUNCTIONS
+// ==========================================
+
+// ==========================================
+// SEZON İŞLEMLERİ
+// ==========================================
+
+/**
+ * Aktif sezonu döndür
+ */
+function getActiveSeason() {
+  const activeSeason = SEASONS.find(s => s.active);
+  return activeSeason || SEASONS[0];
+}
+
+/**
+ * Sezon ID'sine göre sezon bilgisi al
+ */
+function getSeasonById(seasonId) {
+  return SEASONS.find(s => s.id === seasonId);
+}
+
+// ==========================================
+// YAŞ GRUBU İŞLEMLERİ
+// ==========================================
+
+/**
+ * Doğum yılından yaş hesapla
+ */
+function calculateAge(birthYear) {
+  const currentYear = new Date().getFullYear();
+  return currentYear - birthYear;
+}
+
+/**
+ * Doğum yılından yaş grubu belirle
+ */
+function getAgeGroupFromBirthYear(birthYear) {
+  const age = calculateAge(birthYear);
+  const ageGroup = AGE_GROUPS.find(ag => age >= ag.minAge && age <= ag.maxAge);
+  return ageGroup ? ageGroup.id : null;
+}
+
+/**
+ * Yaş grubu ID'sine göre bilgi al
+ */
+function getAgeGroupById(ageGroupId) {
+  return AGE_GROUPS.find(ag => ag.id === ageGroupId);
+}
+
+// ==========================================
+// POZİSYON İŞLEMLERİ
+// ==========================================
+
+/**
+ * Pozisyon kaleci mi kontrol et
+ */
+function isGoalkeeper(positionId) {
+  const position = POSITIONS.find(p => p.id === positionId);
+  return position ? position.isGoalkeeper : false;
+}
+
+/**
+ * Pozisyon ID'sine göre bilgi al
+ */
+function getPositionById(positionId) {
+  return POSITIONS.find(p => p.id === positionId);
+}
+
+/**
+ * Pozisyon adını al
+ */
+function getPositionName(positionId) {
+  const position = getPositionById(positionId);
+  return position ? position.name : 'Bilinmiyor';
+}
+
+// ==========================================
+// OYUNCU İŞLEMLERİ
+// ==========================================
+
+/**
+ * ID'ye göre oyuncu bul
+ */
+function getPlayerById(playerId) {
+  return players.find(p => p.id === playerId);
+}
+
+/**
+ * Yaş grubuna göre oyuncuları filtrele
+ */
+function getPlayersByAgeGroup(ageGroup) {
+  if (ageGroup === 'all') return players;
+  return players.filter(p => p.ageGroup === ageGroup);
+}
+
+/**
+ * Kullanıcının görebileceği oyuncuları getir (yetkilendirme)
+ */
+function getAuthorizedPlayers(user) {
+  if (!user) return [];
+  
+  // Admin ve Manager tüm oyuncuları görebilir
+  if (user.role === 'admin' || user.role === 'manager') {
+    return players;
+  }
+  
+  // Antrenör sadece kendi yaş gruplarındaki oyuncuları görebilir
+  if (user.role === 'coach') {
+    return players.filter(p => user.ageGroups.includes(p.ageGroup));
+  }
+  
+  // Oyuncu sadece kendini görebilir
+  if (user.role === 'player' && user.playerId) {
+    const player = getPlayerById(user.playerId);
+    return player ? [player] : [];
+  }
+  
+  return [];
+}
+
+/**
+ * Yeni oyuncu için ID oluştur
+ */
+function getNextPlayerId() {
+  if (players.length === 0) return 1;
+  return Math.max(...players.map(p => p.id)) + 1;
+}
+
+/**
+ * Oyuncu ekle
+ */
+function addPlayer(playerData) {
+  const newPlayer = {
+    id: getNextPlayerId(),
+    ...playerData,
+    active: true,
+    seasonStats: {},
+    physical: {
+      sprintSpeed: 5.0,
+      endurance: 5.0,
+      agility: 5.0,
+      balance: 5.0,
+      strength: 5.0,
+      jumping: 5.0,
+      lastUpdated: new Date().toISOString().split('T')[0]
+    },
+    tactical: {
+      gameUnderstanding: 5.0,
+      positionKnowledge: 5.0,
+      decisionMaking: 5.0,
+      transitions: 5.0,
+      spacingTiming: 5.0,
+      lastUpdated: new Date().toISOString().split('T')[0]
+    },
+    mental: {
+      discipline: 5.0,
+      workRate: 5.0,
+      learningAttitude: 5.0,
+      confidence: 5.0,
+      competitiveness: 5.0,
+      teamHarmony: 5.0,
+      pressurePerformance: 5.0,
+      lastUpdated: new Date().toISOString().split('T')[0]
+    },
+    health: {
+      pastInjuries: [],
+      recurringIssues: 'Yok',
+      rehabStatus: 'Aktif',
+      loadTolerance: 'İyi',
+      lastCheckup: new Date().toISOString().split('T')[0]
+    },
+    careerHistory: [],
+    notes: []
+  };
+  
+  players.push(newPlayer);
+  return newPlayer;
+}
+
+/**
+ * Oyuncu güncelle
+ */
+function updatePlayer(playerId, updates) {
+  const playerIndex = players.findIndex(p => p.id === playerId);
+  if (playerIndex === -1) return null;
+  
+  players[playerIndex] = {
+    ...players[playerIndex],
+    ...updates
+  };
+  
+  return players[playerIndex];
+}
+
+/**
+ * Oyuncu sil
+ */
+function deletePlayer(playerId) {
+  const playerIndex = players.findIndex(p => p.id === playerId);
+  if (playerIndex === -1) return false;
+  
+  players.splice(playerIndex, 1);
+  return true;
+}
+
+/**
+ * Oyuncuya sezon istatistiği ekle/güncelle
+ */
+function updatePlayerSeasonStats(playerId, seasonId, stats) {
+  const player = getPlayerById(playerId);
+  if (!player) return null;
+  
+  if (!player.seasonStats) {
+    player.seasonStats = {};
+  }
+  
+  player.seasonStats[seasonId] = {
+    ...player.seasonStats[seasonId],
+    ...stats
+  };
+  
+  return player;
+}
+
+/**
+ * Oyuncunun belirli sezondaki istatistiklerini al
+ */
+function getPlayerSeasonStats(playerId, seasonId) {
+  const player = getPlayerById(playerId);
+  if (!player || !player.seasonStats) return null;
+  
+  return player.seasonStats[seasonId] || {
+    matches: 0,
+    minutes: 0,
+    goals: 0,
+    assists: 0,
+    yellowCards: 0,
+    redCards: 0
+  };
+}
+
+// ==========================================
+// TAKIM İŞLEMLERİ
+// ==========================================
+
+/**
+ * ID'ye göre takım bul
+ */
+function getTeamById(teamId) {
+  return teams.find(t => t.id === teamId);
+}
+
+/**
+ * Yaş grubuna göre takımları filtrele
+ */
+function getTeamsByAgeGroup(ageGroup, seasonId = null) {
+  let filtered = teams.filter(t => t.ageGroup === ageGroup);
+  
+  if (seasonId) {
+    filtered = filtered.filter(t => t.season === seasonId);
+  }
+  
+  return filtered;
+}
+
+/**
+ * Kullanıcının görebileceği takımları getir
+ */
+function getAuthorizedTeams(user, seasonId = null) {
+  if (!user) return [];
+  
+  if (user.role === 'admin' || user.role === 'manager') {
+    return seasonId ? teams.filter(t => t.season === seasonId) : teams;
+  }
+  
+  if (user.role === 'coach') {
+    let filtered = teams.filter(t => user.ageGroups.includes(t.ageGroup));
+    if (seasonId) {
+      filtered = filtered.filter(t => t.season === seasonId);
+    }
+    return filtered;
+  }
+  
+  return [];
+}
+
+// ==========================================
+// YETKİLENDİRME İŞLEMLERİ
+// ==========================================
+
+/**
+ * Kullanıcının belirli bir oyuncuyu düzenleme yetkisi var mı?
+ */
+function canEditPlayer(user, playerId) {
+  if (!user) return false;
+  
+  // Admin her şeyi düzenleyebilir
+  if (user.role === 'admin') return true;
+  
+  const player = getPlayerById(playerId);
+  if (!player) return false;
+  
+  // Antrenör sadece kendi yaş grubundaki oyuncuları düzenleyebilir
+  if (user.role === 'coach') {
+    return user.ageGroups.includes(player.ageGroup);
+  }
+  
+  return false;
+}
+
+/**
+ * Kullanıcının oyuncu silme yetkisi var mı?
+ */
+function canDeletePlayer(user, playerId) {
+  if (!user) return false;
+  
+  // Sadece admin silebilir
+  return user.role === 'admin';
+}
+
+/**
+ * Kullanıcının raporları görüntüleme yetkisi var mı?
+ */
+function canViewReports(user) {
+  if (!user) return false;
+  return user.permissions && user.permissions.viewReports;
+}
+
+// ==========================================
+// ARAMA VE FİLTRELEME
+// ==========================================
+
+/**
+ * Oyuncuları isme göre ara
+ */
+function searchPlayersByName(searchTerm) {
+  if (!searchTerm) return players;
+  
+  const term = searchTerm.toLowerCase().trim();
+  return players.filter(p => 
+    p.name.toLowerCase().includes(term)
+  );
+}
+
+/**
+ * Çoklu filtre ile oyuncu ara
+ */
+function filterPlayers(filters) {
+  let filtered = [...players];
+  
+  // Yaş grubu filtresi
+  if (filters.ageGroup && filters.ageGroup !== 'all') {
+    filtered = filtered.filter(p => p.ageGroup === filters.ageGroup);
+  }
+  
+  // Pozisyon filtresi
+  if (filters.position && filters.position !== 'all') {
+    filtered = filtered.filter(p => p.position === filters.position);
+  }
+  
+  // İsim araması
+  if (filters.searchTerm) {
+    const term = filters.searchTerm.toLowerCase().trim();
+    filtered = filtered.filter(p => p.name.toLowerCase().includes(term));
+  }
+  
+  // Aktif/Pasif filtresi
+  if (filters.active !== undefined) {
+    filtered = filtered.filter(p => p.active === filters.active);
+  }
+  
+  return filtered;
+}
+
+// ==========================================
+// İSTATİSTİK HESAPLAMALARI
+// ==========================================
+
+/**
+ * Belirli sezon için takım geneli istatistikler
+ */
+function getTeamStats(ageGroup, seasonId) {
+  const teamPlayers = getPlayersByAgeGroup(ageGroup);
+  
+  const stats = {
+    totalPlayers: teamPlayers.length,
+    totalMatches: 0,
+    totalMinutes: 0,
+    totalGoals: 0,
+    totalAssists: 0,
+    totalYellowCards: 0,
+    totalRedCards: 0,
+    averageAge: 0
+  };
+  
+  teamPlayers.forEach(player => {
+    const seasonStats = getPlayerSeasonStats(player.id, seasonId);
+    if (seasonStats) {
+      stats.totalMatches += seasonStats.matches || 0;
+      stats.totalMinutes += seasonStats.minutes || 0;
+      stats.totalGoals += seasonStats.goals || 0;
+      stats.totalAssists += seasonStats.assists || 0;
+      stats.totalYellowCards += seasonStats.yellowCards || 0;
+      stats.totalRedCards += seasonStats.redCards || 0;
+    }
+  });
+  
+  // Ortalama yaş
+  if (teamPlayers.length > 0) {
+    const totalAge = teamPlayers.reduce((sum, p) => sum + calculateAge(p.birthYear), 0);
+    stats.averageAge = (totalAge / teamPlayers.length).toFixed(1);
+  }
+  
+  return stats;
+}
+
+/**
+ * En iyi performans gösteren oyuncuları bul
+ */
+function getTopPerformers(seasonId, limit = 5) {
+  const playersWithStats = players.map(player => {
+    const stats = getPlayerSeasonStats(player.id, seasonId);
+    return {
+      player,
+      stats,
+      totalContribution: (stats.goals || 0) + (stats.assists || 0)
+    };
+  }).filter(p => p.stats.matches > 0);
+  
+  return playersWithStats
+    .sort((a, b) => b.totalContribution - a.totalContribution)
+    .slice(0, limit);
+}
+
+// ==========================================
+// FORMAT VE GÖSTERIM
+// ==========================================
+
+/**
+ * Dakikayı saat:dakika formatına çevir
+ */
+function formatMinutes(minutes) {
+  if (!minutes) return '0:00';
+  const hours = Math.floor(minutes / 60);
+  const mins = minutes % 60;
+  return `${hours}:${mins.toString().padStart(2, '0')}`;
+}
+
+/**
+ * Tarihi formatla
+ */
+function formatDate(dateString) {
+  if (!dateString) return '';
+  const date = new Date(dateString);
+  return date.toLocaleDateString('tr-TR', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  });
+}
+
+/**
+ * Skor formatla (3-1 gibi)
+ */
+function formatScore(goalsFor, goalsAgainst) {
+  return `${goalsFor}-${goalsAgainst}`;
+}
+
+// ==========================================
+// DOĞRULAMA (VALIDATION)
+// ==========================================
+
+/**
+ * Email doğrula
+ */
+function validateEmail(email) {
+  const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return re.test(email);
+}
+
+/**
+ * Oyuncu verisi doğrula
+ */
+function validatePlayerData(data) {
+  const errors = [];
+  
+  if (!data.name || data.name.trim().length < 3) {
+    errors.push('İsim en az 3 karakter olmalıdır');
+  }
+  
+  if (!data.birthYear || data.birthYear < 2000 || data.birthYear > new Date().getFullYear()) {
+    errors.push('Geçerli bir doğum yılı giriniz');
+  }
+  
+  if (!data.ageGroup || !AGE_GROUPS.find(ag => ag.id === data.ageGroup)) {
+    errors.push('Geçerli bir yaş grubu seçiniz');
+  }
+  
+  if (!data.position || !POSITIONS.find(p => p.id === data.position)) {
+    errors.push('Geçerli bir pozisyon seçiniz');
+  }
+  
+  if (data.height && (data.height < 100 || data.height > 250)) {
+    errors.push('Boy 100-250 cm arasında olmalıdır');
+  }
+  
+  if (data.weight && (data.weight < 30 || data.weight > 150)) {
+    errors.push('Kilo 30-150 kg arasında olmalıdır');
+  }
+  
+  return {
+    isValid: errors.length === 0,
+    errors
+  };
+}
+
+/**
+ * İstatistik verisi doğrula
+ */
+function validateStats(stats) {
+  const errors = [];
+  
+  if (stats.matches < 0) errors.push('Maç sayısı negatif olamaz');
+  if (stats.minutes < 0) errors.push('Dakika negatif olamaz');
+  if (stats.goals < 0) errors.push('Gol sayısı negatif olamaz');
+  if (stats.assists < 0) errors.push('Asist sayısı negatif olamaz');
+  if (stats.yellowCards < 0) errors.push('Sarı kart sayısı negatif olamaz');
+  if (stats.redCards < 0) errors.push('Kırmızı kart sayısı negatif olamaz');
+  
+  return {
+    isValid: errors.length === 0,
+    errors
+  };
+}
+
+// ==========================================
+// LOCAL STORAGE İŞLEMLERİ
+// ==========================================
+
+/**
+ * Verileri localStorage'a kaydet
+ */
+function saveToLocalStorage() {
+  try {
+    localStorage.setItem('beylerbeyi_players', JSON.stringify(players));
+    localStorage.setItem('beylerbeyi_teams', JSON.stringify(teams));
+    localStorage.setItem('beylerbeyi_seasons', JSON.stringify(SEASONS));
+    return true;
+  } catch (error) {
+    console.error('LocalStorage kayıt hatası:', error);
+    return false;
+  }
+}
+
+/**
+ * localStorage'dan verileri yükle
+ */
+function loadFromLocalStorage() {
+  try {
+    const savedPlayers = localStorage.getItem('beylerbeyi_players');
+    const savedTeams = localStorage.getItem('beylerbeyi_teams');
+    const savedSeasons = localStorage.getItem('beylerbeyi_seasons');
+    
+    if (savedPlayers) players = JSON.parse(savedPlayers);
+    if (savedTeams) teams = JSON.parse(savedTeams);
+    // SEASONS constant olduğu için yüklenmiyor
+    
+    return true;
+  } catch (error) {
+    console.error('LocalStorage yükleme hatası:', error);
+    return false;
+  }
+}
+
+/**
+ * localStorage'ı temizle
+ */
+function clearLocalStorage() {
+  try {
+    localStorage.removeItem('beylerbeyi_players');
+    localStorage.removeItem('beylerbeyi_teams');
+    localStorage.removeItem('beylerbeyi_seasons');
+    return true;
+  } catch (error) {
+    console.error('LocalStorage temizleme hatası:', error);
+    return false;
+  }
+}
+
+// ==========================================
+// GENEL YARDIMCI FONKSİYONLAR
+// ==========================================
+
+/**
+ * Rastgele ID oluştur
+ */
+function generateId() {
+  return Date.now().toString(36) + Math.random().toString(36).substr(2);
+}
+
+/**
+ * Dizi içinde benzersiz değerleri bul
+ */
+function getUniqueValues(array, key) {
+  return [...new Set(array.map(item => item[key]))];
+}
+
+/**
+ * Nesneyi derin kopyala
+ */
+function deepClone(obj) {
+  return JSON.parse(JSON.stringify(obj));
+}
+
+/**
+ * Console'a renkli log bas (debug için)
+ */
+function debugLog(message, type = 'info') {
+  const colors = {
+    info: 'color: #2196F3',
+    success: 'color: #4CAF50',
+    warning: 'color: #FF9800',
+    error: 'color: #F44336'
+  };
+  
+  console.log(`%c${message}`, colors[type] || colors.info);
+}
+
+
+// ===== APP.JS =====
+// ==========================================
+// BEYLERBEYI SK - ANA UYGULAMA
+// ==========================================
+
+// Global State
+let currentUser = null;
+let currentSeason = getActiveSeason().id;
+let currentAgeGroupFilter = 'all';
+
+// ==========================================
+// SAYFA YÜKLENDİĞİNDE
+// ==========================================
+
+document.addEventListener('DOMContentLoaded', function() {
+  console.log('🏆 Beylerbeyi SK Sistemi Başlatılıyor...');
+  
+  // LocalStorage'dan verileri yükle
+  loadFromLocalStorage();
+  
+  // Session kontrolü
+  checkSession();
+  
+  // Logo'ları yükle
+  loadLogos();
+  
+  console.log('✅ Sistem hazır');
+});
+
+// ==========================================
+// SESSION YÖNETİMİ
+// ==========================================
+
+/**
+ * Session kontrolü - kullanıcı giriş yapmış mı?
+ */
+function checkSession() {
+  const savedSession = sessionStorage.getItem('beylerbeyi_session');
+  
+  if (savedSession) {
+    try {
+      const session = JSON.parse(savedSession);
+      currentUser = session.user;
+      currentSeason = session.season || getActiveSeason().id;
+      
+      // Dashboard'a yönlendir
+      showDashboard();
+    } catch (error) {
+      console.error('Session hatası:', error);
+      showLogin();
+    }
+  } else {
+    showLogin();
+  }
+}
+
+/**
+ * Session kaydet
+ */
+function saveSession() {
+  const session = {
+    user: currentUser,
+    season: currentSeason,
+    timestamp: new Date().toISOString()
+  };
+  
+  sessionStorage.setItem('beylerbeyi_session', JSON.stringify(session));
+}
+
+/**
+ * Session sil (çıkış yap)
+ */
+function clearSession() {
+  sessionStorage.removeItem('beylerbeyi_session');
+  currentUser = null;
+  currentSeason = getActiveSeason().id;
+}
+
+// ==========================================
+// GİRİŞ EKRANI
+// ==========================================
+
+/**
+ * Login ekranını göster
+ */
+function showLogin() {
+  document.getElementById('loginScreen').style.display = 'block';
+  document.getElementById('dashboard').style.display = 'none';
+}
+
+/**
+ * Giriş yap
+ */
+function login() {
+  const username = document.getElementById('username').value.trim();
+  const password = document.getElementById('password').value;
+  
+  if (!username || !password) {
+    showError('Kullanıcı adı ve şifre gereklidir');
+    return;
+  }
+  
+  // Kullanıcıyı bul
+  const user = USERS[username];
+  
+  if (!user) {
+    showError('Kullanıcı bulunamadı');
+    return;
+  }
+  
+  if (user.password !== password) {
+    showError('Şifre hatalı');
+    return;
+  }
+  
+  // Giriş başarılı
+  currentUser = user;
+  saveSession();
+  
+  console.log('✅ Giriş başarılı:', currentUser.name);
+  
+  showDashboard();
+}
+
+/**
+ * Çıkış yap
+ */
+function logout() {
+  if (confirm('Çıkış yapmak istediğinize emin misiniz?')) {
+    clearSession();
+    showLogin();
+    
+    // Formu temizle
+    document.getElementById('username').value = '';
+    document.getElementById('password').value = '';
+    
+    console.log('👋 Çıkış yapıldı');
+  }
+}
+
+// ==========================================
+// DASHBOARD
+// ==========================================
+
+/**
+ * Dashboard'u göster (role göre)
+ */
+function showDashboard() {
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('dashboard').style.display = 'block';
+  
+  // Kullanıcı bilgisini göster
+  document.getElementById('userBadge').textContent = currentUser.name;
+  
+  // Role göre dashboard başlığını ayarla
+  const roleNames = {
+    admin: 'Admin Paneli',
+    coach: 'Antrenör Paneli',
+    player: 'Oyuncu Paneli',
+    manager: 'Yönetici Paneli'
+  };
+  
+  document.getElementById('dashboardTitle').textContent = roleNames[currentUser.role] || 'Panel';
+  
+  // Tüm view'ları gizle
+  document.getElementById('adminView').style.display = 'none';
+  document.getElementById('coachView').style.display = 'none';
+  document.getElementById('playerView').style.display = 'none';
+  document.getElementById('managerView').style.display = 'none';
+  
+  // Role göre ilgili view'ı göster
+  switch (currentUser.role) {
+    case 'admin':
+      document.getElementById('adminView').style.display = 'block';
+      loadAdminView();
+      break;
+    case 'coach':
+      document.getElementById('coachView').style.display = 'block';
+      loadCoachView();
+      break;
+    case 'player':
+      document.getElementById('playerView').style.display = 'block';
+      loadPlayerView();
+      break;
+    case 'manager':
+      document.getElementById('managerView').style.display = 'block';
+      loadManagerView();
+      break;
+  }
+}
+
+// ==========================================
+// SEZON SEÇİCİ
+// ==========================================
+
+/**
+ * Sezon butonlarını render et
+ */
+function renderSeasonButtons(containerId) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  
+  let html = '';
+  for (let i = 0; i < SEASONS.length; i++) {
+    const season = SEASONS[i];
+    const isActive = season.id === currentSeason;
+    html += '<button class="season-btn' + (isActive ? ' active' : '') + '" onclick="changeSeason(\'' + season.id + '\')">' + season.name + '</button>';
+  }
+  
+  container.innerHTML = html;
+}
+
+/**
+ * Sezon değiştir
+ */
+function changeSeason(seasonId) {
+  currentSeason = seasonId;
+  saveSession();
+  
+  // Sezon butonlarını güncelle
+  renderSeasonButtons('coachSeasonContainer');
+  renderSeasonButtons('playerSeasonContainer');
+  renderSeasonButtons('managerSeasonContainer');
+  renderSeasonButtons('adminSeasonContainer');
+  
+  // İlgili view'ı yeniden yükle
+  switch (currentUser.role) {
+    case 'admin':
+      loadAdminView();
+      break;
+    case 'coach':
+      loadCoachView();
+      break;
+    case 'player':
+      loadPlayerView();
+      break;
+    case 'manager':
+      loadManagerView();
+      break;
+  }
+  
+  console.log('🗓️ Sezon değiştirildi:', seasonId);
+}
+
+// ==========================================
+// YAŞ GRUBU FİLTRESİ
+// ==========================================
+
+/**
+ * Yaş grubu filtre butonlarını render et
+ */
+function renderAgeGroupFilter(containerId, showAll = true) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  
+  let html = '';
+  
+  // "Tümü" butonu
+  if (showAll) {
+    const isActive = currentAgeGroupFilter === 'all';
+    const count = players.length;
+    html += '<div class="team-badge' + (isActive ? ' active' : '') + '" onclick="changeAgeGroupFilter(\'all\')">';
+    html += 'Tümü <span class="count">' + count + '</span>';
+    html += '</div>';
+  }
+  
+  // Yaş grubu butonları (kullanıcının yetkili olduğu)
+  const authorizedAgeGroups = currentUser.role === 'admin' || currentUser.role === 'manager'
+    ? AGE_GROUPS
+    : AGE_GROUPS.filter(ag => currentUser.ageGroups.includes(ag.id));
+  
+  for (let i = 0; i < authorizedAgeGroups.length; i++) {
+    const ageGroup = authorizedAgeGroups[i];
+    const isActive = currentAgeGroupFilter === ageGroup.id;
+    const count = getPlayersByAgeGroup(ageGroup.id).length;
+    
+    html += '<div class="team-badge' + (isActive ? ' active' : '') + '" onclick="changeAgeGroupFilter(\'' + ageGroup.id + '\')">';
+    html += ageGroup.name + ' <span class="count">' + count + '</span>';
+    html += '</div>';
+  }
+  
+  container.innerHTML = html;
+}
+
+/**
+ * Yaş grubu filtresini değiştir
+ */
+function changeAgeGroupFilter(ageGroup) {
+  currentAgeGroupFilter = ageGroup;
+  
+  // Filtreyi yeniden render et
+  renderAgeGroupFilter('ageGroupFilter');
+  
+  // Oyuncu gridini yeniden render et
+  renderPlayersGrid();
+  
+  console.log('🎯 Yaş grubu filtresi:', ageGroup);
+}
+
+// ==========================================
+// OYUNCU GRİDİ
+// ==========================================
+
+/**
+ * Oyuncu kartlarını render et
+ */
+function renderPlayersGrid() {
+  const container = document.getElementById('playersGrid');
+  if (!container) return;
+  
+  // Yetkilendirilmiş oyuncuları al
+  let playersToShow = getAuthorizedPlayers(currentUser);
+  
+  // Yaş grubu filtresini uygula
+  if (currentAgeGroupFilter !== 'all') {
+    playersToShow = playersToShow.filter(p => p.ageGroup === currentAgeGroupFilter);
+  }
+  
+  // Grid'i oluştur
+  let html = '';
+  
+  for (let i = 0; i < playersToShow.length; i++) {
+    const player = playersToShow[i];
+    const stats = getPlayerSeasonStats(player.id, currentSeason);
+    const positionName = getPositionName(player.position);
+    const isGK = isGoalkeeper(player.position);
+    
+    html += '<div class="player-card" onclick="openPlayerModal(' + player.id + ')">';
+    
+    // Header
+    html += '<div class="player-card-header">';
+    html += '<h4>' + player.name + '</h4>';
+    html += '<span class="position-badge">' + positionName + '</span>';
+    html += '</div>';
+    
+    // Fotoğraf
+    html += '<div class="player-photo">';
+    if (player.photo) {
+      html += '<img src="' + player.photo + '" alt="' + player.name + '">';
+    } else {
+      // Default avatar - İsmin baş harfleri
+      const initials = player.name.split(' ').map(n => n[0]).join('');
+      html += '<div class="player-photo-placeholder">' + initials + '</div>';
+    }
+    html += '</div>';
+    
+    // Body - İstatistikler
+    html += '<div class="player-card-body">';
+    html += '<div class="info"><strong>Yaş Grubu:</strong> <span>' + player.ageGroup + '</span></div>';
+    html += '<div class="info"><strong>Maç:</strong> <span>' + stats.matches + '</span></div>';
+    html += '<div class="info"><strong>Dakika:</strong> <span>' + stats.minutes + '</span></div>';
+    
+    if (isGK) {
+      // Kaleci istatistikleri
+      html += '<div class="info"><strong>Kale Koruma:</strong> <span>' + (stats.cleanSheets || 0) + '</span></div>';
+      html += '<div class="info"><strong>Yediği Gol:</strong> <span>' + (stats.goalsConceded || 0) + '</span></div>';
+    } else {
+      // Saha oyuncusu istatistikleri
+      html += '<div class="info"><strong>Gol:</strong> <span>' + stats.goals + '</span></div>';
+      html += '<div class="info"><strong>Asist:</strong> <span>' + stats.assists + '</span></div>';
+    }
+    
+    html += '<div class="info"><strong>Kartlar:</strong> <span>🟨 ' + stats.yellowCards + ' 🟥 ' + stats.redCards + '</span></div>';
+    html += '</div>';
+    
+    html += '</div>';
+  }
+  
+  if (playersToShow.length === 0) {
+    html = '<div class="text-center" style="padding: 40px; color: #666;">Oyuncu bulunamadı</div>';
+  }
+  
+  container.innerHTML = html;
+}
+
+// ==========================================
+// HATA VE BAŞARI MESAJLARI
+// ==========================================
+
+/**
+ * Hata mesajı göster
+ */
+function showError(message) {
+  const errorDiv = document.getElementById('errorMessage');
+  if (errorDiv) {
+    errorDiv.textContent = message;
+    errorDiv.style.display = 'block';
+    
+    setTimeout(() => {
+      errorDiv.style.display = 'none';
+    }, 5000);
+  } else {
+    alert('Hata: ' + message);
+  }
+}
+
+/**
+ * Başarı mesajı göster
+ */
+function showSuccess(message) {
+  const successDiv = document.getElementById('successMessage');
+  if (successDiv) {
+    successDiv.textContent = message;
+    successDiv.style.display = 'block';
+    
+    setTimeout(() => {
+      successDiv.style.display = 'none';
+    }, 3000);
+  } else {
+    alert(message);
+  }
+}
+
+// ==========================================
+// LOGO YÜKLEME
+// ==========================================
+
+/**
+ * Logo'ları yükle
+ */
+function loadLogos() {
+  const loginLogo = document.getElementById('loginLogo');
+  const headerLogo = document.getElementById('headerLogo');
+  
+  if (loginLogo) loginLogo.src = BEYLERBEYI_LOGO;
+  if (headerLogo) headerLogo.src = BEYLERBEYI_LOGO;
+}
+
+// ==========================================
+// TAB YÖNETİMİ
+// ==========================================
+
+/**
+ * Tab değiştir
+ */
+function switchTab(tabName) {
+  // Tüm tab içeriklerini gizle
+  const tabContents = document.querySelectorAll('.tab-content');
+  for (let i = 0; i < tabContents.length; i++) {
+    tabContents[i].classList.remove('active');
+  }
+  
+  // Tüm tab butonlarını pasif yap
+  const tabs = document.querySelectorAll('.tab');
+  for (let i = 0; i < tabs.length; i++) {
+    tabs[i].classList.remove('active');
+  }
+  
+  // Seçili tab'ı aktif yap
+  const selectedTab = document.getElementById(tabName + 'Tab');
+  if (selectedTab) {
+    selectedTab.classList.add('active');
+  }
+  
+  // İlgili butonu aktif yap
+  if (event && event.target) {
+    event.target.classList.add('active');
+  }
+}
+
+
+// ===== VIEWS.JS =====
+// ==========================================
+// ROLE-SPECIFIC VIEWS
+// ==========================================
+
+// ==========================================
+// ANTRENÖR VIEW
+// ==========================================
+
+/**
+ * Antrenör panelini yükle
+ */
+function loadCoachView() {
+  console.log('📋 Antrenör paneli yükleniyor...');
+  
+  // Sezon butonlarını render et
+  renderSeasonButtons('coachSeasonContainer');
+  
+  // Yaş grubu filtresini render et
+  renderAgeGroupFilter('ageGroupFilter', true);
+  
+  // Oyuncu gridini render et
+  renderPlayersGrid();
+  
+  // İstatistik kartlarını göster
+  showCoachStats();
+}
+
+/**
+ * Antrenör istatistiklerini göster
+ */
+function showCoachStats() {
+  const authorizedPlayers = getAuthorizedPlayers(currentUser);
+  const stats = {
+    totalPlayers: authorizedPlayers.length,
+    totalMatches: 0,
+    totalGoals: 0,
+    totalAssists: 0
+  };
+  
+  authorizedPlayers.forEach(player => {
+    const seasonStats = getPlayerSeasonStats(player.id, currentSeason);
+    if (seasonStats) {
+      stats.totalMatches += seasonStats.matches || 0;
+      stats.totalGoals += seasonStats.goals || 0;
+      stats.totalAssists += seasonStats.assists || 0;
+    }
+  });
+  
+  // Kartları güncelle
+  document.getElementById('coachTotalPlayers').textContent = stats.totalPlayers;
+  document.getElementById('coachTotalMatches').textContent = stats.totalMatches;
+  document.getElementById('coachTotalGoals').textContent = stats.totalGoals;
+  document.getElementById('coachTotalAssists').textContent = stats.totalAssists;
+}
+
+// ==========================================
+// OYUNCU VIEW
+// ==========================================
+
+/**
+ * Oyuncu panelini yükle
+ */
+function loadPlayerView() {
+  console.log('👤 Oyuncu paneli yükleniyor...');
+  
+  if (!currentUser.playerId) {
+    document.getElementById('playerContent').innerHTML = '<p class="error-message">Oyuncu bilgisi bulunamadı</p>';
+    return;
+  }
+  
+  const player = getPlayerById(currentUser.playerId);
+  if (!player) {
+    document.getElementById('playerContent').innerHTML = '<p class="error-message">Oyuncu bulunamadı</p>';
+    return;
+  }
+  
+  // Sezon butonlarını render et
+  renderSeasonButtons('playerSeasonContainer');
+  
+  // Oyuncu detaylarını göster
+  showPlayerDetails(player);
+}
+
+/**
+ * Oyuncu detaylarını göster (oyuncu kendi perspektifinden)
+ */
+function showPlayerDetails(player) {
+  const stats = getPlayerSeasonStats(player.id, currentSeason);
+  const isGK = isGoalkeeper(player.position);
+  const positionName = getPositionName(player.position);
+  
+  let html = '';
+  
+  // Profil header
+  html += '<div style="display: flex; gap: 30px; margin-bottom: 30px; align-items: center;">';
+  html += '<div style="width: 150px; height: 150px; border-radius: 50%; overflow: hidden; border: 5px solid var(--beylerbeyi-red);">';
+  if (player.photo) {
+    html += '<img src="' + player.photo + '" style="width: 100%; height: 100%; object-fit: cover;">';
+  } else {
+    const initials = player.name.split(' ').map(n => n[0]).join('');
+    html += '<div class="player-photo-placeholder" style="width: 100%; height: 100%; font-size: 48px;">' + initials + '</div>';
+  }
+  html += '</div>';
+  html += '<div>';
+  html += '<h2 style="color: var(--beylerbeyi-red); margin-bottom: 10px;">' + player.name + '</h2>';
+  html += '<p style="font-size: 18px; color: #666; margin-bottom: 5px;">' + positionName + ' • ' + player.ageGroup + '</p>';
+  html += '<p style="font-size: 14px; color: #999;">Yaş: ' + calculateAge(player.birthYear) + ' • Boy: ' + player.height + 'cm • Kilo: ' + player.weight + 'kg</p>';
+  html += '</div>';
+  html += '</div>';
+  
+  // İstatistik kartları
+  html += '<div class="stats-grid">';
+  html += '<div class="stat-card"><h3>' + stats.matches + '</h3><p>Maç</p></div>';
+  html += '<div class="stat-card green"><h3>' + formatMinutes(stats.minutes) + '</h3><p>Süre</p></div>';
+  
+  if (isGK) {
+    html += '<div class="stat-card gold"><h3>' + (stats.cleanSheets || 0) + '</h3><p>Kale Koruma</p></div>';
+    html += '<div class="stat-card dark"><h3>' + (stats.goalsConceded || 0) + '</h3><p>Yediği Gol</p></div>';
+  } else {
+    html += '<div class="stat-card gold"><h3>' + stats.goals + '</h3><p>Gol</p></div>';
+    html += '<div class="stat-card dark"><h3>' + stats.assists + '</h3><p>Asist</p></div>';
+  }
+  html += '</div>';
+  
+  // Değerlendirmeler
+  html += '<h3 style="margin-top: 30px; margin-bottom: 15px;">Değerlendirmelerim</h3>';
+  html += '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">';
+  
+  // Fiziksel
+  html += '<div class="eval-section">';
+  html += '<h4>💪 Fiziksel</h4>';
+  html += createSkillBar('Sprint', player.physical.sprintSpeed);
+  html += createSkillBar('Dayanıklılık', player.physical.endurance);
+  html += createSkillBar('Çeviklik', player.physical.agility);
+  html += '</div>';
+  
+  // Taktik
+  html += '<div class="eval-section">';
+  html += '<h4>🧠 Taktik</h4>';
+  html += createSkillBar('Oyun Anlayışı', player.tactical.gameUnderstanding);
+  html += createSkillBar('Pozisyon Bilgisi', player.tactical.positionKnowledge);
+  html += createSkillBar('Karar Verme', player.tactical.decisionMaking);
+  html += '</div>';
+  
+  // Mental
+  html += '<div class="eval-section">';
+  html += '<h4>🎯 Mental</h4>';
+  html += createSkillBar('Disiplin', player.mental.discipline);
+  html += createSkillBar('Çalışkanlık', player.mental.workRate);
+  html += createSkillBar('Özgüven', player.mental.confidence);
+  html += '</div>';
+  
+  html += '</div>';
+  
+  // Sezon geçmişi
+  html += '<h3 style="margin-top: 30px; margin-bottom: 15px;">Sezon Geçmişim</h3>';
+  html += '<table>';
+  html += '<thead><tr><th>Sezon</th><th>Maç</th><th>Dakika</th>';
+  html += isGK ? '<th>Yediği Gol</th><th>Kale Koruma</th>' : '<th>Gol</th><th>Asist</th>';
+  html += '<th>🟨</th><th>🟥</th></tr></thead>';
+  html += '<tbody>';
+  
+  for (let i = 0; i < SEASONS.length; i++) {
+    const season = SEASONS[i];
+    const seasonStats = player.seasonStats[season.id];
+    if (seasonStats && seasonStats.matches > 0) {
+      html += '<tr>';
+      html += '<td><strong>' + season.name + '</strong></td>';
+      html += '<td>' + seasonStats.matches + '</td>';
+      html += '<td>' + seasonStats.minutes + '</td>';
+      
+      if (isGK) {
+        html += '<td>' + (seasonStats.goalsConceded || 0) + '</td>';
+        html += '<td>' + (seasonStats.cleanSheets || 0) + '</td>';
+      } else {
+        html += '<td>' + seasonStats.goals + '</td>';
+        html += '<td>' + seasonStats.assists + '</td>';
+      }
+      
+      html += '<td>' + seasonStats.yellowCards + '</td>';
+      html += '<td>' + seasonStats.redCards + '</td>';
+      html += '</tr>';
+    }
+  }
+  
+  html += '</tbody></table>';
+  
+  document.getElementById('playerContent').innerHTML = html;
+}
+
+// ==========================================
+// YÖNETİCİ VIEW
+// ==========================================
+
+/**
+ * Yönetici panelini yükle
+ */
+function loadManagerView() {
+  console.log('📊 Yönetici paneli yükleniyor...');
+  
+  // Sezon butonlarını render et
+  renderSeasonButtons('managerSeasonContainer');
+  
+  // Genel istatistikleri göster
+  showManagerStats();
+  
+  // Raporları göster
+  showManagerReports();
+}
+
+/**
+ * Yönetici istatistiklerini göster
+ */
+function showManagerStats() {
+  const stats = {
+    totalPlayers: players.length,
+    totalGoals: 0,
+    totalAssists: 0,
+    totalMatches: 0
+  };
+  
+  players.forEach(player => {
+    const seasonStats = getPlayerSeasonStats(player.id, currentSeason);
+    if (seasonStats) {
+      stats.totalGoals += seasonStats.goals || 0;
+      stats.totalAssists += seasonStats.assists || 0;
+      stats.totalMatches += seasonStats.matches || 0;
+    }
+  });
+  
+  // En golcü oyuncu
+  const topScorer = getTopPerformers(currentSeason, 1)[0];
+  const topScorerName = topScorer ? topScorer.player.name.split(' ')[0] : '-';
+  
+  // Kartları güncelle
+  document.getElementById('mgrTotalPlayers').textContent = stats.totalPlayers;
+  document.getElementById('mgrTeamGoals').textContent = stats.totalGoals;
+  document.getElementById('mgrTeamAssists').textContent = stats.totalAssists;
+  document.getElementById('mgrTopScorer').textContent = topScorerName;
+}
+
+/**
+ * Yönetici raporlarını göster
+ */
+function showManagerReports() {
+  // Pozisyon dağılımı
+  showPositionDistribution();
+  
+  // En iyi performanslar
+  showTopPerformances();
+  
+  // Disiplin raporu
+  showDisciplineReport();
+  
+  // Yaş grubu dağılımı
+  showAgeGroupDistribution();
+}
+
+/**
+ * Pozisyon dağılımını göster
+ */
+function showPositionDistribution() {
+  const container = document.getElementById('positionDistribution');
+  if (!container) return;
+  
+  const positionCounts = {};
+  
+  players.forEach(player => {
+    const posName = getPositionName(player.position);
+    positionCounts[posName] = (positionCounts[posName] || 0) + 1;
+  });
+  
+  let html = '';
+  const total = players.length;
+  
+  for (const [position, count] of Object.entries(positionCounts)) {
+    const percentage = (count / total * 100).toFixed(1);
+    html += '<div style="margin-bottom: 15px;">';
+    html += '<div style="display: flex; justify-content: space-between; margin-bottom: 5px;">';
+    html += '<strong>' + position + '</strong>';
+    html += '<span>' + count + ' oyuncu (' + percentage + '%)</span>';
+    html += '</div>';
+    html += '<div style="background: #e0e0e0; height: 10px; border-radius: 5px; overflow: hidden;">';
+    html += '<div style="width: ' + percentage + '%; height: 100%; background: var(--beylerbeyi-red);"></div>';
+    html += '</div>';
+    html += '</div>';
+  }
+  
+  container.innerHTML = html;
+}
+
+/**
+ * En iyi performansları göster
+ */
+function showTopPerformances() {
+  const container = document.getElementById('topPerformers');
+  if (!container) return;
+  
+  const topPerformers = getTopPerformers(currentSeason, 10);
+  
+  let html = '<table>';
+  html += '<thead><tr><th>Oyuncu</th><th>Pozisyon</th><th>Gol</th><th>Asist</th><th>Toplam</th></tr></thead>';
+  html += '<tbody>';
+  
+  topPerformers.forEach(performer => {
+    const player = performer.player;
+    const stats = performer.stats;
+    const posName = getPositionName(player.position);
+    
+    html += '<tr>';
+    html += '<td><strong>' + player.name + '</strong></td>';
+    html += '<td>' + posName + '</td>';
+    html += '<td>' + stats.goals + '</td>';
+    html += '<td>' + stats.assists + '</td>';
+    html += '<td><strong>' + performer.totalContribution + '</strong></td>';
+    html += '</tr>';
+  });
+  
+  html += '</tbody></table>';
+  container.innerHTML = html;
+}
+
+/**
+ * Disiplin raporunu göster
+ */
+function showDisciplineReport() {
+  const container = document.getElementById('disciplineReport');
+  if (!container) return;
+  
+  const disciplineData = [];
+  
+  players.forEach(player => {
+    const stats = getPlayerSeasonStats(player.id, currentSeason);
+    if (stats && (stats.yellowCards > 0 || stats.redCards > 0)) {
+      disciplineData.push({
+        name: player.name,
+        yellow: stats.yellowCards,
+        red: stats.redCards,
+        total: stats.yellowCards + (stats.redCards * 3)
+      });
+    }
+  });
+  
+  disciplineData.sort((a, b) => b.total - a.total);
+  
+  if (disciplineData.length === 0) {
+    container.innerHTML = '<p style="text-align: center; color: #666; padding: 20px;">Henüz kart cezası yok</p>';
+    return;
+  }
+  
+  let html = '<table>';
+  html += '<thead><tr><th>Oyuncu</th><th>🟨 Sarı</th><th>🟥 Kırmızı</th></tr></thead>';
+  html += '<tbody>';
+  
+  disciplineData.forEach(item => {
+    html += '<tr>';
+    html += '<td><strong>' + item.name + '</strong></td>';
+    html += '<td>' + item.yellow + '</td>';
+    html += '<td>' + item.red + '</td>';
+    html += '</tr>';
+  });
+  
+  html += '</tbody></table>';
+  container.innerHTML = html;
+}
+
+/**
+ * Yaş grubu dağılımını göster
+ */
+function showAgeGroupDistribution() {
+  const container = document.getElementById('ageGroupDistribution');
+  if (!container) return;
+  
+  const ageGroupCounts = {};
+  
+  AGE_GROUPS.forEach(ag => {
+    ageGroupCounts[ag.id] = 0;
+  });
+  
+  players.forEach(player => {
+    ageGroupCounts[player.ageGroup] = (ageGroupCounts[player.ageGroup] || 0) + 1;
+  });
+  
+  let html = '';
+  const total = players.length;
+  
+  for (const [ageGroup, count] of Object.entries(ageGroupCounts)) {
+    const percentage = total > 0 ? (count / total * 100).toFixed(1) : 0;
+    html += '<div style="margin-bottom: 15px;">';
+    html += '<div style="display: flex; justify-content: space-between; margin-bottom: 5px;">';
+    html += '<strong>' + ageGroup + '</strong>';
+    html += '<span>' + count + ' oyuncu (' + percentage + '%)</span>';
+    html += '</div>';
+    html += '<div style="background: #e0e0e0; height: 10px; border-radius: 5px; overflow: hidden;">';
+    html += '<div style="width: ' + percentage + '%; height: 100%; background: var(--beylerbeyi-green);"></div>';
+    html += '</div>';
+    html += '</div>';
+  }
+  
+  container.innerHTML = html;
+}
+
+// ==========================================
+// ADMİN VIEW
+// ==========================================
+
+/**
+ * Admin panelini yükle
+ */
+function loadAdminView() {
+  console.log('⚙️ Admin paneli yükleniyor...');
+  
+  // Sezon butonlarını render et
+  renderSeasonButtons('adminSeasonContainer');
+  
+  // Tüm oyuncuları listele
+  renderAdminPlayersList();
+  
+  // İstatistikleri göster
+  showAdminStats();
+}
+
+/**
+ * Admin oyuncu listesini render et
+ */
+function renderAdminPlayersList() {
+  const container = document.getElementById('adminPlayersList');
+  if (!container) return;
+  
+  let html = '';
+  
+  players.forEach(player => {
+    const posName = getPositionName(player.position);
+    html += '<tr>';
+    html += '<td>';
+    if (player.photo) {
+      html += '<img src="' + player.photo + '" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">';
+    } else {
+      const initials = player.name.split(' ').map(n => n[0]).join('');
+      html += '<div style="width: 40px; height: 40px; border-radius: 50%; background: var(--beylerbeyi-red); color: white; display: flex; align-items: center; justify-content: center; font-weight: bold;">' + initials + '</div>';
+    }
+    html += '</td>';
+    html += '<td><strong>' + player.name + '</strong></td>';
+    html += '<td>' + player.ageGroup + '</td>';
+    html += '<td>' + posName + '</td>';
+    html += '<td>';
+    html += '<button class="action-btn" onclick="editPlayer(' + player.id + ')">Düzenle</button>';
+    html += '<button class="action-btn btn-danger" onclick="confirmDeletePlayer(' + player.id + ')">Sil</button>';
+    html += '</td>';
+    html += '</tr>';
+  });
+  
+  container.innerHTML = html;
+}
+
+/**
+ * Admin istatistiklerini göster
+ */
+function showAdminStats() {
+  // Özet kartlar
+  document.getElementById('adminTotalPlayers').textContent = players.length;
+  document.getElementById('adminTotalTeams').textContent = teams.length;
+  document.getElementById('adminTotalCoaches').textContent = Object.values(USERS).filter(u => u.role === 'coach').length;
+  document.getElementById('adminActiveSeasons').textContent = SEASONS.filter(s => s.active).length;
+}
+
+// ==========================================
+// YARDIMCI FONKSİYONLAR
+// ==========================================
+
+/**
+ * Skill bar oluştur
+ */
+function createSkillBar(label, value) {
+  const percentage = (value / 10) * 100;
+  let color = '#dc3545';
+  if (value >= 8) color = '#28a745';
+  else if (value >= 6) color = '#ffc107';
+  
+  let html = '<div style="margin-bottom: 12px;">';
+  html += '<div style="display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 13px;">';
+  html += '<span><strong>' + label + '</strong></span>';
+  html += '<span>' + value.toFixed(1) + '/10</span>';
+  html += '</div>';
+  html += '<div style="background: #e0e0e0; height: 8px; border-radius: 10px; overflow: hidden;">';
+  html += '<div style="width: ' + percentage + '%; height: 100%; background: ' + color + '; transition: width 0.3s;"></div>';
+  html += '</div>';
+  html += '</div>';
+  
+  return html;
+}
+
+/**
+ * Eval section oluştur
+ */
+function createEvalSection(title, icon, skills) {
+  let html = '<div class="eval-section">';
+  html += '<h4>' + icon + ' ' + title + '</h4>';
+  html += '<div class="skill-bars">';
+  
+  for (const [label, value] of Object.entries(skills)) {
+    if (typeof value === 'number') {
+      html += createSkillBar(label, value);
+    }
+  }
+  
+  html += '</div></div>';
+  return html;
+}
+
+
+// ===== MODALS.JS =====
+// ==========================================
+// MODAL FUNCTIONS
+// ==========================================
+
+// ==========================================
+// OYUNCU DETAY MODAL
+// ==========================================
+
+/**
+ * Oyuncu detay modalını aç
+ */
+function openPlayerModal(playerId) {
+  const player = getPlayerById(playerId);
+  if (!player) {
+    alert('Oyuncu bulunamadı');
+    return;
+  }
+  
+  const modal = document.getElementById('playerModal');
+  const content = document.getElementById('playerModalContent');
+  
+  const stats = getPlayerSeasonStats(playerId, currentSeason);
+  const isGK = isGoalkeeper(player.position);
+  const positionName = getPositionName(player.position);
+  
+  let html = '';
+  
+  // Header
+  html += '<div style="display: flex; gap: 30px; margin-bottom: 30px; align-items: center;">';
+  html += '<div style="width: 150px; height: 150px; border-radius: 50%; overflow: hidden; border: 5px solid var(--beylerbeyi-red);">';
+  if (player.photo) {
+    html += '<img src="' + player.photo + '" style="width: 100%; height: 100%; object-fit: cover;">';
+  } else {
+    const initials = player.name.split(' ').map(n => n[0]).join('');
+    html += '<div class="player-photo-placeholder" style="width: 100%; height: 100%; font-size: 48px;">' + initials + '</div>';
+  }
+  html += '</div>';
+  html += '<div>';
+  html += '<h2 style="color: var(--beylerbeyi-red); margin-bottom: 10px;">' + player.name + '</h2>';
+  html += '<p style="font-size: 18px; color: #666;">' + positionName + ' • ' + player.ageGroup + '</p>';
+  html += '<p style="font-size: 14px; color: #999; margin-top: 5px;">Yaş: ' + calculateAge(player.birthYear) + ' • Boy: ' + player.height + 'cm • Kilo: ' + player.weight + 'kg</p>';
+  html += '</div>';
+  html += '</div>';
+  
+  // Sezon Seçici
+  html += '<div class="season-selector" style="margin-bottom: 20px;">';
+  for (let i = 0; i < SEASONS.length; i++) {
+    const season = SEASONS[i];
+    const isActive = season.id === currentSeason;
+    html += '<button class="season-btn' + (isActive ? ' active' : '') + '" onclick="changeModalSeason(\'' + season.id + '\')">' + season.name + '</button>';
+  }
+  html += '</div>';
+  
+  // İstatistikler
+  html += '<h3>📊 ' + currentSeason + ' Sezonu İstatistikleri</h3>';
+  html += '<div class="stats-grid" style="margin-top: 15px;">';
+  html += '<div class="stat-card"><h3>' + stats.matches + '</h3><p>Maç</p></div>';
+  html += '<div class="stat-card green"><h3>' + stats.minutes + '</h3><p>Dakika</p></div>';
+  
+  if (isGK) {
+    html += '<div class="stat-card gold"><h3>' + (stats.cleanSheets || 0) + '</h3><p>Kale Koruma</p></div>';
+    html += '<div class="stat-card dark"><h3>' + (stats.goalsConceded || 0) + '</h3><p>Yediği Gol</p></div>';
+  } else {
+    html += '<div class="stat-card gold"><h3>' + stats.goals + '</h3><p>Gol</p></div>';
+    html += '<div class="stat-card dark"><h3>' + stats.assists + '</h3><p>Asist</p></div>';
+  }
+  html += '</div>';
+  
+  // Değerlendirmeler
+  html += '<h3 style="margin-top: 30px; margin-bottom: 15px;">Değerlendirmeler</h3>';
+  html += '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">';
+  
+  // Fiziksel
+  html += '<div class="eval-section">';
+  html += '<h4>💪 Fiziksel</h4>';
+  html += createSkillBar('Sprint Hızı', player.physical.sprintSpeed);
+  html += createSkillBar('Dayanıklılık', player.physical.endurance);
+  html += createSkillBar('Çeviklik', player.physical.agility);
+  html += createSkillBar('Denge', player.physical.balance);
+  html += createSkillBar('Kuvvet', player.physical.strength);
+  html += '</div>';
+  
+  // Taktik
+  html += '<div class="eval-section">';
+  html += '<h4>🧠 Taktik</h4>';
+  html += createSkillBar('Oyun Anlayışı', player.tactical.gameUnderstanding);
+  html += createSkillBar('Pozisyon Bilgisi', player.tactical.positionKnowledge);
+  html += createSkillBar('Karar Verme', player.tactical.decisionMaking);
+  html += createSkillBar('Geçişler', player.tactical.transitions);
+  html += createSkillBar('Alan & Zamanlama', player.tactical.spacingTiming);
+  html += '</div>';
+  
+  // Mental
+  html += '<div class="eval-section">';
+  html += '<h4>🎯 Mental</h4>';
+  html += createSkillBar('Disiplin', player.mental.discipline);
+  html += createSkillBar('Çalışkanlık', player.mental.workRate);
+  html += createSkillBar('Öğrenme İsteği', player.mental.learningAttitude);
+  html += createSkillBar('Özgüven', player.mental.confidence);
+  html += createSkillBar('Rekabet', player.mental.competitiveness);
+  html += createSkillBar('Takım Uyumu', player.mental.teamHarmony);
+  html += createSkillBar('Baskı Altında', player.mental.pressurePerformance);
+  html += '</div>';
+  
+  html += '</div>';
+  
+  content.innerHTML = html;
+  modal.style.display = 'block';
+}
+
+/**
+ * Oyuncu modalını kapat
+ */
+function closePlayerModal() {
+  document.getElementById('playerModal').style.display = 'none';
+}
+
+/**
+ * Modal içinde sezon değiştir
+ */
+function changeModalSeason(seasonId) {
+  currentSeason = seasonId;
+  
+  // Modal'ı yeniden aç
+  const modal = document.getElementById('playerModal');
+  if (modal.style.display === 'block') {
+    const content = document.getElementById('playerModalContent');
+    const playerName = content.querySelector('h2').textContent;
+    const player = players.find(p => p.name === playerName);
+    if (player) {
+      openPlayerModal(player.id);
+    }
+  }
+}
+
+// ==========================================
+// OYUNCU EKLE/DÜZENLE MODAL
+// ==========================================
+
+let editingPlayerId = null;
+
+/**
+ * Oyuncu ekleme modalını göster
+ */
+function showAddPlayerModal() {
+  editingPlayerId = null;
+  
+  document.getElementById('playerFormTitle').textContent = 'Yeni Oyuncu Ekle';
+  document.getElementById('playerFormId').value = '';
+  
+  // Formu temizle
+  document.getElementById('playerName').value = '';
+  document.getElementById('playerBirthYear').value = '';
+  document.getElementById('playerHeight').value = '';
+  document.getElementById('playerWeight').value = '';
+  document.getElementById('playerPreviousClub').value = '';
+  
+  // Select'leri doldur
+  populateAgeGroupSelect();
+  populatePositionSelect();
+  
+  document.getElementById('addPlayerModal').style.display = 'block';
+}
+
+/**
+ * Oyuncu düzenleme modalını göster
+ */
+function editPlayer(playerId) {
+  const player = getPlayerById(playerId);
+  if (!player) {
+    alert('Oyuncu bulunamadı');
+    return;
+  }
+  
+  editingPlayerId = playerId;
+  
+  document.getElementById('playerFormTitle').textContent = 'Oyuncu Düzenle';
+  document.getElementById('playerFormId').value = playerId;
+  
+  // Formu doldur
+  document.getElementById('playerName').value = player.name;
+  document.getElementById('playerBirthYear').value = player.birthYear;
+  document.getElementById('playerHeight').value = player.height;
+  document.getElementById('playerWeight').value = player.weight;
+  document.getElementById('playerPreviousClub').value = player.previousClub;
+  
+  // Select'leri doldur
+  populateAgeGroupSelect();
+  populatePositionSelect();
+  
+  document.getElementById('playerAgeGroup').value = player.ageGroup;
+  document.getElementById('playerPosition').value = player.position;
+  document.getElementById('playerFoot').value = player.foot;
+  
+  document.getElementById('addPlayerModal').style.display = 'block';
+}
+
+/**
+ * Oyuncu ekleme/düzenleme modalını kapat
+ */
+function closeAddPlayerModal() {
+  document.getElementById('addPlayerModal').style.display = 'none';
+  editingPlayerId = null;
+}
+
+/**
+ * Yaş grubu select'ini doldur
+ */
+function populateAgeGroupSelect() {
+  const select = document.getElementById('playerAgeGroup');
+  select.innerHTML = '';
+  
+  AGE_GROUPS.forEach(ag => {
+    const option = document.createElement('option');
+    option.value = ag.id;
+    option.textContent = ag.displayName;
+    select.appendChild(option);
+  });
+}
+
+/**
+ * Pozisyon select'ini doldur
+ */
+function populatePositionSelect() {
+  const select = document.getElementById('playerPosition');
+  select.innerHTML = '';
+  
+  // Kategorilere göre grupla
+  const categories = {};
+  POSITIONS.forEach(pos => {
+    if (!categories[pos.category]) {
+      categories[pos.category] = [];
+    }
+    categories[pos.category].push(pos);
+  });
+  
+  // Her kategori için optgroup oluştur
+  for (const [category, positions] of Object.entries(categories)) {
+    const optgroup = document.createElement('optgroup');
+    optgroup.label = category;
+    
+    positions.forEach(pos => {
+      const option = document.createElement('option');
+      option.value = pos.id;
+      option.textContent = pos.name;
+      optgroup.appendChild(option);
+    });
+    
+    select.appendChild(optgroup);
+  }
+}
+
+/**
+ * Oyuncu kaydet (ekle veya düzenle)
+ */
+function savePlayer(event) {
+  event.preventDefault();
+  
+  const playerData = {
+    name: document.getElementById('playerName').value.trim(),
+    birthYear: parseInt(document.getElementById('playerBirthYear').value),
+    ageGroup: document.getElementById('playerAgeGroup').value,
+    position: document.getElementById('playerPosition').value,
+    height: parseInt(document.getElementById('playerHeight').value) || 170,
+    weight: parseInt(document.getElementById('playerWeight').value) || 65,
+    foot: document.getElementById('playerFoot').value,
+    previousClub: document.getElementById('playerPreviousClub').value.trim() || 'Beylerbeyi 1911',
+    photo: null,
+    joinDate: new Date().toISOString().split('T')[0]
+  };
+  
+  // Validasyon
+  const validation = validatePlayerData(playerData);
+  if (!validation.isValid) {
+    alert('Hata:\n' + validation.errors.join('\n'));
+    return;
+  }
+  
+  if (editingPlayerId) {
+    // Güncelle
+    updatePlayer(editingPlayerId, playerData);
+    showSuccess('Oyuncu başarıyla güncellendi');
+  } else {
+    // Yeni ekle
+    addPlayer(playerData);
+    showSuccess('Oyuncu başarıyla eklendi');
+  }
+  
+  // LocalStorage'a kaydet
+  saveToLocalStorage();
+  
+  // Modal'ı kapat
+  closeAddPlayerModal();
+  
+  // Listeyi yenile
+  if (currentUser.role === 'admin') {
+    renderAdminPlayersList();
+  } else if (currentUser.role === 'coach') {
+    renderPlayersGrid();
+  }
+}
+
+/**
+ * Oyuncu silme onayı
+ */
+function confirmDeletePlayer(playerId) {
+  const player = getPlayerById(playerId);
+  if (!player) {
+    alert('Oyuncu bulunamadı');
+    return;
+  }
+  
+  if (!canDeletePlayer(currentUser, playerId)) {
+    alert('Bu oyuncuyu silme yetkiniz yok');
+    return;
+  }
+  
+  if (confirm('Oyuncuyu silmek istediğinize emin misiniz?\n\nOyuncu: ' + player.name)) {
+    deletePlayer(playerId);
+    saveToLocalStorage();
+    showSuccess('Oyuncu başarıyla silindi');
+    
+    // Listeyi yenile
+    if (currentUser.role === 'admin') {
+      renderAdminPlayersList();
+      showAdminStats();
+    }
+  }
+}
+
+// ==========================================
+// MODAL DIŞINA TIKLAMA
+// ==========================================
+
+window.onclick = function(event) {
+  const playerModal = document.getElementById('playerModal');
+  const addPlayerModal = document.getElementById('addPlayerModal');
+  
+  if (event.target === playerModal) {
+    closePlayerModal();
+  }
+  
+  if (event.target === addPlayerModal) {
+    closeAddPlayerModal();
+  }
+};
+
+
+</script>
+</body>
+</html>
