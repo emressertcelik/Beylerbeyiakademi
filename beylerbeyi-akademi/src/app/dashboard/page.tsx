@@ -14,7 +14,7 @@ export default function DashboardPage() {
       <div className="min-h-screen flex items-center justify-center bg-bb-dark">
         <div className="flex flex-col items-center gap-4">
           <Image
-            src="/logo.png"
+            src="/logo.jpg"
             alt="Beylerbeyi"
             width={64}
             height={64}
@@ -68,7 +68,7 @@ export default function DashboardPage() {
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-3">
               <Image
-                src="/logo.png"
+                src="/logo.jpg"
                 alt="Beylerbeyi"
                 width={36}
                 height={36}
