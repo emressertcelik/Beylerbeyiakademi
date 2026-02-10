@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -36,48 +37,58 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
-      {/* Arka plan deseni */}
-      <div className="absolute inset-0 opacity-10">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-bb-dark via-bb-dark-light to-bb-dark relative overflow-hidden">
+      {/* Dekoratif arka plan elementleri */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute -top-40 -left-40 w-80 h-80 rounded-full bg-bb-red/10 blur-3xl" />
+        <div className="absolute -bottom-40 -right-40 w-80 h-80 rounded-full bg-bb-green/10 blur-3xl" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-bb-dark-card/30 blur-3xl" />
+      </div>
+
+      {/* Kırmızı-Yeşil çizgi deseni */}
+      <div className="absolute inset-0 opacity-[0.03]">
         <div
           className="absolute inset-0"
           style={{
             backgroundImage:
-              "radial-gradient(circle at 1px 1px, rgba(255,255,255,0.15) 1px, transparent 0)",
-            backgroundSize: "40px 40px",
+              "repeating-linear-gradient(90deg, #E30A17 0px, #E30A17 2px, transparent 2px, transparent 20px, #00843D 20px, #00843D 22px, transparent 22px, transparent 40px)",
           }}
         />
       </div>
 
       <div className="relative w-full max-w-md mx-4">
-        {/* Logo / Başlık */}
+        {/* Logo & Başlık */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-400 to-amber-600 shadow-lg shadow-amber-500/25 mb-4">
-            <svg
-              className="w-8 h-8 text-white"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
-              />
-            </svg>
+          <div className="inline-flex items-center justify-center w-24 h-24 mb-4">
+            <Image
+              src="/logo.png"
+              alt="Beylerbeyi Futbol Akademi"
+              width={96}
+              height={96}
+              className="drop-shadow-2xl"
+              priority
+            />
           </div>
           <h1 className="text-3xl font-bold text-white tracking-tight">
-            Beylerbeyi Akademi
+            Beylerbeyi Futbol Akademi
           </h1>
-          <p className="mt-2 text-slate-400">
+          <p className="mt-1 text-sm font-medium text-bb-green-light tracking-widest uppercase">
+            Yönetim Sistemi
+          </p>
+          <p className="mt-3 text-slate-400 text-sm">
             Hesabınıza giriş yapın
           </p>
         </div>
 
         {/* Form Kartı */}
-        <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-8 shadow-2xl">
-          <form onSubmit={handleSubmit} className="space-y-5">
+        <div className="bg-white/[0.04] backdrop-blur-2xl border border-white/10 rounded-2xl p-8 shadow-2xl relative overflow-hidden">
+          {/* Kart üst kırmızı-yeşil şerit */}
+          <div className="absolute top-0 left-0 right-0 h-1 flex">
+            <div className="flex-1 bg-bb-red" />
+            <div className="flex-1 bg-bb-green" />
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-5 mt-2">
             {/* E-posta */}
             <div>
               <label
@@ -109,7 +120,7 @@ export default function LoginPage() {
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="ornek@email.com"
                   required
-                  className="w-full pl-11 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500/50 transition-all duration-200"
+                  className="w-full pl-11 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-bb-green/50 focus:border-bb-green/50 transition-all duration-200"
                 />
               </div>
             </div>
@@ -145,14 +156,14 @@ export default function LoginPage() {
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
                   required
-                  className="w-full pl-11 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500/50 transition-all duration-200"
+                  className="w-full pl-11 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-bb-green/50 focus:border-bb-green/50 transition-all duration-200"
                 />
               </div>
             </div>
 
             {/* Hata Mesajı */}
             {error && (
-              <div className="flex items-center gap-2 p-3 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 text-sm">
+              <div className="flex items-center gap-2 p-3 bg-bb-red/10 border border-bb-red/20 rounded-xl text-red-300 text-sm">
                 <svg
                   className="w-5 h-5 flex-shrink-0"
                   fill="none"
@@ -174,7 +185,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 px-4 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-semibold rounded-xl shadow-lg shadow-amber-500/25 focus:outline-none focus:ring-2 focus:ring-amber-500/50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98]"
+              className="w-full py-3 px-4 bg-gradient-to-r from-bb-red to-bb-red-dark hover:from-bb-red-dark hover:to-bb-red text-white font-semibold rounded-xl shadow-lg shadow-bb-red/25 focus:outline-none focus:ring-2 focus:ring-bb-red/50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98]"
             >
               {loading ? (
                 <div className="flex items-center justify-center gap-2">
@@ -204,15 +215,18 @@ export default function LoginPage() {
               )}
             </button>
           </form>
-
-
         </div>
 
         {/* Alt bilgi */}
-        <p className="mt-6 text-center text-slate-600 text-xs">
-          &copy; {new Date().getFullYear()} Beylerbeyi Akademi. Tüm hakları
-          saklıdır.
-        </p>
+        <div className="mt-6 text-center">
+          <p className="text-slate-500 text-xs">
+            Est. <span className="text-bb-green-light font-semibold">1911</span>
+          </p>
+          <p className="text-slate-600 text-xs mt-1">
+            &copy; {new Date().getFullYear()} Beylerbeyi Futbol Akademi. Tüm
+            hakları saklıdır.
+          </p>
+        </div>
       </div>
     </div>
   );

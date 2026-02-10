@@ -57,9 +57,9 @@ export default function RoleGuard({
     return (
       <div className="flex items-center justify-center p-8">
         <div className="text-center max-w-md">
-          <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-red-500/10 flex items-center justify-center">
+          <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-bb-red/10 flex items-center justify-center">
             <svg
-              className="w-6 h-6 text-red-400"
+              className="w-6 h-6 text-bb-red"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -77,7 +77,7 @@ export default function RoleGuard({
           </h3>
           <p className="text-slate-400 text-sm">
             Bu içeriği görüntülemek için en az{" "}
-            <span className="text-amber-400 font-medium">
+            <span className="text-bb-green-light font-medium">
               {ROLE_LABELS[requiredRole]}
             </span>{" "}
             rolüne sahip olmanız gerekiyor.

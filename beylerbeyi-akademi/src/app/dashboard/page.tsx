@@ -3,6 +3,7 @@
 import { useAuth } from "@/hooks/useAuth";
 import { ROLE_LABELS } from "@/types/roles";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 export default function DashboardPage() {
   const { user, role, loading, signOut } = useAuth();
@@ -10,25 +11,34 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-900">
-        <div className="flex items-center gap-3 text-slate-400">
-          <svg className="animate-spin h-6 w-6" viewBox="0 0 24 24">
-            <circle
-              className="opacity-25"
-              cx="12"
-              cy="12"
-              r="10"
-              stroke="currentColor"
-              strokeWidth="4"
-              fill="none"
-            />
-            <path
-              className="opacity-75"
-              fill="currentColor"
-              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-            />
-          </svg>
-          <span>Yükleniyor...</span>
+      <div className="min-h-screen flex items-center justify-center bg-bb-dark">
+        <div className="flex flex-col items-center gap-4">
+          <Image
+            src="/logo.png"
+            alt="Beylerbeyi"
+            width={64}
+            height={64}
+            className="animate-pulse"
+          />
+          <div className="flex items-center gap-3 text-slate-400">
+            <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+              <circle
+                className="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                strokeWidth="4"
+                fill="none"
+              />
+              <path
+                className="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+              />
+            </svg>
+            <span>Yükleniyor...</span>
+          </div>
         </div>
       </div>
     );
@@ -46,35 +56,36 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+    <div className="min-h-screen bg-gradient-to-br from-bb-dark via-bb-dark-light to-bb-dark">
       {/* Header */}
-      <header className="border-b border-white/10 bg-white/5 backdrop-blur-xl">
+      <header className="border-b border-white/10 bg-white/[0.03] backdrop-blur-xl">
+        {/* Üst kırmızı-yeşil şerit */}
+        <div className="h-1 flex">
+          <div className="flex-1 bg-bb-red" />
+          <div className="flex-1 bg-bb-green" />
+        </div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center">
-                <svg
-                  className="w-4 h-4 text-white"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
-                  />
-                </svg>
+              <Image
+                src="/logo.png"
+                alt="Beylerbeyi"
+                width={36}
+                height={36}
+              />
+              <div>
+                <span className="text-white font-semibold text-lg leading-tight block">
+                  Beylerbeyi Akademi
+                </span>
+                <span className="text-bb-green-light text-[10px] font-medium tracking-widest uppercase leading-tight">
+                  Yönetim Sistemi
+                </span>
               </div>
-              <span className="text-white font-semibold text-lg">
-                Beylerbeyi Akademi
-              </span>
             </div>
 
             <div className="flex items-center gap-4">
               {role && (
-                <span className="px-3 py-1 rounded-full text-xs font-medium bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                <span className="px-3 py-1 rounded-full text-xs font-medium bg-bb-green/10 text-bb-green-light border border-bb-green/20">
                   {ROLE_LABELS[role]}
                 </span>
               )}
@@ -83,7 +94,7 @@ export default function DashboardPage() {
               </span>
               <button
                 onClick={handleSignOut}
-                className="px-4 py-2 text-sm font-medium text-slate-300 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg transition-all duration-200"
+                className="px-4 py-2 text-sm font-medium text-slate-300 hover:text-white bg-white/5 hover:bg-bb-red/20 border border-white/10 hover:border-bb-red/30 rounded-lg transition-all duration-200"
               >
                 Çıkış Yap
               </button>
@@ -97,17 +108,20 @@ export default function DashboardPage() {
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-white">Hoş Geldiniz!</h1>
           <p className="mt-2 text-slate-400">
-            Beylerbeyi Akademi yönetim paneline başarıyla giriş yaptınız.
+            Beylerbeyi Futbol Akademi yönetim paneline başarıyla giriş
+            yaptınız.
           </p>
         </div>
 
         {/* Bilgi Kartları */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6">
+          {/* Kullanıcı Bilgisi */}
+          <div className="bg-white/[0.04] backdrop-blur-xl border border-white/10 rounded-2xl p-6 relative overflow-hidden group hover:border-bb-green/20 transition-all duration-300">
+            <div className="absolute top-0 left-0 w-1 h-full bg-bb-green opacity-0 group-hover:opacity-100 transition-opacity" />
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center">
+              <div className="w-10 h-10 rounded-xl bg-bb-green/10 flex items-center justify-center">
                 <svg
-                  className="w-5 h-5 text-blue-400"
+                  className="w-5 h-5 text-bb-green-light"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -128,11 +142,13 @@ export default function DashboardPage() {
             </p>
           </div>
 
-          <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6">
+          {/* Rol */}
+          <div className="bg-white/[0.04] backdrop-blur-xl border border-white/10 rounded-2xl p-6 relative overflow-hidden group hover:border-bb-red/20 transition-all duration-300">
+            <div className="absolute top-0 left-0 w-1 h-full bg-bb-red opacity-0 group-hover:opacity-100 transition-opacity" />
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center">
+              <div className="w-10 h-10 rounded-xl bg-bb-red/10 flex items-center justify-center">
                 <svg
-                  className="w-5 h-5 text-amber-400"
+                  className="w-5 h-5 text-bb-red-light"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -155,7 +171,9 @@ export default function DashboardPage() {
             </p>
           </div>
 
-          <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6">
+          {/* Durum */}
+          <div className="bg-white/[0.04] backdrop-blur-xl border border-white/10 rounded-2xl p-6 relative overflow-hidden group hover:border-bb-green/20 transition-all duration-300">
+            <div className="absolute top-0 left-0 w-1 h-full bg-bb-green opacity-0 group-hover:opacity-100 transition-opacity" />
             <div className="flex items-center gap-3 mb-4">
               <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center">
                 <svg
@@ -174,11 +192,26 @@ export default function DashboardPage() {
               </div>
               <h3 className="text-white font-medium">Durum</h3>
             </div>
-            <p className="text-emerald-400 text-sm font-medium">Aktif</p>
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-bb-green animate-pulse" />
+              <p className="text-bb-green-light text-sm font-medium">Aktif</p>
+            </div>
             <p className="text-slate-500 text-xs mt-1">Oturum açık</p>
           </div>
         </div>
       </main>
+
+      {/* Footer */}
+      <footer className="border-t border-white/5 mt-auto">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
+          <p className="text-slate-600 text-xs">
+            &copy; {new Date().getFullYear()} Beylerbeyi Futbol Akademi
+          </p>
+          <p className="text-slate-700 text-xs">
+            Est. 1911
+          </p>
+        </div>
+      </footer>
     </div>
   );
 }
