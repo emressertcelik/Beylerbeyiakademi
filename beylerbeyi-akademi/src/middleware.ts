@@ -1,19 +1,26 @@
 import { updateSession } from "@/lib/supabase/middleware";
-import type { NextRequest } from "next/server";
+import { NextResponse, type NextRequest } from "next/server";
 
 export async function middleware(request: NextRequest) {
-  return await updateSession(request);
+  try {
+    // Env değişkenleri yoksa middleware'i atla
+    if (
+      !process.env.NEXT_PUBLIC_SUPABASE_URL ||
+      !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+    ) {
+      console.error("Supabase env variables are missing!");
+      return NextResponse.next();
+    }
+
+    return await updateSession(request);
+  } catch (error) {
+    console.error("Middleware error:", error);
+    return NextResponse.next();
+  }
 }
 
 export const config = {
   matcher: [
-    /*
-     * Aşağıdaki yollar hariç tüm isteklerde middleware çalışır:
-     * - _next/static (statik dosyalar)
-     * - _next/image (resim optimizasyonu)
-     * - favicon.ico (favicon)
-     * - public klasöründeki dosyalar
-     */
     "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 };
