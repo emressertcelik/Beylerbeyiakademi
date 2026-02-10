@@ -37,82 +37,96 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-bb-dark via-bb-dark-light to-bb-dark relative overflow-hidden">
-      {/* Dekoratif arka plan elementleri */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -left-40 w-80 h-80 rounded-full bg-bb-red/10 blur-3xl" />
-        <div className="absolute -bottom-40 -right-40 w-80 h-80 rounded-full bg-bb-green/10 blur-3xl" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-bb-dark-card/30 blur-3xl" />
-      </div>
-
-      {/* Kırmızı-Yeşil çizgi deseni */}
-      <div className="absolute inset-0 opacity-[0.03]">
-        <div
-          className="absolute inset-0"
-          style={{
-            backgroundImage:
-              "repeating-linear-gradient(90deg, #E30A17 0px, #E30A17 2px, transparent 2px, transparent 20px, #00843D 20px, #00843D 22px, transparent 22px, transparent 40px)",
-          }}
-        />
-      </div>
-
-      <div className="relative w-full max-w-md mx-4">
-        {/* Logo & Başlık */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-24 h-24 mb-4">
-            <Image
-              src="/logo.jpg"
-              alt="Beylerbeyi Futbol Akademi"
-              width={96}
-              height={96}
-              className="drop-shadow-2xl"
-              priority
-            />
+    <div className="min-h-screen flex bg-white">
+      {/* Sol panel — kırmızı-yeşil gradient */}
+      <div className="hidden lg:flex lg:w-[45%] flex-col relative overflow-hidden">
+        {/* Üst kırmızı alan */}
+        <div className="flex-1 bg-[#c4111d] relative flex items-end justify-center pb-0">
+          <div className="absolute inset-0 bg-gradient-to-b from-[#d42630] to-[#a50e18]" />
+          <div className="relative z-10 text-center pb-10">
+            <div className="w-28 h-28 mx-auto rounded-full flex items-center justify-center mb-6">
+              <Image
+                src="/Logo_S.png"
+                alt="Beylerbeyi Futbol Akademi"
+                width={112}
+                height={112}
+                className="object-contain drop-shadow-lg"
+                priority
+              />
+            </div>
           </div>
-          <h1 className="text-3xl font-bold text-white tracking-tight">
-            Beylerbeyi Futbol Akademi
-          </h1>
-          <p className="mt-1 text-sm font-medium text-bb-green-light tracking-widest uppercase">
-            Yönetim Sistemi
-          </p>
-          <p className="mt-3 text-slate-400 text-sm">
-            Hesabınıza giriş yapın
-          </p>
         </div>
 
-        {/* Form Kartı */}
-        <div className="bg-white/[0.04] backdrop-blur-2xl border border-white/10 rounded-2xl p-8 shadow-2xl relative overflow-hidden">
-          {/* Kart üst kırmızı-yeşil şerit */}
-          <div className="absolute top-0 left-0 right-0 h-1 flex">
-            <div className="flex-1 bg-bb-red" />
-            <div className="flex-1 bg-bb-green" />
-          </div>
+        {/* Alt yeşil alan */}
+        <div className="flex-1 bg-[#1b6e2a] relative flex items-start justify-center pt-0">
+          <div className="absolute inset-0 bg-gradient-to-b from-[#1b6e2a] to-[#145220]" />
+          <div className="relative z-10 text-center pt-8 px-12">
+            <h1 className="text-white text-3xl xl:text-4xl font-bold leading-tight mb-2">
+              Beylerbeyi
+            </h1>
+            <h2 className="text-white/80 text-xl font-semibold mb-4">
+              Futbol Akademi
+            </h2>
+            <div className="flex items-center justify-center gap-3 mb-5">
+              <div className="h-px w-8 bg-white/30" />
+              <span className="text-white/40 text-[11px] font-bold tracking-[0.3em] uppercase">
+                Yönetim Sistemi
+              </span>
+              <div className="h-px w-8 bg-white/30" />
+            </div>
+            <p className="text-white/35 text-sm max-w-[260px] mx-auto leading-relaxed">
+              Geleceğin futbolcularını yetiştiriyoruz.
+            </p>
 
-          <form onSubmit={handleSubmit} className="space-y-5 mt-2">
-            {/* E-posta */}
-            <div>
-              <label
-                htmlFor="email"
-                className="block text-sm font-medium text-slate-300 mb-2"
-              >
-                E-posta Adresi
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                  <svg
-                    className="w-5 h-5 text-slate-500"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={1.5}
-                      d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-                    />
-                  </svg>
-                </div>
+            <div className="mt-10 flex items-center justify-center gap-2 text-white/20 text-xs">
+              <div className="w-2 h-2 rounded-full bg-[#c4111d]" />
+              <span className="font-medium">1911</span>
+              <div className="w-2 h-2 rounded-full bg-white/30" />
+            </div>
+          </div>
+        </div>
+
+        {/* Ortadaki beyaz şerit */}
+        <div className="absolute top-1/2 left-0 right-0 -translate-y-1/2 h-1 bg-white z-20" />
+      </div>
+
+      {/* Sağ panel — form */}
+      <div className="flex-1 flex flex-col bg-white">
+        {/* Mobil üst şerit */}
+        <div className="lg:hidden h-1.5 flex">
+          <div className="flex-1 bg-[#c4111d]" />
+          <div className="flex-1 bg-white border-b border-[#e5e7eb]" />
+          <div className="flex-1 bg-[#1b6e2a]" />
+        </div>
+
+        <div className="flex-1 flex items-center justify-center px-6 py-12">
+          <div className="w-full max-w-[360px]">
+            {/* Mobil logo */}
+            <div className="lg:hidden flex flex-col items-center mb-10">
+              <div className="w-20 h-20 rounded-full flex items-center justify-center mb-4">
+                <Image
+                  src="/Logo_S.png"
+                  alt="Beylerbeyi"
+                  width={80}
+                  height={80}
+                  className="object-contain drop-shadow-md"
+                  priority
+                />
+              </div>
+              <h1 className="text-[#1a1a1a] text-lg font-bold">Beylerbeyi Akademi</h1>
+              <p className="text-[#6e7781] text-xs mt-0.5">Yönetim Sistemi</p>
+            </div>
+
+            <div className="mb-7">
+              <h2 className="text-[#1a1a1a] text-xl font-bold mb-1">Giriş Yap</h2>
+              <p className="text-[#6e7781] text-sm">Panele erişmek için giriş yapın</p>
+            </div>
+
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label htmlFor="email" className="block text-[13px] font-semibold text-[#24292f] mb-1.5">
+                  E-posta
+                </label>
                 <input
                   id="email"
                   type="email"
@@ -120,35 +134,14 @@ export default function LoginPage() {
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="ornek@email.com"
                   required
-                  className="w-full pl-11 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-bb-green/50 focus:border-bb-green/50 transition-all duration-200"
+                  className="w-full px-3 py-2.5 bg-white border border-[#d0d7de] rounded-lg text-[#1a1a1a] text-sm placeholder-[#8b949e] focus:outline-none focus:border-[#1b6e2a] focus:ring-2 focus:ring-[#1b6e2a]/15 transition-all"
                 />
               </div>
-            </div>
 
-            {/* Şifre */}
-            <div>
-              <label
-                htmlFor="password"
-                className="block text-sm font-medium text-slate-300 mb-2"
-              >
-                Şifre
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                  <svg
-                    className="w-5 h-5 text-slate-500"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={1.5}
-                      d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-                    />
-                  </svg>
-                </div>
+              <div>
+                <label htmlFor="password" className="block text-[13px] font-semibold text-[#24292f] mb-1.5">
+                  Şifre
+                </label>
                 <input
                   id="password"
                   type="password"
@@ -156,76 +149,46 @@ export default function LoginPage() {
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
                   required
-                  className="w-full pl-11 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-bb-green/50 focus:border-bb-green/50 transition-all duration-200"
+                  className="w-full px-3 py-2.5 bg-white border border-[#d0d7de] rounded-lg text-[#1a1a1a] text-sm placeholder-[#8b949e] focus:outline-none focus:border-[#1b6e2a] focus:ring-2 focus:ring-[#1b6e2a]/15 transition-all"
                 />
               </div>
-            </div>
 
-            {/* Hata Mesajı */}
-            {error && (
-              <div className="flex items-center gap-2 p-3 bg-bb-red/10 border border-bb-red/20 rounded-xl text-red-300 text-sm">
-                <svg
-                  className="w-5 h-5 flex-shrink-0"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
-                <span>{error}</span>
-              </div>
-            )}
-
-            {/* Giriş Butonu */}
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full py-3 px-4 bg-gradient-to-r from-bb-red to-bb-red-dark hover:from-bb-red-dark hover:to-bb-red text-white font-semibold rounded-xl shadow-lg shadow-bb-red/25 focus:outline-none focus:ring-2 focus:ring-bb-red/50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98]"
-            >
-              {loading ? (
-                <div className="flex items-center justify-center gap-2">
-                  <svg
-                    className="animate-spin h-5 w-5"
-                    viewBox="0 0 24 24"
-                  >
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                      fill="none"
-                    />
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-                    />
+              {error && (
+                <div className="flex items-start gap-2.5 p-3 bg-[#fff1f0] border border-[#c4111d]/20 rounded-lg">
+                  <svg className="w-4 h-4 text-[#c4111d] mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
-                  <span>Giriş yapılıyor...</span>
+                  <span className="text-[#82071e] text-sm leading-snug">{error}</span>
                 </div>
-              ) : (
-                "Giriş Yap"
               )}
-            </button>
-          </form>
-        </div>
 
-        {/* Alt bilgi */}
-        <div className="mt-6 text-center">
-          <p className="text-slate-500 text-xs">
-            Est. <span className="text-bb-green-light font-semibold">1911</span>
-          </p>
-          <p className="text-slate-600 text-xs mt-1">
-            &copy; {new Date().getFullYear()} Beylerbeyi Futbol Akademi. Tüm
-            hakları saklıdır.
-          </p>
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full py-2.5 mt-1 bg-[#c4111d] hover:bg-[#a50e18] active:bg-[#8a0b14] text-white text-sm font-semibold rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm shadow-[#c4111d]/20"
+              >
+                {loading ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                    </svg>
+                    Giriş yapılıyor...
+                  </span>
+                ) : (
+                  "Giriş Yap"
+                )}
+              </button>
+            </form>
+
+            <div className="mt-12 flex items-center justify-center gap-2">
+              <div className="w-2 h-2 rounded-full bg-[#c4111d]/30" />
+              <p className="text-[#8b949e] text-[11px]">
+                &copy; {new Date().getFullYear()} Beylerbeyi Futbol Akademi
+              </p>
+              <div className="w-2 h-2 rounded-full bg-[#1b6e2a]/30" />
+            </div>
+          </div>
         </div>
       </div>
     </div>

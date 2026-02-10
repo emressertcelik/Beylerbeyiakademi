@@ -11,34 +11,16 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-bb-dark">
-        <div className="flex flex-col items-center gap-4">
-          <Image
-            src="/logo.jpg"
-            alt="Beylerbeyi"
-            width={64}
-            height={64}
-            className="animate-pulse"
-          />
-          <div className="flex items-center gap-3 text-slate-400">
-            <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-              <circle
-                className="opacity-25"
-                cx="12"
-                cy="12"
-                r="10"
-                stroke="currentColor"
-                strokeWidth="4"
-                fill="none"
-              />
-              <path
-                className="opacity-75"
-                fill="currentColor"
-                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-              />
-            </svg>
-            <span>Yükleniyor...</span>
-          </div>
+      <div className="min-h-screen flex flex-col items-center justify-center bg-white">
+        <div className="w-16 h-16 rounded-full flex items-center justify-center mb-5 animate-pulse">
+          <Image src="/logo.png" alt="Beylerbeyi" width={56} height={56} className="object-contain" />
+        </div>
+        <div className="flex items-center gap-2 text-[#6e7781]">
+          <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+          </svg>
+          <span className="text-sm">Yükleniyor...</span>
         </div>
       </div>
     );
@@ -51,50 +33,52 @@ export default function DashboardPage() {
 
   const handleSignOut = async () => {
     await signOut();
-    router.push("/login");
-    router.refresh();
   };
 
+  const roleBadgeClass = (() => {
+    switch (role) {
+      case "yonetici":
+        return "bg-[#c4111d] text-white";
+      case "antrenor":
+        return "bg-[#1b6e2a] text-white";
+      default:
+        return "bg-[#f0f0f0] text-[#24292f]";
+    }
+  })();
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-bb-dark via-bb-dark-light to-bb-dark">
+    <div className="min-h-screen bg-[#fafafa] flex flex-col">
+      {/* Üst şerit */}
+      <div className="h-1 flex flex-shrink-0">
+        <div className="flex-1 bg-[#c4111d]" />
+        <div className="w-1 bg-white" />
+        <div className="flex-1 bg-[#1b6e2a]" />
+      </div>
+
       {/* Header */}
-      <header className="border-b border-white/10 bg-white/[0.03] backdrop-blur-xl">
-        {/* Üst kırmızı-yeşil şerit */}
-        <div className="h-1 flex">
-          <div className="flex-1 bg-bb-red" />
-          <div className="flex-1 bg-bb-green" />
-        </div>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
+      <header className="bg-white border-b border-[#e5e7eb] flex-shrink-0 shadow-sm">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6">
+          <div className="flex items-center justify-between h-14">
             <div className="flex items-center gap-3">
-              <Image
-                src="/logo.jpg"
-                alt="Beylerbeyi"
-                width={36}
-                height={36}
-              />
-              <div>
-                <span className="text-white font-semibold text-lg leading-tight block">
-                  Beylerbeyi Akademi
-                </span>
-                <span className="text-bb-green-light text-[10px] font-medium tracking-widest uppercase leading-tight">
-                  Yönetim Sistemi
-                </span>
+              <div className="w-9 h-9 rounded-full flex items-center justify-center">
+                <Image src="/Logo_S.png" alt="Beylerbeyi" width={30} height={30} className="object-contain" />
+              </div>
+              <div className="hidden sm:block">
+                <span className="text-[#1a1a1a] font-bold text-sm">Beylerbeyi Akademi</span>
+                <span className="text-[#8b949e] text-[10px] ml-1.5 font-medium">Yönetim</span>
               </div>
             </div>
 
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3">
               {role && (
-                <span className="px-3 py-1 rounded-full text-xs font-medium bg-bb-green/10 text-bb-green-light border border-bb-green/20">
+                <span className={`px-2.5 py-1 rounded-full text-[11px] font-bold ${roleBadgeClass}`}>
                   {ROLE_LABELS[role]}
                 </span>
               )}
-              <span className="text-slate-400 text-sm hidden sm:block">
-                {user.email}
-              </span>
+              <span className="text-[#57606a] text-sm hidden md:block">{user.email}</span>
               <button
                 onClick={handleSignOut}
-                className="px-4 py-2 text-sm font-medium text-slate-300 hover:text-white bg-white/5 hover:bg-bb-red/20 border border-white/10 hover:border-bb-red/30 rounded-lg transition-all duration-200"
+                className="px-3 py-1.5 text-xs font-semibold text-[#c4111d] bg-white hover:bg-[#fff1f0] border border-[#c4111d]/30 hover:border-[#c4111d]/50 rounded-lg transition-colors"
               >
                 Çıkış Yap
               </button>
@@ -104,112 +88,69 @@ export default function DashboardPage() {
       </header>
 
       {/* İçerik */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-white">Hoş Geldiniz!</h1>
-          <p className="mt-2 text-slate-400">
-            Beylerbeyi Futbol Akademi yönetim paneline başarıyla giriş
-            yaptınız.
+      <main className="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 py-8">
+        {/* Karşılama banner */}
+        <div className="bg-gradient-to-r from-[#c4111d] to-[#1b6e2a] rounded-2xl p-6 sm:p-8 mb-6 text-white relative overflow-hidden">
+          <div className="absolute right-6 top-1/2 -translate-y-1/2 opacity-10">
+            <Image src="/Logo_S.png" alt="" width={120} height={120} className="object-contain" />
+          </div>
+          <h1 className="text-xl sm:text-2xl font-bold relative z-10">Hoş Geldiniz 👋</h1>
+          <p className="mt-1 text-white/70 text-sm relative z-10">
+            Beylerbeyi Futbol Akademi yönetim paneli
           </p>
         </div>
 
-        {/* Bilgi Kartları */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Kullanıcı Bilgisi */}
-          <div className="bg-white/[0.04] backdrop-blur-xl border border-white/10 rounded-2xl p-6 relative overflow-hidden group hover:border-bb-green/20 transition-all duration-300">
-            <div className="absolute top-0 left-0 w-1 h-full bg-bb-green opacity-0 group-hover:opacity-100 transition-opacity" />
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded-xl bg-bb-green/10 flex items-center justify-center">
-                <svg
-                  className="w-5 h-5 text-bb-green-light"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                  />
-                </svg>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {/* Hesap */}
+          <div className="bg-white border border-[#e5e7eb] rounded-xl p-5 hover:shadow-md transition-shadow group">
+            <div className="flex items-center gap-2.5 mb-3">
+              <div className="w-9 h-9 rounded-full flex items-center justify-center">
+                <Image src="/Logo_S.png" alt="Beylerbeyi" width={30} height={30} className="object-contain" />
               </div>
-              <h3 className="text-white font-medium">Kullanıcı Bilgisi</h3>
+              <h3 className="text-[#1a1a1a] font-semibold text-sm">Hesap</h3>
             </div>
-            <p className="text-slate-400 text-sm">{user.email}</p>
-            <p className="text-slate-500 text-xs mt-1">
-              ID: {user.id.slice(0, 8)}...
-            </p>
+            <p className="text-[#57606a] text-sm truncate">{user.email}</p>
+            <p className="text-[#8b949e] text-xs mt-1 font-mono">ID: {user.id.slice(0, 8)}</p>
           </div>
 
-          {/* Rol */}
-          <div className="bg-white/[0.04] backdrop-blur-xl border border-white/10 rounded-2xl p-6 relative overflow-hidden group hover:border-bb-red/20 transition-all duration-300">
-            <div className="absolute top-0 left-0 w-1 h-full bg-bb-red opacity-0 group-hover:opacity-100 transition-opacity" />
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded-xl bg-bb-red/10 flex items-center justify-center">
-                <svg
-                  className="w-5 h-5 text-bb-red-light"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
-                  />
-                </svg>
+          {/* Yetki */}
+          <div className="bg-white border border-[#e5e7eb] rounded-xl p-5 hover:shadow-md transition-shadow group">
+            <div className="flex items-center gap-2.5 mb-3">
+              <div className="w-9 h-9 rounded-full flex items-center justify-center">
+                <Image src="/Logo_S.png" alt="Beylerbeyi" width={30} height={30} className="object-contain" />
               </div>
-              <h3 className="text-white font-medium">Rol</h3>
+              <h3 className="text-[#1a1a1a] font-semibold text-sm">Yetki</h3>
             </div>
-            <p className="text-slate-400 text-sm">
-              {role ? ROLE_LABELS[role] : "Yükleniyor..."}
-            </p>
-            <p className="text-slate-500 text-xs mt-1">
-              Yetki seviyesi: {role || "-"}
-            </p>
+            <p className="text-[#57606a] text-sm">{role ? ROLE_LABELS[role] : "—"}</p>
+            <p className="text-[#8b949e] text-xs mt-1">Seviye: {role || "—"}</p>
           </div>
 
           {/* Durum */}
-          <div className="bg-white/[0.04] backdrop-blur-xl border border-white/10 rounded-2xl p-6 relative overflow-hidden group hover:border-bb-green/20 transition-all duration-300">
-            <div className="absolute top-0 left-0 w-1 h-full bg-bb-green opacity-0 group-hover:opacity-100 transition-opacity" />
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center">
-                <svg
-                  className="w-5 h-5 text-emerald-400"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
-                  />
-                </svg>
+          <div className="bg-white border border-[#e5e7eb] rounded-xl p-5 hover:shadow-md transition-shadow group">
+            <div className="flex items-center gap-2.5 mb-3">
+              <div className="w-9 h-9 rounded-full flex items-center justify-center">
+                <Image src="/Logo_S.png" alt="Beylerbeyi" width={30} height={30} className="object-contain" />
               </div>
-              <h3 className="text-white font-medium">Durum</h3>
+              <h3 className="text-[#1a1a1a] font-semibold text-sm">Durum</h3>
             </div>
-            <div className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-bb-green animate-pulse" />
-              <p className="text-bb-green-light text-sm font-medium">Aktif</p>
+            <div className="flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-[#1b6e2a] animate-pulse" />
+              <p className="text-[#1b6e2a] text-sm font-semibold">Aktif</p>
             </div>
-            <p className="text-slate-500 text-xs mt-1">Oturum açık</p>
+            <p className="text-[#8b949e] text-xs mt-1">Oturum açık</p>
           </div>
         </div>
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-white/5 mt-auto">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
-          <p className="text-slate-600 text-xs">
-            &copy; {new Date().getFullYear()} Beylerbeyi Futbol Akademi
-          </p>
-          <p className="text-slate-700 text-xs">
-            Est. 1911
-          </p>
+      <footer className="border-t border-[#e5e7eb] bg-white flex-shrink-0">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
+          <p className="text-[#8b949e] text-xs">&copy; {new Date().getFullYear()} Beylerbeyi Futbol Akademi</p>
+          <div className="flex items-center gap-1.5">
+            <div className="w-2 h-2 rounded-full bg-[#c4111d]" />
+            <span className="text-[#8b949e] text-[11px] font-semibold">1911</span>
+            <div className="w-2 h-2 rounded-full bg-[#1b6e2a]" />
+          </div>
         </div>
       </footer>
     </div>
