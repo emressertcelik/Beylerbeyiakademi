@@ -22,6 +22,7 @@ export function useAuth() {
   });
 
   const mountedRef = useRef(true);
+  const loadingRef = useRef(false);
   const pathname = usePathname();
 
   const fetchRole = useCallback(
@@ -34,12 +35,20 @@ export function useAuth() {
           .single();
 
         if (error) {
+          // AbortError sessizce geç
+          if (error.message?.includes("AbortError") || error.message?.includes("aborted")) {
+            return null;
+          }
           console.error("Rol bilgisi alınamadı:", error.message);
           return null;
         }
 
         return data?.role as UserRole;
-      } catch {
+      } catch (err) {
+        // AbortError veya diğer hatalar
+        if (err instanceof DOMException && err.name === "AbortError") {
+          return null;
+        }
         return null;
       }
     },
@@ -47,10 +56,11 @@ export function useAuth() {
   );
 
   const loadUser = useCallback(async () => {
+    if (loadingRef.current) return;
+    loadingRef.current = true;
+
     try {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
+      const { data: { session } } = await supabase.auth.getSession();
 
       if (!mountedRef.current) return;
 
@@ -64,14 +74,20 @@ export function useAuth() {
           setState({ user: null, role: null, loading: false });
         }
       }
-    } catch {
+    } catch (err) {
+      // AbortError sessizce geç
+      if (err instanceof DOMException && err.name === "AbortError") {
+        return;
+      }
       if (mountedRef.current) {
         setState({ user: null, role: null, loading: false });
       }
+    } finally {
+      loadingRef.current = false;
     }
   }, [fetchRole]);
 
-  // Route değiştiğinde (geri tuşu dahil) yeniden yükle
+  // Route değişikliğinde yeniden yükle
   useEffect(() => {
     loadUser();
   }, [pathname, loadUser]);
@@ -79,7 +95,6 @@ export function useAuth() {
   useEffect(() => {
     mountedRef.current = true;
 
-    // Auth state değişiklikleri
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
@@ -98,33 +113,18 @@ export function useAuth() {
       }
     });
 
-    // Geri tuşu (popstate) handler
-    const handlePopState = () => {
-      setState((prev) => ({ ...prev, loading: true }));
-      loadUser();
-    };
-
-    window.addEventListener("popstate", handlePopState);
-
-    // Sayfa visibility değişikliği (tab'a geri dönme)
-    const handleVisibility = () => {
-      if (document.visibilityState === "visible") {
-        loadUser();
-      }
-    };
-
-    document.addEventListener("visibilitychange", handleVisibility);
-
     return () => {
       mountedRef.current = false;
       subscription.unsubscribe();
-      window.removeEventListener("popstate", handlePopState);
-      document.removeEventListener("visibilitychange", handleVisibility);
     };
-  }, [fetchRole, loadUser]);
+  }, [fetchRole]);
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    try {
+      await supabase.auth.signOut();
+    } catch {
+      // ignore
+    }
     setState({ user: null, role: null, loading: false });
     window.location.href = "/login";
   };

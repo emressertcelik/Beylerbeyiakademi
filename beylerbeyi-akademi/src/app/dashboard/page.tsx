@@ -2,157 +2,149 @@
 
 import { useAuth } from "@/hooks/useAuth";
 import { ROLE_LABELS } from "@/types/roles";
-import { useRouter } from "next/navigation";
-import Image from "next/image";
+import { useAgeGroup } from "@/context/AgeGroupContext";
+import { getPlayersByAgeGroup, getMatchesByAgeGroup, getStatsByAgeGroup, getPlayerSeasonSummary } from "@/lib/mock-data";
+import { POSITION_COLORS } from "@/types/player";
 
 export default function DashboardPage() {
-  const { user, role, loading, signOut } = useAuth();
-  const router = useRouter();
+  const { user, role, loading } = useAuth();
+  const { selectedAge } = useAgeGroup();
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-white">
-        <div className="w-16 h-16 rounded-full flex items-center justify-center mb-5 animate-pulse">
-          <Image src="/logo.png" alt="Beylerbeyi" width={56} height={56} className="object-contain" />
-        </div>
-        <div className="flex items-center gap-2 text-[#6e7781]">
-          <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
-            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-          </svg>
-          <span className="text-sm">Yükleniyor...</span>
-        </div>
-      </div>
-    );
-  }
+  if (loading || !user) return <div />;
 
-  if (!user) {
-    router.push("/login");
-    return null;
-  }
+  const players = getPlayersByAgeGroup(selectedAge);
+  const matches = getMatchesByAgeGroup(selectedAge);
+  const stats = getStatsByAgeGroup(selectedAge);
+  const played = matches.filter((m) => m.status === "played");
+  const wins = played.filter((m) => (m.is_home ? m.home_score > m.away_score : m.away_score > m.home_score)).length;
 
-  const handleSignOut = async () => {
-    await signOut();
-  };
+  const summaries = players.map((p) => ({ player: p, ...getPlayerSeasonSummary(p.id, stats) }));
+  const topScorers = [...summaries].sort((a, b) => b.total_goals - a.total_goals).slice(0, 5);
+  const totalGoals = summaries.reduce((a, s) => a + s.total_goals, 0);
+  const maxGoal = Math.max(...topScorers.map((s) => s.total_goals), 1);
 
-  const roleBadgeClass = (() => {
-    switch (role) {
-      case "yonetici":
-        return "bg-[#c4111d] text-white";
-      case "antrenor":
-        return "bg-[#1b6e2a] text-white";
-      default:
-        return "bg-[#f0f0f0] text-[#24292f]";
-    }
-  })();
+  const posDist = players.reduce<Record<string, number>>((acc, p) => { acc[p.position] = (acc[p.position] || 0) + 1; return acc; }, {});
+  const posEntries = Object.entries(posDist);
+  const noData = players.length === 0;
 
   return (
-    <div className="min-h-screen bg-[#fafafa] flex flex-col">
-      {/* Üst şerit */}
-      <div className="h-1 flex flex-shrink-0">
-        <div className="flex-1 bg-[#c4111d]" />
-        <div className="w-1 bg-white" />
-        <div className="flex-1 bg-[#1b6e2a]" />
+    <div>
+      <div className="bg-gradient-to-r from-[#c4111d] to-[#1b6e2a] rounded-2xl p-6 sm:p-8 mb-6 text-white relative overflow-hidden">
+        <div className="absolute right-4 bottom-0 opacity-5 text-[100px] font-black leading-none select-none">⚽</div>
+        <p className="text-white/50 text-xs font-bold tracking-wider uppercase mb-1">{selectedAge}</p>
+        <h1 className="text-xl sm:text-2xl font-bold relative z-10">Hoş Geldiniz 👋</h1>
+        <p className="mt-1 text-white/70 text-sm relative z-10">Beylerbeyi Futbol Akademi &middot; {role ? ROLE_LABELS[role] : ""}</p>
       </div>
 
-      {/* Header */}
-      <header className="bg-white border-b border-[#e5e7eb] flex-shrink-0 shadow-sm">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6">
-          <div className="flex items-center justify-between h-14">
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-full flex items-center justify-center">
-                <Image src="/Logo_S.png" alt="Beylerbeyi" width={30} height={30} className="object-contain" />
-              </div>
-              <div className="hidden sm:block">
-                <span className="text-[#1a1a1a] font-bold text-sm">Beylerbeyi Akademi</span>
-                <span className="text-[#8b949e] text-[10px] ml-1.5 font-medium">Yönetim</span>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3">
-              {role && (
-                <span className={`px-2.5 py-1 rounded-full text-[11px] font-bold ${roleBadgeClass}`}>
-                  {ROLE_LABELS[role]}
-                </span>
-              )}
-              <span className="text-[#57606a] text-sm hidden md:block">{user.email}</span>
-              <button
-                onClick={handleSignOut}
-                className="px-3 py-1.5 text-xs font-semibold text-[#c4111d] bg-white hover:bg-[#fff1f0] border border-[#c4111d]/30 hover:border-[#c4111d]/50 rounded-lg transition-colors"
-              >
-                Çıkış Yap
-              </button>
-            </div>
-          </div>
+      {noData ? (
+        <div className="text-center py-16">
+          <p className="text-[#8b949e] text-sm">{selectedAge} yaş grubu için veri bulunamadı.</p>
         </div>
-      </header>
-
-      {/* İçerik */}
-      <main className="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 py-8">
-        {/* Karşılama banner */}
-        <div className="bg-gradient-to-r from-[#c4111d] to-[#1b6e2a] rounded-2xl p-6 sm:p-8 mb-6 text-white relative overflow-hidden">
-          <div className="absolute right-6 top-1/2 -translate-y-1/2 opacity-10">
-            <Image src="/Logo_S.png" alt="" width={120} height={120} className="object-contain" />
+      ) : (
+        <>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
+            <Card label="Kadro" value={players.length} color="green" />
+            <Card label="Oynanan Maç" value={played.length} color="red" />
+            <Card label="Galibiyet" value={wins} color="green" />
+            <Card label="Toplam Gol" value={totalGoals} color="red" />
           </div>
-          <h1 className="text-xl sm:text-2xl font-bold relative z-10">Hoş Geldiniz 👋</h1>
-          <p className="mt-1 text-white/70 text-sm relative z-10">
-            Beylerbeyi Futbol Akademi yönetim paneli
-          </p>
-        </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {/* Hesap */}
-          <div className="bg-white border border-[#e5e7eb] rounded-xl p-5 hover:shadow-md transition-shadow group">
-            <div className="flex items-center gap-2.5 mb-3">
-              <div className="w-9 h-9 rounded-full flex items-center justify-center">
-                <Image src="/Logo_S.png" alt="Beylerbeyi" width={30} height={30} className="object-contain" />
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
+            <div className="lg:col-span-2 bg-white border border-[#e5e7eb] rounded-xl p-5">
+              <h3 className="text-sm font-bold text-[#1a1a1a] mb-4 flex items-center gap-2">
+                <span className="w-1 h-4 bg-[#c4111d] rounded-full" />Gol Krallığı
+              </h3>
+              <div className="space-y-2.5">
+                {topScorers.filter((s) => s.total_goals > 0).map((s, i) => {
+                  const pc = POSITION_COLORS[s.player.position];
+                  return (
+                    <div key={s.player.id} className="flex items-center gap-3">
+                      <span className="text-xs font-bold text-[#8b949e] w-4">{i + 1}</span>
+                      <div className={`w-7 h-7 rounded-full bg-gradient-to-br ${pc?.avatar || "from-gray-400 to-gray-600"} flex items-center justify-center text-white text-[10px] font-bold`}>{s.player.jersey_number}</div>
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between mb-0.5">
+                          <span className="text-xs font-medium text-[#1a1a1a]">{s.player.first_name} {s.player.last_name}</span>
+                          <div className="flex gap-2">
+                            <span className="text-xs font-bold text-[#c4111d]">{s.total_goals}G</span>
+                            <span className="text-xs font-bold text-[#1b6e2a]">{s.total_assists}A</span>
+                          </div>
+                        </div>
+                        <div className="h-2 bg-[#f0f0f0] rounded-full overflow-hidden">
+                          <div className="h-full bg-gradient-to-r from-[#c4111d] to-[#c4111d]/60 rounded-full" style={{ width: `${(s.total_goals / maxGoal) * 100}%` }} />
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+                {topScorers.filter((s) => s.total_goals > 0).length === 0 && (
+                  <p className="text-xs text-[#8b949e] text-center py-4">Henüz gol verisi yok</p>
+                )}
               </div>
-              <h3 className="text-[#1a1a1a] font-semibold text-sm">Hesap</h3>
             </div>
-            <p className="text-[#57606a] text-sm truncate">{user.email}</p>
-            <p className="text-[#8b949e] text-xs mt-1 font-mono">ID: {user.id.slice(0, 8)}</p>
-          </div>
 
-          {/* Yetki */}
-          <div className="bg-white border border-[#e5e7eb] rounded-xl p-5 hover:shadow-md transition-shadow group">
-            <div className="flex items-center gap-2.5 mb-3">
-              <div className="w-9 h-9 rounded-full flex items-center justify-center">
-                <Image src="/Logo_S.png" alt="Beylerbeyi" width={30} height={30} className="object-contain" />
+            <div className="bg-white border border-[#e5e7eb] rounded-xl p-5">
+              <h3 className="text-sm font-bold text-[#1a1a1a] mb-4 flex items-center gap-2">
+                <span className="w-1 h-4 bg-[#1b6e2a] rounded-full" />Pozisyon Dağılımı
+              </h3>
+              <div className="space-y-3">
+                {posEntries.map(([pos, count]) => {
+                  const pc = POSITION_COLORS[pos];
+                  const pct = Math.round((count / players.length) * 100);
+                  return (
+                    <div key={pos}>
+                      <div className="flex items-center justify-between mb-1">
+                        <span className={`text-xs font-semibold ${pc?.text || "text-[#57606a]"}`}>{pos}</span>
+                        <span className="text-xs text-[#8b949e]">{count} (%{pct})</span>
+                      </div>
+                      <div className="h-2 bg-[#f0f0f0] rounded-full overflow-hidden">
+                        <div className={`h-full rounded-full ${pos === "Kaleci" ? "bg-[#f59e0b]" : pos === "Defans" ? "bg-[#0969da]" : pos === "Orta Saha" ? "bg-[#1b6e2a]" : "bg-[#c4111d]"}`} style={{ width: `${pct}%` }} />
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
-              <h3 className="text-[#1a1a1a] font-semibold text-sm">Yetki</h3>
             </div>
-            <p className="text-[#57606a] text-sm">{role ? ROLE_LABELS[role] : "—"}</p>
-            <p className="text-[#8b949e] text-xs mt-1">Seviye: {role || "—"}</p>
           </div>
 
-          {/* Durum */}
-          <div className="bg-white border border-[#e5e7eb] rounded-xl p-5 hover:shadow-md transition-shadow group">
-            <div className="flex items-center gap-2.5 mb-3">
-              <div className="w-9 h-9 rounded-full flex items-center justify-center">
-                <Image src="/Logo_S.png" alt="Beylerbeyi" width={30} height={30} className="object-contain" />
-              </div>
-              <h3 className="text-[#1a1a1a] font-semibold text-sm">Durum</h3>
+          <div className="bg-white border border-[#e5e7eb] rounded-xl p-5">
+            <h3 className="text-sm font-bold text-[#1a1a1a] mb-3 flex items-center gap-2">
+              <span className="w-1 h-4 bg-[#c4111d] rounded-full" />Son Maçlar
+            </h3>
+            <div className="space-y-2">
+              {[...played].reverse().slice(0, 5).map((m) => {
+                const bs = m.is_home ? m.home_score : m.away_score;
+                const os = m.is_home ? m.away_score : m.home_score;
+                const r = bs > os ? "G" : bs < os ? "M" : "B";
+                return (
+                  <div key={m.id} className="flex items-center justify-between py-2 border-b border-[#f0f0f0] last:border-0">
+                    <div className="flex items-center gap-3">
+                      <span className="text-[10px] font-bold text-[#8b949e] bg-[#f6f8fa] px-1.5 py-0.5 rounded">H{m.week}</span>
+                      <span className="text-sm text-[#1a1a1a]">vs {m.opponent}</span>
+                      <span className={`text-[9px] px-1.5 py-0.5 rounded font-bold ${m.is_home ? "bg-[#dafbe1] text-[#116329]" : "bg-[#f6f8fa] text-[#57606a]"}`}>{m.is_home ? "İÇ" : "DIŞ"}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-bold">{m.home_score}-{m.away_score}</span>
+                      <span className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold text-white ${r === "G" ? "bg-[#1b6e2a]" : r === "M" ? "bg-[#c4111d]" : "bg-[#f59e0b]"}`}>{r}</span>
+                    </div>
+                  </div>
+                );
+              })}
+              {played.length === 0 && <p className="text-xs text-[#8b949e] text-center py-4">Henüz maç verisi yok</p>}
             </div>
-            <div className="flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-[#1b6e2a] animate-pulse" />
-              <p className="text-[#1b6e2a] text-sm font-semibold">Aktif</p>
-            </div>
-            <p className="text-[#8b949e] text-xs mt-1">Oturum açık</p>
           </div>
-        </div>
-      </main>
+        </>
+      )}
+    </div>
+  );
+}
 
-      {/* Footer */}
-      <footer className="border-t border-[#e5e7eb] bg-white flex-shrink-0">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
-          <p className="text-[#8b949e] text-xs">&copy; {new Date().getFullYear()} Beylerbeyi Futbol Akademi</p>
-          <div className="flex items-center gap-1.5">
-            <div className="w-2 h-2 rounded-full bg-[#c4111d]" />
-            <span className="text-[#8b949e] text-[11px] font-semibold">1911</span>
-            <div className="w-2 h-2 rounded-full bg-[#1b6e2a]" />
-          </div>
-        </div>
-      </footer>
+function Card({ label, value, color }: { label: string; value: number; color: "red" | "green" }) {
+  return (
+    <div className="bg-white border border-[#e5e7eb] rounded-xl p-4">
+      <p className="text-2xl font-bold text-[#1a1a1a]">{value}</p>
+      <p className="text-xs text-[#8b949e] mt-0.5 flex items-center gap-1.5">
+        <span className={`w-1.5 h-1.5 rounded-full ${color === "red" ? "bg-[#c4111d]" : "bg-[#1b6e2a]"}`} />{label}
+      </p>
     </div>
   );
 }

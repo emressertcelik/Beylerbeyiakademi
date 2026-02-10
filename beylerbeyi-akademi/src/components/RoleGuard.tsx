@@ -35,8 +35,7 @@ export default function RoleGuard({
 
     return (
       <div className="flex items-center justify-center p-10">
-        <div className="text-center max-w-xs bg-white border border-[#e5e7eb] rounded-xl p-7 shadow-sm">
-          {/* Kırmızı üst şerit */}
+        <div className="text-center max-w-xs bg-white border border-[#e5e7eb] rounded-xl p-7 shadow-sm relative overflow-hidden">
           <div className="absolute top-0 left-0 right-0 h-1 bg-[#c4111d] rounded-t-xl" />
           <div className="w-11 h-11 mx-auto mb-4 rounded-full bg-[#c4111d]/10 flex items-center justify-center">
             <svg className="w-5 h-5 text-[#c4111d]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
