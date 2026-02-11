@@ -52,7 +52,7 @@ export default function DashboardLayout({
                   className="object-contain drop-shadow-sm transition-transform group-hover:scale-105"
                 />
               </div>
-              <div className="hidden sm:block">
+              <div>
                 <p className="text-[15px] font-bold text-[#1a1a2e] leading-tight tracking-tight">
                   Beylerbeyi
                 </p>
@@ -108,6 +108,29 @@ export default function DashboardLayout({
               <LogOut size={16} />
               <span>Çıkış</span>
             </button>
+
+          {/* Mobile Nav Tabs */}
+            <nav className="flex md:hidden items-center gap-1">
+              {NAV_ITEMS.map((item) => {
+                const isActive =
+                  item.href === "/dashboard"
+                    ? pathname === "/dashboard"
+                    : pathname.startsWith(item.href);
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={`flex items-center justify-center w-9 h-9 rounded-lg transition-all duration-200 ${
+                      isActive
+                        ? "bg-[#c4111d] text-white shadow-sm shadow-[#c4111d]/25"
+                        : "text-[#5a6170] hover:text-[#1a1a2e] hover:bg-[#f1f3f5]"
+                    }`}
+                  >
+                    <item.icon size={18} />
+                  </Link>
+                );
+              })}
+            </nav>
 
             {/* Mobile menu button */}
             <button
