@@ -25,7 +25,7 @@ export default function LoginPage() {
         password,
       });
       if (error) throw error;
-      router.push("/dashboard");
+      router.push("/");
       router.refresh();
     } catch (err: unknown) {
       const message =
