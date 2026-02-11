@@ -47,10 +47,10 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  // Giriş yapmış kullanıcıyı login'den ana sayfaya yönlendir
+  // Giriş yapmış kullanıcıyı login'den dashboard'a yönlendir
   if (user && isAuthPage) {
     const url = request.nextUrl.clone();
-    url.pathname = "/";
+    url.pathname = "/dashboard";
     return NextResponse.redirect(url);
   }
 
