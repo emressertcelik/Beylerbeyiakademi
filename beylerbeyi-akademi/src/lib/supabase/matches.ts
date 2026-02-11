@@ -1,5 +1,5 @@
 import { createClient } from "./client";
-import { Match, MatchPlayerStat, MatchStatus } from "@/types/match";
+import { Match, MatchPlayerStat, MatchStatus, SquadPlayer } from "@/types/match";
 
 function getClient() {
   return createClient();
@@ -14,6 +14,7 @@ interface DbMatchPlayerStat {
   player_name: string;
   jersey_number: number;
   position: string;
+  participation_status: string | null;
   minutes_played: number;
   goals: number;
   assists: number;
@@ -37,6 +38,10 @@ interface DbMatch {
   result: string;
   venue: string | null;
   notes: string | null;
+  match_time: string | null;
+  gathering_time: string | null;
+  gathering_location: string | null;
+  squad: SquadPlayer[] | null;
   created_at: string;
   updated_at: string;
   match_player_stats: DbMatchPlayerStat[];
@@ -48,6 +53,7 @@ function mapDbToMatch(db: DbMatch): Match {
     playerName: s.player_name,
     jerseyNumber: s.jersey_number,
     position: s.position,
+    participationStatus: s.participation_status || undefined,
     minutesPlayed: s.minutes_played,
     goals: s.goals,
     assists: s.assists,
@@ -71,6 +77,10 @@ function mapDbToMatch(db: DbMatch): Match {
     result: db.result as Match["result"],
     venue: db.venue || undefined,
     notes: db.notes || undefined,
+    matchTime: db.match_time || undefined,
+    gatheringTime: db.gathering_time || undefined,
+    gatheringLocation: db.gathering_location || undefined,
+    squad: Array.isArray(db.squad) ? db.squad : (typeof db.squad === "string" ? JSON.parse(db.squad) : []),
     playerStats: stats,
     createdAt: db.created_at,
     updatedAt: db.updated_at,
@@ -114,6 +124,10 @@ export async function createMatch(match: Match): Promise<Match> {
       result: match.result,
       venue: match.venue || null,
       notes: match.notes || null,
+      match_time: match.matchTime || null,
+      gathering_time: match.gatheringTime || null,
+      gathering_location: match.gatheringLocation || null,
+      squad: (match.squad ?? []).length > 0 ? JSON.stringify(match.squad) : '[]',
     })
     .select()
     .single();
@@ -128,6 +142,7 @@ export async function createMatch(match: Match): Promise<Match> {
       player_name: s.playerName,
       jersey_number: s.jerseyNumber,
       position: s.position,
+      participation_status: s.participationStatus || null,
       minutes_played: s.minutesPlayed,
       goals: s.goals,
       assists: s.assists,
@@ -176,6 +191,10 @@ export async function updateMatch(match: Match): Promise<Match> {
       result: match.result,
       venue: match.venue || null,
       notes: match.notes || null,
+      match_time: match.matchTime || null,
+      gathering_time: match.gatheringTime || null,
+      gathering_location: match.gatheringLocation || null,
+      squad: (match.squad ?? []).length > 0 ? JSON.stringify(match.squad) : '[]',
     })
     .eq("id", match.id);
 
@@ -196,6 +215,7 @@ export async function updateMatch(match: Match): Promise<Match> {
       player_name: s.playerName,
       jersey_number: s.jerseyNumber,
       position: s.position,
+      participation_status: s.participationStatus || null,
       minutes_played: s.minutesPlayed,
       goals: s.goals,
       assists: s.assists,

@@ -53,6 +53,7 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
     feet: [],
     ageGroups: [],
     seasons: [],
+    participationStatuses: [],
   });
   const [loading, setLoading] = useState(true);
 

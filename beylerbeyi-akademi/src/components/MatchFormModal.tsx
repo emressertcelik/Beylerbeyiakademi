@@ -1,10 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Match, MatchPlayerStat, MatchStatus } from "@/types/match";
+import { Match, MatchPlayerStat, MatchStatus, SquadPlayer } from "@/types/match";
 import { Player, AgeGroup } from "@/types/player";
 import { useAppData } from "@/lib/app-data";
-import { X, Plus, Trash2, UserPlus, Loader2, Star } from "lucide-react";
+import { X, Plus, Trash2, UserPlus, Loader2, Star, Users, Check } from "lucide-react";
 
 interface MatchFormModalProps {
   match?: Match | null;
@@ -20,10 +20,22 @@ function getResult(scoreHome: number, scoreAway: number): "W" | "D" | "L" {
   return "L";
 }
 
+function statusColor(status: string): string {
+  const colors: { [key: string]: string } = {
+    "İlk 11": "bg-emerald-500 text-white border-emerald-600",
+    "Sonradan Girdi": "bg-blue-500 text-white border-blue-600",
+    "Sakat": "bg-red-500 text-white border-red-600",
+    "Cezalı": "bg-orange-500 text-white border-orange-600",
+    "Kadroda Yok": "bg-gray-400 text-white border-gray-500",
+  };
+  return colors[status] || "bg-[#5a6170] text-white border-[#5a6170]";
+}
+
 export default function MatchFormModal({ match, players, saving, onClose, onSave }: MatchFormModalProps) {
   const { lookups } = useAppData();
   const AGE_GROUPS = lookups.ageGroups.filter((a) => a.isActive).map((a) => a.value);
   const SEASONS = lookups.seasons.filter((s) => s.isActive).map((s) => s.value);
+  const PARTICIPATION_STATUSES = lookups.participationStatuses.filter((p) => p.isActive).map((p) => p.value);
   const isEdit = !!match;
 
   const [form, setForm] = useState({
@@ -37,10 +49,14 @@ export default function MatchFormModal({ match, players, saving, onClose, onSave
     scoreAway: 0,
     venue: "",
     notes: "",
+    matchTime: "",
+    gatheringTime: "",
+    gatheringLocation: "",
   });
 
+  const [squad, setSquad] = useState<SquadPlayer[]>([]);
   const [playerStats, setPlayerStats] = useState<MatchPlayerStat[]>([]);
-  const [activeTab, setActiveTab] = useState<"match" | "players">("match");
+  const [activeTab, setActiveTab] = useState<"match" | "squad" | "players">("match");
 
   useEffect(() => {
     if (match) {
@@ -55,7 +71,11 @@ export default function MatchFormModal({ match, players, saving, onClose, onSave
         scoreAway: match.scoreAway,
         venue: match.venue || "",
         notes: match.notes || "",
+        matchTime: match.matchTime || "",
+        gatheringTime: match.gatheringTime || "",
+        gatheringLocation: match.gatheringLocation || "",
       });
+      setSquad([...(match.squad || [])]);
       setPlayerStats([...match.playerStats]);
     }
   }, [match]);
@@ -67,6 +87,69 @@ export default function MatchFormModal({ match, players, saving, onClose, onSave
 
   const addedPlayerIds = playerStats.map((ps) => ps.playerId);
   const unaddedPlayers = availablePlayers.filter((p) => !addedPlayerIds.includes(p.id));
+
+  // Squad helpers
+  const isInSquad = (playerId: string) => squad.some((s) => s.playerId === playerId);
+
+  const toggleSquadPlayer = (player: Player) => {
+    if (isInSquad(player.id)) {
+      setSquad((prev) => prev.filter((s) => s.playerId !== player.id));
+    } else {
+      setSquad((prev) => [
+        ...prev,
+        {
+          playerId: player.id,
+          playerName: `${player.firstName} ${player.lastName}`,
+          jerseyNumber: player.jerseyNumber,
+          position: player.position,
+        },
+      ]);
+    }
+  };
+
+  const selectAllForSquad = () => {
+    const allSquad: SquadPlayer[] = availablePlayers.map((p) => ({
+      playerId: p.id,
+      playerName: `${p.firstName} ${p.lastName}`,
+      jerseyNumber: p.jerseyNumber,
+      position: p.position,
+    }));
+    setSquad(allSquad);
+  };
+
+  const clearSquad = () => setSquad([]);
+
+  // Sync squad → playerStats: kadrodaki oyuncuları otomatik olarak istatistik listesine ekle
+  const syncSquadToStats = (currentSquad: SquadPlayer[]) => {
+    setPlayerStats((prev) => {
+      // Mevcut istatistikleri koru (zaten girilmişse)
+      const existingMap = new Map(prev.map((ps) => [ps.playerId, ps]));
+      return currentSquad.map((s) =>
+        existingMap.get(s.playerId) || {
+          playerId: s.playerId,
+          playerName: s.playerName,
+          jerseyNumber: s.jerseyNumber,
+          position: s.position,
+          minutesPlayed: 0,
+          goals: 0,
+          assists: 0,
+          yellowCards: 0,
+          redCards: 0,
+          goalsConceded: 0,
+          cleanSheet: false,
+          rating: undefined,
+        }
+      );
+    });
+  };
+
+  // Squad değiştiğinde playerStats'ı senkronize et
+  useEffect(() => {
+    if (squad.length > 0) {
+      syncSquadToStats(squad);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [squad]);
 
   const addPlayer = (player: Player) => {
     setPlayerStats((prev) => [
@@ -108,9 +191,13 @@ export default function MatchFormModal({ match, players, saving, onClose, onSave
     const saved: Match = {
       id: match?.id || crypto.randomUUID(),
       ...form,
+      matchTime: form.matchTime || undefined,
+      gatheringTime: form.gatheringTime || undefined,
+      gatheringLocation: form.gatheringLocation || undefined,
       scoreHome: isPlayed ? form.scoreHome : 0,
       scoreAway: isPlayed ? form.scoreAway : 0,
       result,
+      squad,
       playerStats: isPlayed ? playerStats : [],
       createdAt: match?.createdAt || now,
       updatedAt: now,
@@ -137,6 +224,7 @@ export default function MatchFormModal({ match, players, saving, onClose, onSave
         <div className="border-b border-[#e2e5e9] px-4 sm:px-6 flex gap-1 shrink-0 overflow-x-auto">
           {[
             { key: "match" as const, label: "Maç Bilgisi" },
+            { key: "squad" as const, label: `Kadro (${squad.length})` },
             ...(form.status === "played" ? [{ key: "players" as const, label: `Oyuncu İstatistikleri (${playerStats.length})` }] : []),
           ].map((t) => (
             <button
@@ -309,6 +397,38 @@ export default function MatchFormModal({ match, players, saving, onClose, onSave
                 />
               </div>
 
+              {/* Match Time & Gathering Info */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-xs font-medium text-[#5a6170] mb-1.5">Maç Saati</label>
+                  <input
+                    type="time"
+                    value={form.matchTime}
+                    onChange={(e) => setForm({ ...form, matchTime: e.target.value })}
+                    className="w-full px-3 py-2 bg-[#f8f9fb] border border-[#e2e5e9] rounded-lg text-sm text-[#1a1a2e] focus:outline-none focus:ring-2 focus:ring-[#c4111d]/20 focus:border-[#c4111d]/30 transition-all"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-[#5a6170] mb-1.5">Toplanma Saati</label>
+                  <input
+                    type="time"
+                    value={form.gatheringTime}
+                    onChange={(e) => setForm({ ...form, gatheringTime: e.target.value })}
+                    className="w-full px-3 py-2 bg-[#f8f9fb] border border-[#e2e5e9] rounded-lg text-sm text-[#1a1a2e] focus:outline-none focus:ring-2 focus:ring-[#c4111d]/20 focus:border-[#c4111d]/30 transition-all"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-[#5a6170] mb-1.5">Toplanma Yeri</label>
+                  <input
+                    type="text"
+                    value={form.gatheringLocation}
+                    onChange={(e) => setForm({ ...form, gatheringLocation: e.target.value })}
+                    placeholder="Toplanma noktası"
+                    className="w-full px-3 py-2 bg-[#f8f9fb] border border-[#e2e5e9] rounded-lg text-sm text-[#1a1a2e] placeholder-[#8c919a] focus:outline-none focus:ring-2 focus:ring-[#c4111d]/20 focus:border-[#c4111d]/30 transition-all"
+                  />
+                </div>
+              </div>
+
               <div>
                 <label className="block text-xs font-medium text-[#5a6170] mb-1.5">Notlar</label>
                 <textarea
@@ -322,31 +442,32 @@ export default function MatchFormModal({ match, players, saving, onClose, onSave
             </div>
           )}
 
-          {activeTab === "players" && (
+          {/* KADRO TAB */}
+          {activeTab === "squad" && (
             <div className="space-y-4">
-              {/* Add Player */}
-              {unaddedPlayers.length > 0 && (
-                <div className="bg-[#f8f9fb] border border-[#e2e5e9] rounded-xl p-4">
-                  <p className="text-xs font-semibold text-[#5a6170] mb-2 flex items-center gap-1.5">
-                    <UserPlus size={14} />
-                    Oyuncu Ekle ({form.ageGroup} · {form.season})
-                  </p>
-                  <div className="flex flex-wrap gap-2">
-                    {unaddedPlayers.map((p) => (
-                      <button
-                        key={p.id}
-                        type="button"
-                        onClick={() => addPlayer(p)}
-                        className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-[#e2e5e9] rounded-lg text-xs font-medium text-[#1a1a2e] hover:border-[#c4111d] hover:text-[#c4111d] transition-all"
-                      >
-                        <Plus size={12} />
-                        <span className="font-bold text-[#c4111d]">#{p.jerseyNumber}</span>
-                        {p.firstName} {p.lastName}
-                      </button>
-                    ))}
-                  </div>
+              {/* Actions */}
+              <div className="flex items-center justify-between">
+                <p className="text-xs font-semibold text-[#5a6170] flex items-center gap-1.5">
+                  <Users size={14} />
+                  Kadro Seç ({form.ageGroup} · {form.season})
+                </p>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={selectAllForSquad}
+                    className="px-3 py-1.5 text-[10px] font-semibold text-[#5a6170] bg-[#f1f3f5] rounded-lg hover:bg-[#e2e5e9] transition-all"
+                  >
+                    Tümünü Seç
+                  </button>
+                  <button
+                    type="button"
+                    onClick={clearSquad}
+                    className="px-3 py-1.5 text-[10px] font-semibold text-[#c4111d] bg-red-50 rounded-lg hover:bg-red-100 transition-all"
+                  >
+                    Temizle
+                  </button>
                 </div>
-              )}
+              </div>
 
               {availablePlayers.length === 0 && (
                 <div className="text-center py-8 text-sm text-[#8c919a]">
@@ -354,10 +475,96 @@ export default function MatchFormModal({ match, players, saving, onClose, onSave
                 </div>
               )}
 
-              {/* Player Stats List */}
-              {playerStats.length === 0 && availablePlayers.length > 0 && (
+              {/* Player Grid for Selection */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {availablePlayers
+                  .sort((a, b) => a.jerseyNumber - b.jerseyNumber)
+                  .map((p) => {
+                    const selected = isInSquad(p.id);
+                    return (
+                      <button
+                        key={p.id}
+                        type="button"
+                        onClick={() => toggleSquadPlayer(p)}
+                        className={`flex items-center gap-3 p-3 rounded-xl border transition-all text-left ${
+                          selected
+                            ? "bg-[#c4111d]/5 border-[#c4111d]/30 ring-1 ring-[#c4111d]/20"
+                            : "bg-white border-[#e2e5e9] hover:border-[#c4111d]/30"
+                        }`}
+                      >
+                        <span className={`w-9 h-9 rounded-lg flex items-center justify-center text-xs font-black shrink-0 ${
+                          selected ? "bg-[#c4111d] text-white" : "bg-[#f1f3f5] text-[#5a6170]"
+                        }`}>
+                          {p.jerseyNumber}
+                        </span>
+                        <div className="flex-1 min-w-0">
+                          <p className={`text-sm font-semibold truncate ${selected ? "text-[#1a1a2e]" : "text-[#5a6170]"}`}>
+                            {p.firstName} {p.lastName}
+                          </p>
+                          <p className="text-[10px] text-[#8c919a]">{p.position}</p>
+                        </div>
+                        {selected && (
+                          <Check size={16} className="text-[#c4111d] shrink-0" />
+                        )}
+                      </button>
+                    );
+                  })}
+              </div>
+
+              {/* Selected Squad Summary */}
+              {squad.length > 0 && (
+                <div className="bg-[#f8f9fb] border border-[#e2e5e9] rounded-xl p-4">
+                  <p className="text-[10px] font-semibold text-[#8c919a] uppercase tracking-wider mb-2">
+                    Seçilen Kadro ({squad.length} oyuncu)
+                  </p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {squad
+                      .sort((a, b) => a.jerseyNumber - b.jerseyNumber)
+                      .map((s) => (
+                        <span
+                          key={s.playerId}
+                          className="inline-flex items-center gap-1 px-2.5 py-1 bg-white border border-[#e2e5e9] rounded-lg text-xs"
+                        >
+                          <span className="font-black text-[#c4111d]">#{s.jerseyNumber}</span>
+                          <span className="font-medium text-[#1a1a2e]">{s.playerName}</span>
+                        </span>
+                      ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {activeTab === "players" && (
+            <div className="space-y-4">
+              {playerStats.length === 0 && (
                 <div className="text-center py-8 text-sm text-[#8c919a]">
-                  Henüz oyuncu eklenmedi. Yukarıdan oyuncu ekleyin.
+                  Önce <span className="font-semibold text-[#1a1a2e]">Kadro</span> sekmesinden oyuncu seçin veya aşağıdan manuel ekleyin.
+                </div>
+              )}
+
+              {/* Manuel oyuncu ekleme */}
+              {unaddedPlayers.length > 0 && (
+                <div className="bg-[#f8f9fb] border border-[#e2e5e9] rounded-xl p-3">
+                  <p className="text-[10px] font-semibold text-[#8c919a] uppercase tracking-wider mb-2">
+                    Oyuncu Ekle
+                  </p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {unaddedPlayers
+                      .sort((a, b) => a.jerseyNumber - b.jerseyNumber)
+                      .map((p) => (
+                        <button
+                          key={p.id}
+                          type="button"
+                          onClick={() => addPlayer(p)}
+                          className="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-white border border-[#e2e5e9] rounded-lg text-xs hover:border-[#c4111d]/40 hover:bg-[#c4111d]/5 transition-all"
+                        >
+                          <Plus size={12} className="text-[#c4111d]" />
+                          <span className="font-black text-[#c4111d]">#{p.jerseyNumber}</span>
+                          <span className="font-medium text-[#1a1a2e]">{p.firstName} {p.lastName}</span>
+                        </button>
+                      ))}
+                  </div>
                 </div>
               )}
 
@@ -365,24 +572,49 @@ export default function MatchFormModal({ match, players, saving, onClose, onSave
                 {playerStats.map((ps) => (
                   <div key={ps.playerId} className="bg-white border border-[#e2e5e9] rounded-xl p-4">
                     {/* Player Header */}
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center gap-2">
-                        <span className="w-8 h-8 rounded-lg bg-[#c4111d]/10 flex items-center justify-center text-xs font-black text-[#c4111d]">
+                    <div className="flex items-center gap-2 mb-3">
+                      <span className="w-8 h-8 rounded-lg bg-[#c4111d]/10 flex items-center justify-center text-xs font-black text-[#c4111d]">
                           {ps.jerseyNumber}
                         </span>
-                        <div>
+                        <div className="flex-1 min-w-0">
                           <p className="text-sm font-semibold text-[#1a1a2e]">{ps.playerName}</p>
                           <p className="text-[10px] text-[#8c919a]">{ps.position}</p>
                         </div>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => removePlayer(ps.playerId)}
-                        className="p-1.5 hover:bg-red-50 rounded-lg text-[#8c919a] hover:text-[#c4111d] transition-colors"
-                      >
-                        <Trash2 size={14} />
-                      </button>
+                        <button
+                          type="button"
+                          onClick={() => removePlayer(ps.playerId)}
+                          className="p-1.5 text-[#8c919a] hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+                          title="Oyuncuyu çıkar"
+                        >
+                          <Trash2 size={14} />
+                        </button>
                     </div>
+
+                    {/* Participation Status */}
+                    {PARTICIPATION_STATUSES.length > 0 && (
+                      <div className="mb-3">
+                        <label className="block text-[10px] font-medium text-[#8c919a] mb-1.5">Katılım Durumu</label>
+                        <div className="flex flex-wrap gap-1.5">
+                          {PARTICIPATION_STATUSES.map((status) => {
+                            const active = ps.participationStatus === status;
+                            return (
+                              <button
+                                key={status}
+                                type="button"
+                                onClick={() => updatePlayerStat(ps.playerId, "participationStatus", active ? undefined : status)}
+                                className={`px-2.5 py-1 text-[11px] font-semibold rounded-lg border transition-all ${
+                                  active
+                                    ? statusColor(status)
+                                    : "bg-white text-[#5a6170] border-[#e2e5e9] hover:border-[#c4111d]/30"
+                                }`}
+                              >
+                                {status}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
 
                     {/* Star Rating */}
                     <div className="mb-2">

@@ -15,7 +15,6 @@ import {
   Shield,
   TrendingUp,
   ChevronRight,
-  Swords,
 } from "lucide-react";
 
 const resultColors: Record<string, { bg: string; text: string; border: string }> = {
@@ -219,7 +218,7 @@ export default function TeamsPage() {
       {/* Team Stats Cards */}
       {teamStats && (
         <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-3">
-          <StatCard icon={<Swords size={16} />} label="Toplam Maç" value={teamStats.totalMatches} />
+          <StatCard icon={<Shield size={16} />} label="Toplam Maç" value={teamStats.totalMatches} />
           <StatCard icon={<Trophy size={16} />} label="Galibiyet" value={teamStats.wins} color="text-emerald-600" />
           <StatCard icon={<Shield size={16} />} label="Beraberlik" value={teamStats.draws} color="text-amber-600" />
           <StatCard icon={<Target size={16} />} label="Mağlubiyet" value={teamStats.losses} color="text-red-600" />
@@ -232,7 +231,7 @@ export default function TeamsPage() {
       {filteredMatches.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 animate-fade-in">
           <div className="w-16 h-16 rounded-2xl bg-[#f1f3f5] flex items-center justify-center mb-4">
-            <Swords size={28} className="text-[#8c919a]" />
+            <Shield size={28} className="text-[#8c919a]" />
           </div>
           <p className="text-sm font-medium text-[#5a6170]">Maç bulunamadı</p>
           <p className="text-xs text-[#8c919a] mt-1">Bu filtre için henüz maç eklenmemiş</p>

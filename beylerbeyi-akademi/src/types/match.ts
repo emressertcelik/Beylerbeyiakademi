@@ -5,6 +5,7 @@ export interface MatchPlayerStat {
   playerName: string;       // "Ad Soyad" - kolay gösterim için
   jerseyNumber: number;
   position: string;
+  participationStatus?: string; // İlk 11, Sonradan Girdi, Sakat, Cezalı, Kadroda Yok
   minutesPlayed: number;
   goals: number;
   assists: number;
@@ -17,6 +18,13 @@ export interface MatchPlayerStat {
 
 export type MatchResult = "W" | "D" | "L"; // Win, Draw, Loss
 export type MatchStatus = "scheduled" | "played"; // Planlandı / Oynandı
+
+export interface SquadPlayer {
+  playerId: string;
+  playerName: string;
+  jerseyNumber: number;
+  position: string;
+}
 
 export interface Match {
   id: string;
@@ -31,6 +39,10 @@ export interface Match {
   result: MatchResult;
   venue?: string;           // Saha / Stat
   notes?: string;
+  matchTime?: string;       // Maç saati (ör: "14:00")
+  gatheringTime?: string;   // Toplanma saati (ör: "12:15")
+  gatheringLocation?: string; // Toplanma yeri (ör: "Beylerbeyi")
+  squad: SquadPlayer[];     // Maç kadrosu
   playerStats: MatchPlayerStat[];
   createdAt: string;
   updatedAt: string;

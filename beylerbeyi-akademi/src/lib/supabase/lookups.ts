@@ -14,13 +14,15 @@ export interface Lookups {
   feet: LookupItem[];
   ageGroups: LookupItem[];
   seasons: LookupItem[];
+  participationStatuses: LookupItem[];
 }
 
 type LookupTable =
   | "lookup_positions"
   | "lookup_feet"
   | "lookup_age_groups"
-  | "lookup_seasons";
+  | "lookup_seasons"
+  | "lookup_participation_statuses";
 
 /* ──────────────── Helpers ──────────────── */
 
@@ -50,13 +52,14 @@ async function fetchTable(table: LookupTable): Promise<LookupItem[]> {
 
 /** Tüm lookup tablolarını tek seferde çeker. */
 export async function fetchAllLookups(): Promise<Lookups> {
-  const [positions, feet, ageGroups, seasons] = await Promise.all([
+  const [positions, feet, ageGroups, seasons, participationStatuses] = await Promise.all([
     fetchTable("lookup_positions"),
     fetchTable("lookup_feet"),
     fetchTable("lookup_age_groups"),
     fetchTable("lookup_seasons"),
+    fetchTable("lookup_participation_statuses"),
   ]);
-  return { positions, feet, ageGroups, seasons };
+  return { positions, feet, ageGroups, seasons, participationStatuses };
 }
 
 /** Tek tablo çekmek için (opsiyonel). */
@@ -64,6 +67,7 @@ export async function fetchPositions()  { return fetchTable("lookup_positions");
 export async function fetchFeet()       { return fetchTable("lookup_feet");       }
 export async function fetchAgeGroups()  { return fetchTable("lookup_age_groups"); }
 export async function fetchSeasons()    { return fetchTable("lookup_seasons");    }
+export async function fetchParticipationStatuses() { return fetchTable("lookup_participation_statuses"); }
 
 /* ──────────────── CRUD ──────────────── */
 

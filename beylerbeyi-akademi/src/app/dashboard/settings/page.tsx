@@ -19,6 +19,7 @@ import {
   Users,
   Calendar,
   Loader2,
+  CheckCircle2,
 } from "lucide-react";
 
 /* ────────── Tablo adı eşlemeleri ────────── */
@@ -26,7 +27,8 @@ type LookupTable =
   | "lookup_positions"
   | "lookup_feet"
   | "lookup_age_groups"
-  | "lookup_seasons";
+  | "lookup_seasons"
+  | "lookup_participation_statuses";
 
 interface TabConfig {
   key: keyof typeof TAB_META;
@@ -37,10 +39,11 @@ interface TabConfig {
 }
 
 const TAB_META = {
-  positions:  { table: "lookup_positions"  as LookupTable, label: "Pozisyonlar",  icon: Shield,     placeholder: "Yeni pozisyon (örn: Bek)" },
-  feet:       { table: "lookup_feet"       as LookupTable, label: "Ayak",         icon: Footprints, placeholder: "Yeni ayak tercihi" },
-  ageGroups:  { table: "lookup_age_groups" as LookupTable, label: "Yaş Grupları", icon: Users,      placeholder: "Yeni yaş grubu (örn: U13)" },
-  seasons:    { table: "lookup_seasons"    as LookupTable, label: "Sezonlar",     icon: Calendar,   placeholder: "Yeni sezon (örn: 2026-2027)" },
+  positions:  { table: "lookup_positions"  as LookupTable, label: "Pozisyonlar",           icon: Shield,        placeholder: "Yeni pozisyon (örn: Bek)" },
+  feet:       { table: "lookup_feet"       as LookupTable, label: "Ayak",                   icon: Footprints,    placeholder: "Yeni ayak tercihi" },
+  ageGroups:  { table: "lookup_age_groups" as LookupTable, label: "Yaş Grupları",           icon: Users,         placeholder: "Yeni yaş grubu (örn: U13)" },
+  seasons:    { table: "lookup_seasons"    as LookupTable, label: "Sezonlar",               icon: Calendar,      placeholder: "Yeni sezon (örn: 2026-2027)" },
+  participationStatuses: { table: "lookup_participation_statuses" as LookupTable, label: "Katılım Durumu", icon: CheckCircle2, placeholder: "Yeni katılım durumu" },
 } as const;
 
 const TABS: TabConfig[] = Object.entries(TAB_META).map(([key, val]) => ({

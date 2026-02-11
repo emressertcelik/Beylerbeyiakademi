@@ -7,12 +7,12 @@ import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { AppDataProvider } from "@/lib/app-data";
 import { ToastProvider } from "@/components/Toast";
-import { Users, LogOut, Home, Menu, X, ChevronRight, Swords, Settings } from "lucide-react";
+import { Users, LogOut, Home, Menu, X, ChevronRight, Shield, Settings } from "lucide-react";
 
 const NAV_ITEMS = [
   { href: "/dashboard", label: "Ana Sayfa", icon: Home },
   { href: "/dashboard/players", label: "Oyuncular", icon: Users },
-  { href: "/dashboard/teams", label: "Takımlar", icon: Swords },
+  { href: "/dashboard/teams", label: "Takımlar", icon: Shield },
 ];
 
 export default function DashboardLayout({

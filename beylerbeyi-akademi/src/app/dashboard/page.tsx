@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Users, TrendingUp, Calendar, Award, Trophy, Target, Swords, MapPin, Star } from "lucide-react";
+import { Users, TrendingUp, Calendar, Award, Trophy, Target, Shield, MapPin, Star } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { useAppData } from "@/lib/app-data";
@@ -463,7 +463,7 @@ export default function DashboardPage() {
           >
             <div className="flex items-start gap-4">
               <div className="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center shrink-0 group-hover:bg-blue-100 transition-colors">
-                <Swords size={24} className="text-blue-600" />
+                <Shield size={24} className="text-blue-600" />
               </div>
               <div className="min-w-0">
                 <h3 className="text-base font-semibold text-[#1a1a2e] group-hover:text-[#c4111d] transition-colors">
