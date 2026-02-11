@@ -6,7 +6,7 @@ import { MOCK_PLAYERS } from "@/lib/mock-players";
 import PlayerCard from "@/components/PlayerCard";
 import PlayerDetailModal from "@/components/PlayerDetailModal";
 import PlayerFormModal from "@/components/PlayerFormModal";
-import { Plus, Search } from "lucide-react";
+import { Plus, Search, Users } from "lucide-react";
 
 const AGE_FILTERS: { label: string; value: AgeGroup | "ALL" }[] = [
   { label: "Tümü", value: "ALL" },
@@ -22,7 +22,7 @@ export default function PlayersPage() {
   const [selectedAge, setSelectedAge] = useState<AgeGroup | "ALL">("ALL");
   const [search, setSearch] = useState("");
   const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
-  const [editingPlayer, setEditingPlayer] = useState<Player | null | undefined>(undefined); // undefined = closed, null = new, Player = edit
+  const [editingPlayer, setEditingPlayer] = useState<Player | null | undefined>(undefined);
 
   const filtered = players.filter((p) => {
     const matchAge = selectedAge === "ALL" || p.ageGroup === selectedAge;
@@ -54,37 +54,38 @@ export default function PlayersPage() {
   };
 
   return (
-    <div className="space-y-8 animate-fade-in bg-gradient-to-br from-[#c4111d]/40 via-[#fff8f0] to-[#c4111d]/60 min-h-screen p-2 md:p-4">
+    <div className="space-y-6 animate-slide-up">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6 border-b border-[#c4111d]/20 pb-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-extrabold text-[#c4111d] tracking-tight mb-2 font-sans drop-shadow-sm">Oyuncular</h1>
-          <div className="w-16 h-1 bg-gradient-to-r from-[#c4111d] via-[#ff1f2d] to-[#b80811] rounded-full mb-2" />
-          <p className="text-base text-[#1b6e2a] mt-1 font-medium">
-            {filtered.length} oyuncu {selectedAge !== "ALL" ? `(${selectedAge})` : ""}
+          <h1 className="text-2xl font-bold text-[#1a1a2e] tracking-tight">
+            Oyuncular
+          </h1>
+          <p className="text-sm text-[#5a6170] mt-1">
+            {filtered.length} oyuncu {selectedAge !== "ALL" ? `· ${selectedAge}` : ""}
           </p>
         </div>
         <button
           onClick={() => setEditingPlayer(null)}
-          className="flex items-center gap-2 px-2 py-1 bg-[#c4111d] hover:bg-[#a50e18] text-white text-base font-semibold rounded-lg transition-all duration-300 shadow-md font-sans focus:ring-2 focus:ring-[#c4111d]/20 border border-[#c4111d]/40 min-w-[110px]"
+          className="flex items-center gap-2 px-4 py-2.5 bg-[#c4111d] hover:bg-[#9b0d16] text-white text-sm font-semibold rounded-xl transition-all duration-200 shadow-sm shadow-[#c4111d]/25 focus-ring"
         >
           <Plus size={18} />
           Oyuncu Ekle
         </button>
       </div>
 
-      {/* Filters */}
-      <div className="flex flex-col sm:flex-row gap-4">
+      {/* Filters Bar */}
+      <div className="flex flex-col sm:flex-row gap-3 bg-white border border-[#e2e5e9] rounded-xl p-3">
         {/* Age group tabs */}
-        <div className="flex gap-1 bg-gradient-to-r from-[#c4111d]/20 via-[#ff1f2d]/10 to-[#b80811]/20 border border-[#c4111d]/40 rounded-xl p-1 shadow-md">
+        <div className="flex gap-1 bg-[#f1f3f5] rounded-lg p-1">
           {AGE_FILTERS.map((f) => (
             <button
               key={f.value}
               onClick={() => setSelectedAge(f.value)}
-              className={`px-2 py-1 text-sm font-semibold rounded-lg transition-all duration-300 font-sans ${
+              className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-all duration-200 ${
                 selectedAge === f.value
-                  ? "bg-gradient-to-r from-[#c4111d] via-[#ff1f2d] to-[#b80811] text-white shadow-md border border-[#c4111d]/40"
-                  : "text-[#c4111d] hover:bg-[#c4111d]/20 hover:text-[#c4111d] border border-transparent"
+                  ? "bg-white text-[#c4111d] shadow-sm"
+                  : "text-[#5a6170] hover:text-[#1a1a2e]"
               }`}
             >
               {f.label}
@@ -93,36 +94,35 @@ export default function PlayersPage() {
         </div>
 
         {/* Search */}
-        <div className="relative flex-1 max-w-xs">
-          <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-[#c4111d]/80" />
+        <div className="relative flex-1 max-w-sm">
+          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#8c919a]" />
           <input
             type="text"
             placeholder="Oyuncu ara..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-10 pr-3 py-3 bg-white border border-[#c4111d]/30 rounded-xl text-base text-[#222] placeholder-[#c4111d]/60 focus:outline-none focus:border-[#c4111d] focus:ring-2 focus:ring-[#c4111d]/15 transition-all duration-300 shadow-sm font-sans"
+            className="w-full pl-9 pr-3 py-2 bg-[#f1f3f5] border-0 rounded-lg text-sm text-[#1a1a2e] placeholder-[#8c919a] focus:outline-none focus:ring-2 focus:ring-[#c4111d]/20 focus:bg-white transition-all duration-200"
           />
         </div>
       </div>
 
       {/* Player Grid */}
       {filtered.length === 0 ? (
-        <div className="text-center py-20">
-          <div className="w-20 h-20 rounded-2xl bg-[#c4111d]/20 flex items-center justify-center mx-auto mb-4 border border-[#c4111d]/40">
-            <Search size={32} className="text-[#c4111d]" />
+        <div className="flex flex-col items-center justify-center py-20 animate-fade-in">
+          <div className="w-16 h-16 rounded-2xl bg-[#f1f3f5] flex items-center justify-center mb-4">
+            <Users size={28} className="text-[#8c919a]" />
           </div>
-          <p className="text-base text-[#c4111d]">Oyuncu bulunamadı</p>
+          <p className="text-sm font-medium text-[#5a6170]">Oyuncu bulunamadı</p>
+          <p className="text-xs text-[#8c919a] mt-1">Farklı bir filtre veya arama terimi deneyin</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {filtered.map((player) => (
-            <div className="bg-gradient-to-br from-[#c4111d]/10 via-[#fff8f0]/60 to-[#b80811]/10 border border-[#c4111d]/40 rounded-xl shadow-md p-2">
-              <PlayerCard
-                key={player.id}
-                player={player}
-                onClick={() => setSelectedPlayer(player)}
-              />
-            </div>
+            <PlayerCard
+              key={player.id}
+              player={player}
+              onClick={() => setSelectedPlayer(player)}
+            />
           ))}
         </div>
       )}

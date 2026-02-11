@@ -1,7 +1,7 @@
 "use client";
 
 import { Player } from "@/types/player";
-import { X } from "lucide-react";
+import { X, Edit3 } from "lucide-react";
 
 interface PlayerDetailModalProps {
   player: Player;
@@ -9,18 +9,20 @@ interface PlayerDetailModalProps {
   onEdit: (player: Player) => void;
 }
 
-// Removed duplicate SkillBar definition
 function SkillBar({ label, value, max = 10 }: { label: string; value: number; max?: number }) {
   const color =
-    value >= 8 ? "bg-green-500" : value >= 6 ? "bg-amber-400" : value >= 4 ? "bg-orange-400" : "bg-red-400";
+    value >= 8 ? "bg-emerald-500" : value >= 6 ? "bg-amber-400" : value >= 4 ? "bg-orange-400" : "bg-red-400";
   const percent = Math.max(0, Math.min(100, (value / max) * 100));
   return (
-    <div className="flex items-center gap-2">
-      <span className="text-[11px] text-[#57606a] w-24 shrink-0">{label}</span>
-      <div className="flex-1 bg-[#f0f0f0] rounded-full h-2 overflow-hidden">
-        <div className={`h-full rounded-full ${color} transition-all`} style={{ width: `${percent}%` }} />
+    <div className="flex items-center gap-3">
+      <span className="text-xs text-[#5a6170] w-24 shrink-0">{label}</span>
+      <div className="flex-1 bg-[#e2e5e9] rounded-full h-1.5 overflow-hidden">
+        <div
+          className={`h-full rounded-full ${color} transition-all duration-500`}
+          style={{ width: `${percent}%` }}
+        />
       </div>
-      <span className="text-xs font-bold text-[#1a1a1a] w-8 text-right">{value}</span>
+      <span className="text-xs font-bold text-[#1a1a2e] w-7 text-right">{value}</span>
     </div>
   );
 }
@@ -31,150 +33,156 @@ export default function PlayerDetailModal({ player, onClose, onEdit }: PlayerDet
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-fade-in">
       {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/40 backdrop-blur-md transition-all duration-300" onClick={onClose} />
+      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
 
       {/* Modal */}
-      <div className="relative bg-gradient-to-br from-white via-[#f6f8fa] to-[#eaf0f6] rounded-3xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto border border-[#e5e7eb]/60 animate-slide-in-up">
+      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto border border-[#e2e5e9] animate-slide-in-up">
         {/* Header */}
-        <div className="sticky top-0 bg-white/80 backdrop-blur-xl border-b border-[#e5e7eb]/60 px-8 py-6 flex items-center justify-between z-10 rounded-t-3xl shadow-sm">
-          <div className="flex items-center gap-6">
-            <div className="w-16 h-16 rounded-full bg-[#c4111d]/10 border-2 border-[#c4111d]/20 flex items-center justify-center text-2xl font-black text-[#c4111d] shadow-md">
+        <div className="sticky top-0 bg-white/95 backdrop-blur-md border-b border-[#e2e5e9] px-6 py-5 flex items-center justify-between z-10 rounded-t-2xl">
+          <div className="flex items-center gap-4">
+            <div className="w-14 h-14 rounded-xl bg-[#c4111d]/10 flex items-center justify-center text-xl font-black text-[#c4111d]">
               {player.jerseyNumber}
             </div>
             <div>
-              <h2 className="text-xl font-bold text-[#1a1a1a]">
+              <h2 className="text-lg font-bold text-[#1a1a2e]">
                 {player.firstName} {player.lastName}
               </h2>
-              <p className="text-sm text-[#6e7781]">
+              <p className="text-sm text-[#5a6170]">
                 {player.position} · {player.ageGroup} · {player.foot} Ayak
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             <button
               onClick={() => onEdit(player)}
-              className="px-5 py-2 bg-gradient-to-r from-[#c4111d] to-[#a50e18] hover:from-[#a50e18] hover:to-[#c4111d] text-white text-sm font-semibold rounded-xl transition-all duration-300 shadow-md"
+              className="flex items-center gap-2 px-4 py-2 bg-[#c4111d] hover:bg-[#9b0d16] text-white text-sm font-medium rounded-lg transition-all duration-200 shadow-sm"
             >
+              <Edit3 size={14} />
               Düzenle
             </button>
             <button
               onClick={onClose}
-              className="p-3 hover:bg-[#f6f8fa] rounded-xl transition-all duration-300 text-[#57606a]"
+              className="p-2 hover:bg-[#f1f3f5] rounded-lg transition-colors text-[#5a6170]"
             >
               <X size={20} />
             </button>
           </div>
         </div>
 
-        <div className="p-8 space-y-8">
+        <div className="p-6 space-y-6">
           {/* Genel Bilgiler */}
-          <section>
-            <h3 className="text-xs font-bold text-[#8b949e] uppercase tracking-wider mb-4">Genel Bilgiler</h3>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <Section title="Genel Bilgiler">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               <InfoBox label="Doğum Tarihi" value={new Date(player.birthDate).toLocaleDateString("tr-TR")} />
               <InfoBox label="Boy" value={`${player.height} cm`} />
               <InfoBox label="Kilo" value={`${player.weight} kg`} />
               <InfoBox label="Forma No" value={`#${player.jerseyNumber}`} />
             </div>
             {(player.phone || player.parentPhone) && (
-              <div className="grid grid-cols-2 gap-4 mt-4">
+              <div className="grid grid-cols-2 gap-3 mt-3">
                 {player.phone && <InfoBox label="Telefon" value={player.phone} />}
                 {player.parentPhone && <InfoBox label="Veli Telefonu" value={player.parentPhone} />}
               </div>
             )}
             {player.notes && (
-              <div className="mt-4 bg-[#f6f8fa] rounded-xl p-4 shadow-sm">
-                <p className="text-[12px] text-[#8b949e] font-medium mb-2">Notlar</p>
-                <p className="text-base text-[#1a1a1a]">{player.notes}</p>
+              <div className="mt-3 bg-[#f8f9fb] rounded-xl p-4 border border-[#e2e5e9]">
+                <p className="text-[11px] text-[#8c919a] font-medium uppercase tracking-wider mb-1.5">Notlar</p>
+                <p className="text-sm text-[#1a1a2e] leading-relaxed">{player.notes}</p>
               </div>
             )}
-          </section>
+          </Section>
 
           {/* İstatistikler */}
-          <section>
-            <h3 className="text-xs font-bold text-[#8b949e] uppercase tracking-wider mb-4">Maç İstatistikleri</h3>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <Section title="Maç İstatistikleri">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               <StatBox label="Maç" value={player.stats.matches} />
               <StatBox label="Dk. Oynanan" value={player.stats.minutesPlayed} />
               {isGoalkeeper ? (
                 <>
-                  <StatBox label="Yenilen Gol" value={player.stats.goalsConceded} color="text-orange-600" />
-                  <StatBox label="Clean Sheet" value={player.stats.cleanSheets} color="text-green-600" />
+                  <StatBox label="Yenilen Gol" value={player.stats.goalsConceded} color="text-orange-500" />
+                  <StatBox label="Clean Sheet" value={player.stats.cleanSheets} color="text-emerald-500" />
                 </>
               ) : (
                 <>
-                  <StatBox label="Gol" value={player.stats.goals} color="text-green-600" />
-                  <StatBox label="Asist" value={player.stats.assists} color="text-blue-600" />
+                  <StatBox label="Gol" value={player.stats.goals} color="text-emerald-500" />
+                  <StatBox label="Asist" value={player.stats.assists} color="text-blue-500" />
                 </>
               )}
             </div>
-            <div className="grid grid-cols-2 gap-4 mt-4">
-              <div className="bg-[#f6f8fa] rounded-xl p-4 flex items-center gap-4 shadow-sm">
-                <span className="inline-block w-5 h-6 rounded-[4px] bg-yellow-400" />
+            <div className="grid grid-cols-2 gap-3 mt-3">
+              <div className="bg-[#f8f9fb] rounded-xl p-4 flex items-center gap-3 border border-[#e2e5e9]">
+                <span className="inline-block w-4 h-5 rounded-[3px] bg-yellow-400" />
                 <div>
-                  <p className="text-base font-bold text-[#1a1a1a]">{player.stats.yellowCards}</p>
-                  <p className="text-[11px] text-[#8b949e]">Sarı Kart</p>
+                  <p className="text-base font-bold text-[#1a1a2e]">{player.stats.yellowCards}</p>
+                  <p className="text-[11px] text-[#8c919a]">Sarı Kart</p>
                 </div>
               </div>
-              <div className="bg-[#f6f8fa] rounded-xl p-4 flex items-center gap-4 shadow-sm">
-                <span className="inline-block w-5 h-6 rounded-[4px] bg-red-500" />
+              <div className="bg-[#f8f9fb] rounded-xl p-4 flex items-center gap-3 border border-[#e2e5e9]">
+                <span className="inline-block w-4 h-5 rounded-[3px] bg-red-500" />
                 <div>
-                  <p className="text-base font-bold text-[#1a1a1a]">{player.stats.redCards}</p>
-                  <p className="text-[11px] text-[#8b949e]">Kırmızı Kart</p>
+                  <p className="text-base font-bold text-[#1a1a2e]">{player.stats.redCards}</p>
+                  <p className="text-[11px] text-[#8c919a]">Kırmızı Kart</p>
                 </div>
               </div>
             </div>
-          </section>
+          </Section>
 
           {/* Taktik Değerler */}
-          <section>
-            <h3 className="text-xs font-bold text-[#8b949e] uppercase tracking-wider mb-4">Taktik Değerler</h3>
-            <div className="bg-[#f6f8fa] rounded-2xl p-6 space-y-3 shadow-sm">
-              <SkillBar label="Pozisyon Alma" value={player.tactical.positioning} max={10} />
-              <SkillBar label="Pas" value={player.tactical.passing} max={10} />
-              <SkillBar label="Orta" value={player.tactical.crossing} max={10} />
-              <SkillBar label="Şut" value={player.tactical.shooting} max={10} />
-              <SkillBar label="Dribling" value={player.tactical.dribbling} max={10} />
-              <SkillBar label="Kafa Vuruşu" value={player.tactical.heading} max={10} />
-              <SkillBar label="Top Kesme" value={player.tactical.tackling} max={10} />
-              <SkillBar label="Markaj" value={player.tactical.marking} max={10} />
-              <SkillBar label="Oyun Okuma" value={player.tactical.gameReading} max={10} />
+          <Section title="Taktik Değerler">
+            <div className="bg-[#f8f9fb] rounded-xl p-5 space-y-3 border border-[#e2e5e9]">
+              <SkillBar label="Pozisyon Alma" value={player.tactical.positioning} />
+              <SkillBar label="Pas" value={player.tactical.passing} />
+              <SkillBar label="Orta" value={player.tactical.crossing} />
+              <SkillBar label="Şut" value={player.tactical.shooting} />
+              <SkillBar label="Dribling" value={player.tactical.dribbling} />
+              <SkillBar label="Kafa Vuruşu" value={player.tactical.heading} />
+              <SkillBar label="Top Kesme" value={player.tactical.tackling} />
+              <SkillBar label="Markaj" value={player.tactical.marking} />
+              <SkillBar label="Oyun Okuma" value={player.tactical.gameReading} />
             </div>
-          </section>
+          </Section>
 
           {/* Atletik Değerler */}
-          <section>
-            <h3 className="text-xs font-bold text-[#8b949e] uppercase tracking-wider mb-4">Atletik Değerler</h3>
-            <div className="bg-[#f6f8fa] rounded-2xl p-6 space-y-3 shadow-sm">
-              <SkillBar label="Hız" value={player.athletic.speed} max={10} />
-              <SkillBar label="Güç" value={player.athletic.strength} max={10} />
-              <SkillBar label="Dayanıklılık" value={player.athletic.stamina} max={10} />
-              <SkillBar label="Çeviklik" value={player.athletic.agility} max={10} />
-              <SkillBar label="Sıçrama" value={player.athletic.jumping} max={10} />
-              <SkillBar label="Denge" value={player.athletic.balance} max={10} />
-              <SkillBar label="Esneklik" value={player.athletic.flexibility} max={10} />
+          <Section title="Atletik Değerler">
+            <div className="bg-[#f8f9fb] rounded-xl p-5 space-y-3 border border-[#e2e5e9]">
+              <SkillBar label="Hız" value={player.athletic.speed} />
+              <SkillBar label="Güç" value={player.athletic.strength} />
+              <SkillBar label="Dayanıklılık" value={player.athletic.stamina} />
+              <SkillBar label="Çeviklik" value={player.athletic.agility} />
+              <SkillBar label="Sıçrama" value={player.athletic.jumping} />
+              <SkillBar label="Denge" value={player.athletic.balance} />
+              <SkillBar label="Esneklik" value={player.athletic.flexibility} />
             </div>
-          </section>
+          </Section>
         </div>
       </div>
     </div>
   );
 }
 
+function Section({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <section>
+      <h3 className="text-xs font-semibold text-[#8c919a] uppercase tracking-wider mb-3">{title}</h3>
+      {children}
+    </section>
+  );
+}
+
 function InfoBox({ label, value }: { label: string; value: string }) {
   return (
-    <div className="bg-[#f6f8fa] rounded-lg p-3">
-      <p className="text-[10px] text-[#8b949e] font-medium mb-0.5">{label}</p>
-      <p className="text-sm font-semibold text-[#1a1a1a]">{value}</p>
+    <div className="bg-[#f8f9fb] rounded-lg p-3 border border-[#e2e5e9]">
+      <p className="text-[10px] text-[#8c919a] font-medium mb-0.5">{label}</p>
+      <p className="text-sm font-semibold text-[#1a1a2e]">{value}</p>
     </div>
   );
 }
 
 function StatBox({ label, value, color }: { label: string; value: number; color?: string }) {
   return (
-    <div className="bg-[#f6f8fa] rounded-lg p-3 text-center">
-      <p className={`text-lg font-bold ${color || "text-[#1a1a1a]"}`}>{value}</p>
-      <p className="text-[10px] text-[#8b949e] font-medium">{label}</p>
+    <div className="bg-[#f8f9fb] rounded-lg p-3 text-center border border-[#e2e5e9]">
+      <p className={`text-lg font-bold ${color || "text-[#1a1a2e]"}`}>{value}</p>
+      <p className="text-[10px] text-[#8c919a] font-medium">{label}</p>
     </div>
   );
 }

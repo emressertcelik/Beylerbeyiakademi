@@ -101,29 +101,29 @@ export default function PlayerFormModal({ player, onClose, onSave }: PlayerFormM
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-fade-in">
-      <div className="absolute inset-0 bg-black/40 backdrop-blur-md transition-all duration-300" onClick={onClose} />
+      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
 
-      <div className="relative bg-gradient-to-br from-white via-[#f6f8fa] to-[#eaf0f6] rounded-3xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col border border-[#e5e7eb]/60 animate-slide-in-up">
+      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col border border-[#e2e5e9] animate-slide-in-up">
         {/* Header */}
-        <div className="border-b border-[#e5e7eb]/60 px-8 py-6 flex items-center justify-between rounded-t-3xl shrink-0 bg-white/80 backdrop-blur-xl shadow-sm">
-          <h2 className="text-xl font-bold text-[#1a1a1a]">
+        <div className="border-b border-[#e2e5e9] px-6 py-5 flex items-center justify-between rounded-t-2xl shrink-0">
+          <h2 className="text-lg font-bold text-[#1a1a2e]">
             {isEdit ? "Oyuncu Düzenle" : "Yeni Oyuncu Ekle"}
           </h2>
-          <button onClick={onClose} className="p-3 hover:bg-[#f6f8fa] rounded-xl transition-all duration-300 text-[#57606a]">
+          <button onClick={onClose} className="p-2 hover:bg-[#f1f3f5] rounded-lg transition-colors text-[#5a6170]">
             <X size={20} />
           </button>
         </div>
 
         {/* Tabs */}
-        <div className="border-b border-[#e5e7eb]/60 px-8 flex gap-2 shrink-0 bg-white/80 backdrop-blur-xl">
+        <div className="border-b border-[#e2e5e9] px-6 flex gap-1 shrink-0">
           {tabs.map((t) => (
             <button
               key={t.key}
               onClick={() => setActiveTab(t.key)}
-              className={`px-5 py-3 text-sm font-semibold border-b-2 transition-all duration-300 rounded-t-lg ${
+              className={`px-4 py-3 text-sm font-medium border-b-2 transition-all duration-200 -mb-px ${
                 activeTab === t.key
-                  ? "border-[#c4111d] text-[#c4111d] bg-gradient-to-r from-[#c4111d]/10 to-[#a50e18]/10 shadow-md"
-                  : "border-transparent text-[#57606a] hover:text-[#1a1a1a]"
+                  ? "border-[#c4111d] text-[#c4111d]"
+                  : "border-transparent text-[#5a6170] hover:text-[#1a1a2e] hover:border-[#e2e5e9]"
               }`}
             >
               {t.label}
@@ -132,57 +132,57 @@ export default function PlayerFormModal({ player, onClose, onSave }: PlayerFormM
         </div>
 
         {/* Form content */}
-        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-8">
+        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6">
           {activeTab === "general" && (
-            <div className="space-y-6">
-              <div className="grid grid-cols-2 gap-6">
+            <div className="space-y-5">
+              <div className="grid grid-cols-2 gap-4">
                 <Field label="Ad" value={form.firstName} onChange={(v) => updateField("firstName", v)} required />
                 <Field label="Soyad" value={form.lastName} onChange={(v) => updateField("lastName", v)} required />
               </div>
-              <div className="grid grid-cols-2 gap-6">
+              <div className="grid grid-cols-2 gap-4">
                 <Field label="Doğum Tarihi" value={form.birthDate} onChange={(v) => updateField("birthDate", v)} type="date" required />
                 <SelectField label="Yaş Grubu" value={form.ageGroup} onChange={(v) => updateField("ageGroup", v)} options={AGE_GROUPS} />
               </div>
-              <div className="grid grid-cols-3 gap-6">
+              <div className="grid grid-cols-3 gap-4">
                 <SelectField label="Pozisyon" value={form.position} onChange={(v) => updateField("position", v)} options={POSITIONS} />
                 <SelectField label="Ayak" value={form.foot} onChange={(v) => updateField("foot", v)} options={FEET} />
                 <NumberField label="Forma No" value={form.jerseyNumber} onChange={(v) => updateField("jerseyNumber", v)} min={1} max={99} />
               </div>
-              <div className="grid grid-cols-2 gap-6">
+              <div className="grid grid-cols-2 gap-4">
                 <NumberField label="Boy (cm)" value={form.height} onChange={(v) => updateField("height", v)} min={100} max={220} />
                 <NumberField label="Kilo (kg)" value={form.weight} onChange={(v) => updateField("weight", v)} min={30} max={120} />
               </div>
-              <div className="grid grid-cols-2 gap-6">
+              <div className="grid grid-cols-2 gap-4">
                 <Field label="Telefon" value={form.phone} onChange={(v) => updateField("phone", v)} />
                 <Field label="Veli Telefonu" value={form.parentPhone} onChange={(v) => updateField("parentPhone", v)} />
               </div>
               <div>
-                <label className="block text-[13px] font-semibold text-[#24292f] mb-2">Notlar</label>
+                <label className="block text-xs font-medium text-[#5a6170] mb-1.5">Notlar</label>
                 <textarea
                   value={form.notes}
                   onChange={(e) => updateField("notes", e.target.value)}
                   rows={3}
-                  className="w-full px-4 py-3 bg-white/80 border border-[#d0d7de]/60 rounded-xl text-[#1a1a1a] text-base focus:outline-none focus:border-[#c4111d] focus:ring-2 focus:ring-[#c4111d]/15 transition-all duration-300 resize-none shadow-sm"
+                  className="w-full px-3 py-2.5 bg-white border border-[#e2e5e9] rounded-lg text-[#1a1a2e] text-sm focus:outline-none focus:border-[#c4111d] focus:ring-2 focus:ring-[#c4111d]/10 transition-all duration-200 resize-none"
                 />
               </div>
             </div>
           )}
 
           {activeTab === "stats" && (
-            <div className="space-y-6">
-              <div className="grid grid-cols-2 gap-6">
+            <div className="space-y-5">
+              <div className="grid grid-cols-2 gap-4">
                 <NumberField label="Maç Sayısı" value={form.stats.matches} onChange={(v) => updateStat("matches", v)} min={0} />
                 <NumberField label="Oynanan Dakika" value={form.stats.minutesPlayed} onChange={(v) => updateStat("minutesPlayed", v)} min={0} />
               </div>
-              <div className="grid grid-cols-2 gap-6">
+              <div className="grid grid-cols-2 gap-4">
                 <NumberField label="Gol" value={form.stats.goals} onChange={(v) => updateStat("goals", v)} min={0} />
                 <NumberField label="Asist" value={form.stats.assists} onChange={(v) => updateStat("assists", v)} min={0} />
               </div>
-              <div className="grid grid-cols-2 gap-6">
+              <div className="grid grid-cols-2 gap-4">
                 <NumberField label="Sarı Kart" value={form.stats.yellowCards} onChange={(v) => updateStat("yellowCards", v)} min={0} />
                 <NumberField label="Kırmızı Kart" value={form.stats.redCards} onChange={(v) => updateStat("redCards", v)} min={0} />
               </div>
-              <div className="grid grid-cols-2 gap-6">
+              <div className="grid grid-cols-2 gap-4">
                 <NumberField label="Yenilen Gol (Kaleci)" value={form.stats.goalsConceded} onChange={(v) => updateStat("goalsConceded", v)} min={0} />
                 <NumberField label="Clean Sheet (Kaleci)" value={form.stats.cleanSheets} onChange={(v) => updateStat("cleanSheets", v)} min={0} />
               </div>
@@ -206,8 +206,6 @@ export default function PlayerFormModal({ player, onClose, onSave }: PlayerFormM
                   key={key}
                   label={label}
                   value={form.tactical[key]}
-                  min={1}
-                  max={10}
                   onChange={(v) => updateTactical(key, v)}
                 />
               ))}
@@ -229,8 +227,6 @@ export default function PlayerFormModal({ player, onClose, onSave }: PlayerFormM
                   key={key}
                   label={label}
                   value={form.athletic[key]}
-                  min={1}
-                  max={10}
                   onChange={(v) => updateAthletic(key, v)}
                 />
               ))}
@@ -239,18 +235,18 @@ export default function PlayerFormModal({ player, onClose, onSave }: PlayerFormM
         </form>
 
         {/* Footer */}
-        <div className="border-t border-[#e5e7eb]/60 px-8 py-6 flex justify-end gap-4 shrink-0 rounded-b-3xl bg-white/80 backdrop-blur-xl shadow-sm">
+        <div className="border-t border-[#e2e5e9] px-6 py-4 flex justify-end gap-3 shrink-0 rounded-b-2xl">
           <button
             type="button"
             onClick={onClose}
-            className="px-5 py-2 text-base font-medium text-[#57606a] bg-[#f6f8fa] hover:bg-[#e5e7eb] rounded-xl transition-all duration-300"
+            className="px-4 py-2 text-sm font-medium text-[#5a6170] bg-[#f1f3f5] hover:bg-[#e2e5e9] rounded-lg transition-colors"
           >
             İptal
           </button>
           <button
             type="submit"
             onClick={handleSubmit}
-            className="px-6 py-2 text-base font-semibold text-white bg-gradient-to-r from-[#c4111d] to-[#a50e18] hover:from-[#a50e18] hover:to-[#c4111d] rounded-xl transition-all duration-300 shadow-md"
+            className="px-5 py-2 text-sm font-semibold text-white bg-[#c4111d] hover:bg-[#9b0d16] rounded-lg transition-colors shadow-sm shadow-[#c4111d]/25"
           >
             {isEdit ? "Güncelle" : "Kaydet"}
           </button>
@@ -268,13 +264,13 @@ function Field({
 }) {
   return (
     <div>
-      <label className="block text-[12px] font-semibold text-[#24292f] mb-1.5">{label}</label>
+      <label className="block text-xs font-medium text-[#5a6170] mb-1.5">{label}</label>
       <input
         type={type}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         required={required}
-        className="w-full px-3 py-2 bg-white border border-[#d0d7de] rounded-lg text-[#1a1a1a] text-sm focus:outline-none focus:border-[#c4111d] focus:ring-2 focus:ring-[#c4111d]/15 transition-all"
+        className="w-full px-3 py-2.5 bg-white border border-[#e2e5e9] rounded-lg text-[#1a1a2e] text-sm focus:outline-none focus:border-[#c4111d] focus:ring-2 focus:ring-[#c4111d]/10 transition-all duration-200"
       />
     </div>
   );
@@ -287,14 +283,14 @@ function NumberField({
 }) {
   return (
     <div>
-      <label className="block text-[12px] font-semibold text-[#24292f] mb-1.5">{label}</label>
+      <label className="block text-xs font-medium text-[#5a6170] mb-1.5">{label}</label>
       <input
         type="number"
         value={value}
         onChange={(e) => onChange(Number(e.target.value))}
         min={min}
         max={max}
-        className="w-full px-3 py-2 bg-white border border-[#d0d7de] rounded-lg text-[#1a1a1a] text-sm focus:outline-none focus:border-[#c4111d] focus:ring-2 focus:ring-[#c4111d]/15 transition-all"
+        className="w-full px-3 py-2.5 bg-white border border-[#e2e5e9] rounded-lg text-[#1a1a2e] text-sm focus:outline-none focus:border-[#c4111d] focus:ring-2 focus:ring-[#c4111d]/10 transition-all duration-200"
       />
     </div>
   );
@@ -307,11 +303,11 @@ function SelectField({
 }) {
   return (
     <div>
-      <label className="block text-[12px] font-semibold text-[#24292f] mb-1.5">{label}</label>
+      <label className="block text-xs font-medium text-[#5a6170] mb-1.5">{label}</label>
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full px-3 py-2 bg-white border border-[#d0d7de] rounded-lg text-[#1a1a1a] text-sm focus:outline-none focus:border-[#c4111d] focus:ring-2 focus:ring-[#c4111d]/15 transition-all"
+        className="w-full px-3 py-2.5 bg-white border border-[#e2e5e9] rounded-lg text-[#1a1a2e] text-sm focus:outline-none focus:border-[#c4111d] focus:ring-2 focus:ring-[#c4111d]/10 transition-all duration-200"
       >
         {options.map((o) => (
           <option key={o} value={o}>{o}</option>
@@ -327,19 +323,19 @@ function SliderField({
   label: string; value: number; onChange: (v: number) => void;
 }) {
   const color =
-    value >= 8 ? "text-green-600" : value >= 6 ? "text-amber-600" : value >= 4 ? "text-orange-600" : "text-red-500";
+    value >= 8 ? "text-emerald-600" : value >= 6 ? "text-amber-600" : value >= 4 ? "text-orange-500" : "text-red-500";
   return (
-    <div className="flex items-center gap-3">
-      <span className="text-[12px] text-[#57606a] font-medium w-28 shrink-0">{label}</span>
+    <div className="flex items-center gap-3 bg-[#f8f9fb] rounded-lg px-4 py-3 border border-[#e2e5e9]">
+      <span className="text-xs text-[#5a6170] font-medium w-28 shrink-0">{label}</span>
       <input
         type="range"
         min={1}
         max={10}
         value={value}
         onChange={(e) => onChange(Number(e.target.value))}
-        className="flex-1 h-2 accent-[#c4111d]"
+        className="flex-1 h-1.5 accent-[#c4111d]"
       />
-      <span className={`text-sm font-bold w-8 text-right ${color}`}>{value}</span>
+      <span className={`text-sm font-bold w-7 text-right ${color}`}>{value}</span>
     </div>
   );
 }

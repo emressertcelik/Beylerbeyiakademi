@@ -7,61 +7,68 @@ interface PlayerCardProps {
   onClick: (player: Player) => void;
 }
 
-const positionColor: Record<string, string> = {
-  Kaleci: "bg-amber-100 text-amber-700",
-  Defans: "bg-blue-100 text-blue-700",
-  "Orta Saha": "bg-green-100 text-green-700",
-  Forvet: "bg-red-100 text-red-700",
+const positionStyle: Record<string, { bg: string; text: string; dot: string }> = {
+  Kaleci: { bg: "bg-amber-50", text: "text-amber-700", dot: "bg-amber-400" },
+  Defans: { bg: "bg-blue-50", text: "text-blue-700", dot: "bg-blue-400" },
+  "Orta Saha": { bg: "bg-emerald-50", text: "text-emerald-700", dot: "bg-emerald-400" },
+  Forvet: { bg: "bg-red-50", text: "text-red-700", dot: "bg-red-400" },
 };
 
 export default function PlayerCard({ player, onClick }: PlayerCardProps) {
   const isGoalkeeper = player.position === "Kaleci";
+  const style = positionStyle[player.position] || { bg: "bg-slate-50", text: "text-slate-600", dot: "bg-slate-400" };
 
   return (
     <button
       onClick={() => onClick(player)}
-      className="bg-gradient-to-br from-white via-[#f6f8fa] to-[#eaf0f6] border border-[#e5e7eb]/60 rounded-2xl p-6 text-left hover:border-[#c4111d]/30 hover:shadow-xl transition-all duration-300 w-full group animate-fade-in"
+      className="bg-white border border-[#e2e5e9] rounded-xl p-5 text-left hover:border-[#c4111d]/30 hover:shadow-lg hover:shadow-[#c4111d]/5 transition-all duration-200 w-full group"
     >
       {/* Header */}
       <div className="flex items-start justify-between mb-4">
-        <div className="flex items-center gap-4">
-          <div className="w-14 h-14 rounded-full bg-[#f6f8fa] border-2 border-[#e5e7eb]/60 flex items-center justify-center text-xl font-black text-[#c4111d] shadow-sm">
+        <div className="flex items-center gap-3">
+          <div className="w-12 h-12 rounded-xl bg-[#f1f3f5] border border-[#e2e5e9] flex items-center justify-center text-lg font-black text-[#c4111d]">
             {player.jerseyNumber}
           </div>
-          <div>
-            <h3 className="font-bold text-[#1a1a1a] text-base group-hover:text-[#c4111d] transition-colors">
+          <div className="min-w-0">
+            <h3 className="font-semibold text-[#1a1a2e] text-sm group-hover:text-[#c4111d] transition-colors truncate">
               {player.firstName} {player.lastName}
             </h3>
-            <p className="text-[12px] text-[#6e7781]">{player.ageGroup} · {player.foot} Ayak</p>
+            <p className="text-xs text-[#8c919a] mt-0.5">
+              {player.ageGroup} · {player.foot} Ayak
+            </p>
           </div>
         </div>
-        <span className={`text-[11px] font-bold px-3 py-1 rounded-lg ${positionColor[player.position] || "bg-slate-100 text-slate-600"} shadow-sm`}>
+        <span className={`inline-flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-1 rounded-lg ${style.bg} ${style.text}`}>
+          <span className={`w-1.5 h-1.5 rounded-full ${style.dot}`} />
           {player.position}
         </span>
       </div>
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-4 gap-3">
+      {/* Divider */}
+      <div className="h-px bg-[#e2e5e9] mb-3" />
+
+      {/* Stats */}
+      <div className="grid grid-cols-4 gap-2">
         <StatMini label="Maç" value={player.stats.matches} />
         {isGoalkeeper ? (
           <>
-            <StatMini label="Y. Gol" value={player.stats.goalsConceded} color="text-orange-600" />
-            <StatMini label="C. Kale" value={player.stats.cleanSheets} color="text-green-600" />
+            <StatMini label="Y. Gol" value={player.stats.goalsConceded} color="text-orange-500" />
+            <StatMini label="C. Kale" value={player.stats.cleanSheets} color="text-emerald-500" />
           </>
         ) : (
           <>
-            <StatMini label="Gol" value={player.stats.goals} color="text-green-600" />
-            <StatMini label="Asist" value={player.stats.assists} color="text-blue-600" />
+            <StatMini label="Gol" value={player.stats.goals} color="text-emerald-500" />
+            <StatMini label="Asist" value={player.stats.assists} color="text-blue-500" />
           </>
         )}
         <StatMini
           label="Kart"
           value={
             <span className="flex items-center justify-center gap-1">
-              <span className="inline-block w-3 h-4 rounded-[3px] bg-yellow-400" />
-              <span className="text-[12px]">{player.stats.yellowCards}</span>
-              <span className="inline-block w-3 h-4 rounded-[3px] bg-red-500 ml-0.5" />
-              <span className="text-[12px]">{player.stats.redCards}</span>
+              <span className="inline-block w-2.5 h-3.5 rounded-[2px] bg-yellow-400" />
+              <span className="text-xs text-[#1a1a2e]">{player.stats.yellowCards}</span>
+              <span className="inline-block w-2.5 h-3.5 rounded-[2px] bg-red-500 ml-0.5" />
+              <span className="text-xs text-[#1a1a2e]">{player.stats.redCards}</span>
             </span>
           }
         />
@@ -80,9 +87,9 @@ function StatMini({
   color?: string;
 }) {
   return (
-    <div className="bg-[#f6f8fa] rounded-lg py-2 px-1 text-center">
-      <div className={`text-sm font-bold ${color || "text-[#1a1a1a]"}`}>{value}</div>
-      <div className="text-[9px] text-[#8b949e] font-medium uppercase tracking-wider mt-0.5">{label}</div>
+    <div className="bg-[#f8f9fb] rounded-lg py-2 px-1 text-center">
+      <div className={`text-sm font-bold ${color || "text-[#1a1a2e]"}`}>{value}</div>
+      <div className="text-[9px] text-[#8c919a] font-medium uppercase tracking-wider mt-0.5">{label}</div>
     </div>
   );
 }

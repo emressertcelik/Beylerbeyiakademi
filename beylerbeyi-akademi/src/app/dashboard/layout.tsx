@@ -5,7 +5,7 @@ import Image from "next/image";
 import React, { useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { Users, LogOut, Home } from "lucide-react";
+import { Users, LogOut, Home, Menu, X, ChevronRight } from "lucide-react";
 
 const NAV_ITEMS = [
   { href: "/dashboard", label: "Ana Sayfa", icon: Home },
@@ -28,102 +28,128 @@ export default function DashboardLayout({
   };
 
   const [menuOpen, setMenuOpen] = useState(false);
-  // Mock user info for display
-  const user = { name: "Mehmet Yılmaz", email: "mehmetyilmaz@example.com" };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#c4111d]/20 via-[#f9fafc] to-[#c4111d]/40 flex flex-col">
+    <div className="min-h-screen bg-[#f8f9fb] flex flex-col">
       {/* Top Navigation Bar */}
-      <header className="w-full bg-white shadow-md border-b border-[#e5e7eb]/60 sticky top-0 z-30">
-        <div className="flex items-center px-2 py-2 md:px-4">
-          {/* Logo */}
-          <div className="flex items-center gap-2">
-            <Image src="/Logo_S.png" alt="Logo" width={28} height={28} className="object-contain drop-shadow-md" />
-            <div>
-              <p className="text-sm font-bold text-[#c4111d] leading-tight">Beylerbeyi</p>
-              <p className="text-[10px] text-[#c4111d] font-medium">Futbol Akademi</p>
-            </div>
+      <header className="w-full bg-white/95 backdrop-blur-lg border-b border-[#e2e5e9] sticky top-0 z-30">
+        <div className="max-w-7xl mx-auto flex items-center justify-between h-16 px-4 md:px-6">
+          {/* Left: Logo + Nav */}
+          <div className="flex items-center gap-8">
+            {/* Logo */}
+            <Link href="/dashboard" className="flex items-center gap-2.5 group">
+              <div className="relative">
+                <Image
+                  src="/Logo_S.png"
+                  alt="Logo"
+                  width={36}
+                  height={36}
+                  className="object-contain drop-shadow-sm transition-transform group-hover:scale-105"
+                />
+              </div>
+              <div className="hidden sm:block">
+                <p className="text-[15px] font-bold text-[#1a1a2e] leading-tight tracking-tight">
+                  Beylerbeyi
+                </p>
+                <p className="text-[10px] text-[#c4111d] font-semibold uppercase tracking-widest">
+                  Akademi
+                </p>
+              </div>
+            </Link>
+
+            {/* Desktop Nav */}
+            <nav className="hidden md:flex items-center gap-1">
+              {NAV_ITEMS.map((item) => {
+                const isActive =
+                  item.href === "/dashboard"
+                    ? pathname === "/dashboard"
+                    : pathname.startsWith(item.href);
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                      isActive
+                        ? "bg-[#c4111d] text-white shadow-sm shadow-[#c4111d]/25"
+                        : "text-[#5a6170] hover:text-[#1a1a2e] hover:bg-[#f1f3f5]"
+                    }`}
+                  >
+                    <item.icon size={18} />
+                    {item.label}
+                  </Link>
+                );
+              })}
+            </nav>
           </div>
-          {/* Hamburger for mobile */}
-          <button className="md:hidden ml-auto p-1 rounded-lg bg-[#c4111d] text-white shadow-sm transition-all duration-300 border border-[#c4111d]/60" onClick={() => setMenuOpen(!menuOpen)}>
-            <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-menu"><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="18" x2="21" y2="18" /></svg>
-          </button>
+
+          {/* Right: User + Logout */}
+          <div className="flex items-center gap-3">
+            <button
+              onClick={handleLogout}
+              className="hidden md:flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-[#5a6170] hover:text-[#c4111d] hover:bg-red-50 transition-all duration-200"
+            >
+              <LogOut size={16} />
+              <span>Çıkış</span>
+            </button>
+
+            {/* Mobile menu button */}
+            <button
+              className="md:hidden p-2 rounded-lg text-[#5a6170] hover:bg-[#f1f3f5] transition-colors"
+              onClick={() => setMenuOpen(!menuOpen)}
+            >
+              {menuOpen ? <X size={22} /> : <Menu size={22} />}
+            </button>
+          </div>
         </div>
-        <div className="w-full flex items-center mt-1">
-          <nav className="hidden md:flex gap-1 bg-[#c4111d]/30 rounded-lg px-1 py-1 shadow-sm mx-auto max-w-xs border border-[#c4111d]/30">
-            {NAV_ITEMS.map((item) => {
-              const isActive =
-                item.href === "/dashboard"
-                  ? pathname === "/dashboard"
-                  : pathname.startsWith(item.href);
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={`flex items-center gap-1 px-2 py-1 rounded-md text-xs font-semibold transition-all duration-300 font-sans border-2 ${
-                    isActive
-                      ? "bg-[#c4111d] text-white border-[#c4111d] shadow-md"
-                      : "text-[#c4111d] border-transparent hover:bg-[#c4111d]/40 hover:text-white hover:border-[#c4111d]"
-                  }`}
-                >
-                  <item.icon size={18} />
-                  {item.label}
-                </Link>
-              );
-            })}
-          </nav>
-          <button
-            onClick={handleLogout}
-            className="ml-auto flex items-center gap-2 px-3 py-1 rounded-md text-xs font-semibold text-white bg-[#c4111d] hover:bg-[#a50e18] shadow-md transition-all duration-300 font-sans focus:ring-2 focus:ring-[#c4111d]/20 border-2 border-[#c4111d]"
-          >
-            <div className="flex flex-col items-end mr-1">
-              <span className="text-[11px] font-medium text-white">{user.name}</span>
-              <span className="text-[10px] text-white/80">{user.email}</span>
-            </div>
-            <LogOut size={16} />
-            Çıkış
-          </button>
-        </div>
+
         {/* Mobile menu */}
         {menuOpen && (
-          <nav className="md:hidden flex flex-col gap-2 px-2 pb-3 bg-[#c4111d]/20 rounded-lg mt-2 shadow-sm max-w-xs mx-auto border border-[#c4111d]/30">
-            {NAV_ITEMS.map((item) => {
-              const isActive =
-                item.href === "/dashboard"
-                  ? pathname === "/dashboard"
-                  : pathname.startsWith(item.href);
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={`flex items-center gap-2 px-3 py-1 rounded-md text-sm font-semibold transition-all duration-300 font-sans ${
-                    isActive
-                      ? "bg-[#c4111d] text-white shadow-md"
-                      : "text-[#c4111d] hover:bg-[#c4111d]/30 hover:text-white"
-                  }`}
-                  onClick={() => setMenuOpen(false)}
+          <div className="md:hidden border-t border-[#e2e5e9] bg-white animate-slide-up">
+            <nav className="p-3 space-y-1">
+              {NAV_ITEMS.map((item) => {
+                const isActive =
+                  item.href === "/dashboard"
+                    ? pathname === "/dashboard"
+                    : pathname.startsWith(item.href);
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={`flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 ${
+                      isActive
+                        ? "bg-[#c4111d] text-white"
+                        : "text-[#5a6170] hover:bg-[#f1f3f5]"
+                    }`}
+                    onClick={() => setMenuOpen(false)}
+                  >
+                    <div className="flex items-center gap-3">
+                      <item.icon size={20} />
+                      {item.label}
+                    </div>
+                    <ChevronRight size={16} className="opacity-40" />
+                  </Link>
+                );
+              })}
+              <div className="border-t border-[#e2e5e9] pt-2 mt-2">
+                <button
+                  onClick={() => {
+                    setMenuOpen(false);
+                    handleLogout();
+                  }}
+                  className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-[#c4111d] hover:bg-red-50 transition-all duration-200"
                 >
-                  <item.icon size={20} />
-                  {item.label}
-                </Link>
-              );
-            })}
-            <button
-              onClick={() => { setMenuOpen(false); handleLogout(); }}
-              className="ml-auto flex items-center gap-2 px-3 py-1 rounded-md text-sm font-semibold text-white bg-[#c4111d] hover:bg-[#a50e18] shadow-md transition-all duration-300 font-sans focus:ring-2 focus:ring-[#c4111d]/20"
-            >
-              <div className="flex flex-col items-end mr-1">
-                <span className="text-[11px] font-medium text-white">{user.name}</span>
-                <span className="text-[10px] text-white/80">{user.email}</span>
+                  <LogOut size={20} />
+                  Çıkış Yap
+                </button>
               </div>
-              <LogOut size={16} />
-              Çıkış
-            </button>
-          </nav>
+            </nav>
+          </div>
         )}
       </header>
+
       {/* Content */}
-      <main className="flex-1 w-full animate-fade-in bg-[#f9fafc]">
-        <div className="p-4 md:p-8">
+      <main className="flex-1 w-full">
+        <div className="max-w-7xl mx-auto p-4 md:p-8 animate-fade-in">
           {children}
         </div>
       </main>
