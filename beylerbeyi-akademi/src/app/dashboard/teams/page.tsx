@@ -137,6 +137,7 @@ export default function TeamsPage() {
 
   return (
     <div className="space-y-6 animate-slide-up">
+      {/* ...puan durumu linki kaldırıldı... */}
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
