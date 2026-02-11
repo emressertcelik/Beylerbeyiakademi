@@ -3,13 +3,18 @@
 import React, { createContext, useContext, useState, useCallback, useMemo, useEffect } from "react";
 import { Player } from "@/types/player";
 import { Match } from "@/types/match";
-import { MOCK_MATCHES } from "@/lib/mock-matches";
 import {
   fetchPlayers as supabaseFetchPlayers,
   createPlayer as supabaseCreatePlayer,
   updatePlayer as supabaseUpdatePlayer,
   deletePlayer as supabaseDeletePlayer,
 } from "@/lib/supabase/players";
+import {
+  fetchMatches as supabaseFetchMatches,
+  createMatch as supabaseCreateMatch,
+  updateMatch as supabaseUpdateMatch,
+  deleteMatch as supabaseDeleteMatch,
+} from "@/lib/supabase/matches";
 import { fetchAllLookups, Lookups } from "@/lib/supabase/lookups";
 
 interface AppData {
@@ -20,9 +25,12 @@ interface AppData {
   setPlayers: React.Dispatch<React.SetStateAction<Player[]>>;
   setMatches: React.Dispatch<React.SetStateAction<Match[]>>;
   refreshPlayers: () => Promise<void>;
+  refreshMatches: () => Promise<void>;
   refreshLookups: () => Promise<void>;
   savePlayer: (player: Player, isEdit: boolean) => Promise<Player>;
   removePlayer: (playerId: string) => Promise<void>;
+  saveMatch: (match: Match, isEdit: boolean) => Promise<Match>;
+  removeMatch: (matchId: string) => Promise<void>;
   getPlayerStatsFromMatches: (playerId: string) => {
     matches: number;
     goals: number;
@@ -39,7 +47,7 @@ const AppDataContext = createContext<AppData | null>(null);
 
 export function AppDataProvider({ children }: { children: React.ReactNode }) {
   const [players, setPlayers] = useState<Player[]>([]);
-  const [matches, setMatches] = useState<Match[]>(MOCK_MATCHES);
+  const [matches, setMatches] = useState<Match[]>([]);
   const [lookups, setLookups] = useState<Lookups>({
     positions: [],
     feet: [],
@@ -58,6 +66,16 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
+  // Supabase'den maçları çek
+  const refreshMatches = useCallback(async () => {
+    try {
+      const data = await supabaseFetchMatches();
+      setMatches(data);
+    } catch (err) {
+      console.error("Maçlar yüklenemedi:", err);
+    }
+  }, []);
+
   // Lookup'ları yenile
   const refreshLookups = useCallback(async () => {
     try {
@@ -68,15 +86,17 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  // İlk yüklemede oyuncuları ve lookup'ları çek
+  // İlk yüklemede oyuncuları, maçları ve lookup'ları çek
   useEffect(() => {
     const init = async () => {
       try {
-        const [playersData, lookupsData] = await Promise.all([
+        const [playersData, matchesData, lookupsData] = await Promise.all([
           supabaseFetchPlayers(),
+          supabaseFetchMatches(),
           fetchAllLookups(),
         ]);
         setPlayers(playersData);
+        setMatches(matchesData);
         setLookups(lookupsData);
       } catch (err) {
         console.error("İlk yükleme hatası:", err);
@@ -113,6 +133,31 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
     setPlayers((prev) => prev.filter((p) => p.id !== playerId));
   }, []);
 
+  // Maç kaydet (oluştur veya güncelle)
+  const saveMatch = useCallback(async (match: Match, isEdit: boolean): Promise<Match> => {
+    const saved = isEdit
+      ? await supabaseUpdateMatch(match)
+      : await supabaseCreateMatch(match);
+
+    setMatches((prev) => {
+      const idx = prev.findIndex((m) => m.id === saved.id);
+      if (idx >= 0) {
+        const updated = [...prev];
+        updated[idx] = saved;
+        return updated;
+      }
+      return [saved, ...prev];
+    });
+
+    return saved;
+  }, []);
+
+  // Maç sil
+  const removeMatch = useCallback(async (matchId: string): Promise<void> => {
+    await supabaseDeleteMatch(matchId);
+    setMatches((prev) => prev.filter((m) => m.id !== matchId));
+  }, []);
+
   const getPlayerStatsFromMatches = useCallback(
     (playerId: string) => {
       const stats = {
@@ -146,8 +191,8 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
   );
 
   const value = useMemo(
-    () => ({ players, matches, lookups, loading, setPlayers, setMatches, refreshPlayers, refreshLookups, savePlayer, removePlayer, getPlayerStatsFromMatches }),
-    [players, matches, lookups, loading, refreshPlayers, refreshLookups, savePlayer, removePlayer, getPlayerStatsFromMatches]
+    () => ({ players, matches, lookups, loading, setPlayers, setMatches, refreshPlayers, refreshMatches, refreshLookups, savePlayer, removePlayer, saveMatch, removeMatch, getPlayerStatsFromMatches }),
+    [players, matches, lookups, loading, refreshPlayers, refreshMatches, refreshLookups, savePlayer, removePlayer, saveMatch, removeMatch, getPlayerStatsFromMatches]
   );
 
   return (

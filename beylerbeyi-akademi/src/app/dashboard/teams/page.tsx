@@ -56,7 +56,7 @@ function computeTeamStats(matches: Match[], ageGroup: AgeGroup | "ALL", season: 
 }
 
 export default function TeamsPage() {
-  const { players, matches, lookups, setMatches } = useAppData();
+  const { players, matches, lookups, saveMatch, removeMatch } = useAppData();
 
   const AGE_FILTERS = useMemo(() => [
     { label: "Tümü", value: "ALL" as AgeGroup | "ALL" },
@@ -100,18 +100,16 @@ export default function TeamsPage() {
     [matches, selectedAge, selectedSeason]
   );
 
-  const handleSaveMatch = (saved: Match) => {
-    setMatches((prev) => {
-      const idx = prev.findIndex((m) => m.id === saved.id);
-      if (idx >= 0) {
-        const updated = [...prev];
-        updated[idx] = saved;
-        return updated;
-      }
-      return [...prev, saved];
-    });
-    setEditingMatch(undefined);
-    setSelectedMatch(null);
+  const handleSaveMatch = async (saved: Match) => {
+    try {
+      const isEdit = matches.some((m) => m.id === saved.id);
+      await saveMatch(saved, isEdit);
+      setEditingMatch(undefined);
+      setSelectedMatch(null);
+    } catch (err) {
+      console.error("Maç kaydedilemedi:", err);
+      alert("Maç kaydedilemedi. Lütfen tekrar deneyin.");
+    }
   };
 
   const handleEditFromDetail = (match: Match) => {
@@ -119,9 +117,14 @@ export default function TeamsPage() {
     setEditingMatch(match);
   };
 
-  const handleDeleteMatch = (matchId: string) => {
-    setMatches((prev) => prev.filter((m) => m.id !== matchId));
-    setSelectedMatch(null);
+  const handleDeleteMatch = async (matchId: string) => {
+    try {
+      await removeMatch(matchId);
+      setSelectedMatch(null);
+    } catch (err) {
+      console.error("Maç silinemedi:", err);
+      alert("Maç silinemedi. Lütfen tekrar deneyin.");
+    }
   };
 
   return (
