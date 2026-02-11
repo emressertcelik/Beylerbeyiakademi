@@ -1,0 +1,49 @@
+import { AgeGroup } from "./player";
+
+export interface MatchPlayerStat {
+  playerId: string;
+  playerName: string;       // "Ad Soyad" - kolay gösterim için
+  jerseyNumber: number;
+  position: string;
+  minutesPlayed: number;
+  goals: number;
+  assists: number;
+  yellowCards: number;
+  redCards: number;
+  goalsConceded: number;    // kaleci için
+  cleanSheet: boolean;      // kaleci için
+  rating?: number;          // 1-10 puan (opsiyonel)
+}
+
+export type MatchResult = "W" | "D" | "L"; // Win, Draw, Loss
+
+export interface Match {
+  id: string;
+  date: string;             // YYYY-MM-DD
+  season: string;           // "2025-2026"
+  ageGroup: AgeGroup;
+  opponent: string;         // Rakip takım adı
+  homeAway: "home" | "away";
+  scoreHome: number;        // Bizim golümüz
+  scoreAway: number;        // Rakip golü
+  result: MatchResult;
+  venue?: string;           // Saha / Stat
+  notes?: string;
+  playerStats: MatchPlayerStat[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface TeamStats {
+  ageGroup: AgeGroup;
+  season: string;
+  totalMatches: number;
+  wins: number;
+  draws: number;
+  losses: number;
+  goalsFor: number;
+  goalsAgainst: number;
+  goalDifference: number;
+  points: number;           // G:3 B:1 M:0
+  winRate: number;           // Yüzde
+}

@@ -5,11 +5,13 @@ import Image from "next/image";
 import React, { useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { Users, LogOut, Home, Menu, X, ChevronRight } from "lucide-react";
+import { AppDataProvider } from "@/lib/app-data";
+import { Users, LogOut, Home, Menu, X, ChevronRight, Swords } from "lucide-react";
 
 const NAV_ITEMS = [
   { href: "/dashboard", label: "Ana Sayfa", icon: Home },
   { href: "/dashboard/players", label: "Oyuncular", icon: Users },
+  { href: "/dashboard/teams", label: "Takımlar", icon: Swords },
 ];
 
 export default function DashboardLayout({
@@ -30,6 +32,7 @@ export default function DashboardLayout({
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
+    <AppDataProvider>
     <div className="min-h-screen bg-[#f8f9fb] flex flex-col">
       {/* Top Navigation Bar */}
       <header className="w-full bg-white/95 backdrop-blur-lg border-b border-[#e2e5e9] sticky top-0 z-30">
@@ -154,5 +157,6 @@ export default function DashboardLayout({
         </div>
       </main>
     </div>
+    </AppDataProvider>
   );
 }

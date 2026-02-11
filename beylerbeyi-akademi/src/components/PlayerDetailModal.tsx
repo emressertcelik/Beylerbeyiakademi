@@ -1,13 +1,36 @@
 "use client";
 
-import { Player } from "@/types/player";
-import { X, Edit3 } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Player, SkillLog } from "@/types/player";
+import { fetchSkillLogs } from "@/lib/supabase/players";
+import { X, Edit3, Trash2, TrendingUp, TrendingDown, ArrowUp, ArrowDown } from "lucide-react";
 
 interface PlayerDetailModalProps {
   player: Player;
   onClose: () => void;
   onEdit: (player: Player) => void;
+  onDelete?: (playerId: string) => void;
 }
+
+// Beceri alan adlarının Türkçe karşılıkları
+const SKILL_LABELS: Record<string, string> = {
+  positioning: "Pozisyon Alma",
+  passing: "Pas",
+  crossing: "Orta",
+  shooting: "Şut",
+  dribbling: "Dribling",
+  heading: "Kafa Vuruşu",
+  tackling: "Top Kesme",
+  marking: "Markaj",
+  game_reading: "Oyun Okuma",
+  speed: "Hız",
+  strength: "Güç",
+  stamina: "Dayanıklılık",
+  agility: "Çeviklik",
+  jumping: "Sıçrama",
+  balance: "Denge",
+  flexibility: "Esneklik",
+};
 
 function SkillBar({ label, value, max = 10 }: { label: string; value: number; max?: number }) {
   const color =
@@ -27,8 +50,26 @@ function SkillBar({ label, value, max = 10 }: { label: string; value: number; ma
   );
 }
 
-export default function PlayerDetailModal({ player, onClose, onEdit }: PlayerDetailModalProps) {
+export default function PlayerDetailModal({ player, onClose, onEdit, onDelete }: PlayerDetailModalProps) {
   const isGoalkeeper = player.position === "Kaleci";
+  const [skillLogs, setSkillLogs] = useState<SkillLog[]>([]);
+  const [logsLoading, setLogsLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function loadLogs() {
+      try {
+        const logs = await fetchSkillLogs(player.id);
+        if (!cancelled) setSkillLogs(logs);
+      } catch {
+        // hata halinde boş bırak
+      } finally {
+        if (!cancelled) setLogsLoading(false);
+      }
+    }
+    loadLogs();
+    return () => { cancelled = true; };
+  }, [player.id]);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-fade-in">
@@ -48,7 +89,7 @@ export default function PlayerDetailModal({ player, onClose, onEdit }: PlayerDet
                 {player.firstName} {player.lastName}
               </h2>
               <p className="text-sm text-[#5a6170]">
-                {player.position} · {player.ageGroup} · {player.foot} Ayak
+                {player.position} · {player.ageGroup} · {player.foot} Ayak · {player.seasons.join(", ")}
               </p>
             </div>
           </div>
@@ -60,6 +101,15 @@ export default function PlayerDetailModal({ player, onClose, onEdit }: PlayerDet
               <Edit3 size={14} />
               Düzenle
             </button>
+            {onDelete && (
+              <button
+                onClick={() => { if (confirm(`${player.firstName} ${player.lastName} silinecek. Emin misiniz?`)) onDelete(player.id); }}
+                className="flex items-center gap-2 px-4 py-2 bg-white hover:bg-red-50 text-[#c4111d] text-sm font-medium rounded-lg transition-all duration-200 border border-[#e2e5e9] hover:border-[#c4111d]/30"
+              >
+                <Trash2 size={14} />
+                Sil
+              </button>
+            )}
             <button
               onClick={onClose}
               className="p-2 hover:bg-[#f1f3f5] rounded-lg transition-colors text-[#5a6170]"
@@ -78,6 +128,22 @@ export default function PlayerDetailModal({ player, onClose, onEdit }: PlayerDet
               <InfoBox label="Kilo" value={`${player.weight} kg`} />
               <InfoBox label="Forma No" value={`#${player.jerseyNumber}`} />
             </div>
+            <div className="grid grid-cols-2 gap-3 mt-3">
+              <InfoBox label="Sezon" value={player.seasons.join(", ")} />
+            </div>
+            {player.previousTeams && player.previousTeams.length > 0 && (
+              <div className="mt-3 bg-[#f8f9fb] rounded-xl p-4 border border-[#e2e5e9]">
+                <p className="text-[11px] text-[#8c919a] font-medium uppercase tracking-wider mb-2">Önceki Takımlar</p>
+                <div className="space-y-2">
+                  {player.previousTeams.map((pt, i) => (
+                    <div key={i} className="flex items-center justify-between bg-white rounded-lg px-3 py-2 border border-[#e2e5e9]">
+                      <span className="text-sm font-medium text-[#1a1a2e]">{pt.team}</span>
+                      <span className="text-xs text-[#8c919a] bg-[#f1f3f5] px-2 py-0.5 rounded-md">{pt.years}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
             {(player.phone || player.parentPhone) && (
               <div className="grid grid-cols-2 gap-3 mt-3">
                 {player.phone && <InfoBox label="Telefon" value={player.phone} />}
@@ -153,6 +219,70 @@ export default function PlayerDetailModal({ player, onClose, onEdit }: PlayerDet
               <SkillBar label="Denge" value={player.athletic.balance} />
               <SkillBar label="Esneklik" value={player.athletic.flexibility} />
             </div>
+          </Section>
+
+          {/* Gelişim Logu */}
+          <Section title="Gelişim Geçmişi">
+            {logsLoading ? (
+              <div className="flex items-center justify-center py-8">
+                <div className="w-6 h-6 border-2 border-[#e2e5e9] border-t-[#c4111d] rounded-full animate-spin" />
+              </div>
+            ) : skillLogs.length === 0 ? (
+              <div className="bg-[#f8f9fb] rounded-xl p-6 text-center border border-[#e2e5e9]">
+                <p className="text-sm text-[#8c919a]">Henüz beceri değişikliği kaydı bulunmuyor.</p>
+                <p className="text-xs text-[#8c919a] mt-1">Taktik veya atletik değerler güncellendiğinde gelişim burada görünür.</p>
+              </div>
+            ) : (
+              <div className="space-y-2 max-h-[300px] overflow-y-auto pr-1">
+                {skillLogs.map((log) => {
+                  const diff = log.newValue - log.oldValue;
+                  const isUp = diff > 0;
+                  return (
+                    <div
+                      key={log.id}
+                      className="flex items-center gap-3 bg-[#f8f9fb] rounded-lg px-4 py-3 border border-[#e2e5e9]"
+                    >
+                      <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
+                        isUp ? "bg-emerald-50 text-emerald-600" : "bg-red-50 text-red-500"
+                      }`}>
+                        {isUp ? <TrendingUp size={16} /> : <TrendingDown size={16} />}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-semibold text-[#1a1a2e]">
+                            {SKILL_LABELS[log.skillName] || log.skillName}
+                          </span>
+                          <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded ${
+                            log.category === "tactical"
+                              ? "bg-blue-50 text-blue-600"
+                              : "bg-purple-50 text-purple-600"
+                          }`}>
+                            {log.category === "tactical" ? "Taktik" : "Atletik"}
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-[#8c919a] mt-0.5">
+                          {new Date(log.changedAt).toLocaleDateString("tr-TR", { day: "numeric", month: "long", year: "numeric" })}
+                          {" · "}
+                          {new Date(log.changedAt).toLocaleTimeString("tr-TR", { hour: "2-digit", minute: "2-digit" })}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <span className="text-sm font-medium text-[#8c919a]">{log.oldValue}</span>
+                        <div className={`flex items-center gap-0.5 px-2 py-1 rounded-md text-xs font-bold ${
+                          isUp
+                            ? "bg-emerald-50 text-emerald-600"
+                            : "bg-red-50 text-red-500"
+                        }`}>
+                          {isUp ? <ArrowUp size={12} /> : <ArrowDown size={12} />}
+                          {Math.abs(diff)}
+                        </div>
+                        <span className="text-sm font-bold text-[#1a1a2e]">{log.newValue}</span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </Section>
         </div>
       </div>

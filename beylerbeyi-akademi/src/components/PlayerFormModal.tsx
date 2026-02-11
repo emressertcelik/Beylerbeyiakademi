@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { Player, AgeGroup, Position, Foot } from "@/types/player";
-import { X } from "lucide-react";
+import { SEASONS } from "@/lib/seasons";
+import { X, Plus, Trash2 } from "lucide-react";
 
 const AGE_GROUPS: AgeGroup[] = ["U14", "U15", "U16", "U17", "U19"];
 const POSITIONS: Position[] = ["Kaleci", "Defans", "Orta Saha", "Forvet"];
@@ -34,6 +35,8 @@ export default function PlayerFormModal({ player, onClose, onSave }: PlayerFormM
     phone: "",
     parentPhone: "",
     notes: "",
+    seasons: ["2025-2026"] as string[],
+    previousTeams: [] as { team: string; years: string }[],
     stats: { ...defaultStats },
     tactical: { ...defaultTactical },
     athletic: { ...defaultAthletic },
@@ -56,6 +59,8 @@ export default function PlayerFormModal({ player, onClose, onSave }: PlayerFormM
         phone: player.phone || "",
         parentPhone: player.parentPhone || "",
         notes: player.notes || "",
+        seasons: [...player.seasons],
+        previousTeams: player.previousTeams ? [...player.previousTeams] : [],
         stats: { ...player.stats },
         tactical: { ...player.tactical },
         athletic: { ...player.athletic },
@@ -78,10 +83,6 @@ export default function PlayerFormModal({ player, onClose, onSave }: PlayerFormM
 
   const updateField = (field: string, value: unknown) => {
     setForm((prev) => ({ ...prev, [field]: value }));
-  };
-
-  const updateStat = (field: string, value: number) => {
-    setForm((prev) => ({ ...prev, stats: { ...prev.stats, [field]: value } }));
   };
 
   const updateTactical = (field: string, value: number) => {
@@ -139,9 +140,39 @@ export default function PlayerFormModal({ player, onClose, onSave }: PlayerFormM
                 <Field label="Ad" value={form.firstName} onChange={(v) => updateField("firstName", v)} required />
                 <Field label="Soyad" value={form.lastName} onChange={(v) => updateField("lastName", v)} required />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-3 gap-4">
                 <Field label="Doğum Tarihi" value={form.birthDate} onChange={(v) => updateField("birthDate", v)} type="date" required />
                 <SelectField label="Yaş Grubu" value={form.ageGroup} onChange={(v) => updateField("ageGroup", v)} options={AGE_GROUPS} />
+                <div>
+                  <label className="block text-xs font-medium text-[#5a6170] mb-1.5">Sezon</label>
+                  <div className="flex flex-wrap gap-2">
+                    {SEASONS.map((s) => {
+                      const checked = form.seasons.includes(s);
+                      return (
+                        <button
+                          key={s}
+                          type="button"
+                          onClick={() => {
+                            if (checked) {
+                              if (form.seasons.length > 1) {
+                                updateField("seasons", form.seasons.filter((ss: string) => ss !== s));
+                              }
+                            } else {
+                              updateField("seasons", [...form.seasons, s]);
+                            }
+                          }}
+                          className={`px-3 py-1.5 text-xs font-semibold rounded-lg border transition-all duration-200 ${
+                            checked
+                              ? "bg-[#c4111d] text-white border-[#c4111d]"
+                              : "bg-white text-[#5a6170] border-[#e2e5e9] hover:border-[#c4111d] hover:text-[#c4111d]"
+                          }`}
+                        >
+                          {s}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
               </div>
               <div className="grid grid-cols-3 gap-4">
                 <SelectField label="Pozisyon" value={form.position} onChange={(v) => updateField("position", v)} options={POSITIONS} />
@@ -157,6 +188,55 @@ export default function PlayerFormModal({ player, onClose, onSave }: PlayerFormM
                 <Field label="Veli Telefonu" value={form.parentPhone} onChange={(v) => updateField("parentPhone", v)} />
               </div>
               <div>
+                <label className="block text-xs font-medium text-[#5a6170] mb-1.5">Önceki Takımlar</label>
+                <div className="space-y-2">
+                  {form.previousTeams.map((pt, index) => (
+                    <div key={index} className="flex items-center gap-2">
+                      <input
+                        type="text"
+                        placeholder="Takım adı"
+                        value={pt.team}
+                        onChange={(e) => {
+                          const updated = [...form.previousTeams];
+                          updated[index] = { ...updated[index], team: e.target.value };
+                          updateField("previousTeams", updated);
+                        }}
+                        className="flex-1 px-3 py-2 bg-white border border-[#e2e5e9] rounded-lg text-[#1a1a2e] text-sm focus:outline-none focus:border-[#c4111d] focus:ring-2 focus:ring-[#c4111d]/10 transition-all duration-200"
+                      />
+                      <input
+                        type="text"
+                        placeholder="Örn: 2022-2024"
+                        value={pt.years}
+                        onChange={(e) => {
+                          const updated = [...form.previousTeams];
+                          updated[index] = { ...updated[index], years: e.target.value };
+                          updateField("previousTeams", updated);
+                        }}
+                        className="w-32 px-3 py-2 bg-white border border-[#e2e5e9] rounded-lg text-[#1a1a2e] text-sm focus:outline-none focus:border-[#c4111d] focus:ring-2 focus:ring-[#c4111d]/10 transition-all duration-200"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const updated = form.previousTeams.filter((_, i) => i !== index);
+                          updateField("previousTeams", updated);
+                        }}
+                        className="p-2 text-[#8c919a] hover:text-[#c4111d] hover:bg-red-50 rounded-lg transition-colors"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                  ))}
+                  <button
+                    type="button"
+                    onClick={() => updateField("previousTeams", [...form.previousTeams, { team: "", years: "" }])}
+                    className="flex items-center gap-1.5 text-xs font-medium text-[#c4111d] hover:text-[#9b0d16] transition-colors py-1"
+                  >
+                    <Plus size={14} />
+                    Takım Ekle
+                  </button>
+                </div>
+              </div>
+              <div>
                 <label className="block text-xs font-medium text-[#5a6170] mb-1.5">Notlar</label>
                 <textarea
                   value={form.notes}
@@ -169,23 +249,38 @@ export default function PlayerFormModal({ player, onClose, onSave }: PlayerFormM
           )}
 
           {activeTab === "stats" && (
-            <div className="space-y-5">
-              <div className="grid grid-cols-2 gap-4">
-                <NumberField label="Maç Sayısı" value={form.stats.matches} onChange={(v) => updateStat("matches", v)} min={0} />
-                <NumberField label="Oynanan Dakika" value={form.stats.minutesPlayed} onChange={(v) => updateStat("minutesPlayed", v)} min={0} />
+            <div className="space-y-4">
+              <div className="bg-amber-50 border border-amber-200 rounded-lg px-4 py-2.5 text-xs text-amber-700 font-medium">
+                İstatistikler yalnızca görüntüleme amaçlıdır. Düzenleme bu bölümden yapılmaz.
               </div>
-              <div className="grid grid-cols-2 gap-4">
-                <NumberField label="Gol" value={form.stats.goals} onChange={(v) => updateStat("goals", v)} min={0} />
-                <NumberField label="Asist" value={form.stats.assists} onChange={(v) => updateStat("assists", v)} min={0} />
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <ReadOnlyStat label="Maç" value={form.stats.matches} />
+                <ReadOnlyStat label="Dk. Oynanan" value={form.stats.minutesPlayed} />
+                <ReadOnlyStat label="Gol" value={form.stats.goals} color="text-emerald-500" />
+                <ReadOnlyStat label="Asist" value={form.stats.assists} color="text-blue-500" />
               </div>
-              <div className="grid grid-cols-2 gap-4">
-                <NumberField label="Sarı Kart" value={form.stats.yellowCards} onChange={(v) => updateStat("yellowCards", v)} min={0} />
-                <NumberField label="Kırmızı Kart" value={form.stats.redCards} onChange={(v) => updateStat("redCards", v)} min={0} />
+              <div className="grid grid-cols-2 gap-3">
+                <div className="bg-[#f8f9fb] rounded-xl p-4 flex items-center gap-3 border border-[#e2e5e9]">
+                  <span className="inline-block w-4 h-5 rounded-[3px] bg-yellow-400" />
+                  <div>
+                    <p className="text-base font-bold text-[#1a1a2e]">{form.stats.yellowCards}</p>
+                    <p className="text-[11px] text-[#8c919a]">Sarı Kart</p>
+                  </div>
+                </div>
+                <div className="bg-[#f8f9fb] rounded-xl p-4 flex items-center gap-3 border border-[#e2e5e9]">
+                  <span className="inline-block w-4 h-5 rounded-[3px] bg-red-500" />
+                  <div>
+                    <p className="text-base font-bold text-[#1a1a2e]">{form.stats.redCards}</p>
+                    <p className="text-[11px] text-[#8c919a]">Kırmızı Kart</p>
+                  </div>
+                </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
-                <NumberField label="Yenilen Gol (Kaleci)" value={form.stats.goalsConceded} onChange={(v) => updateStat("goalsConceded", v)} min={0} />
-                <NumberField label="Clean Sheet (Kaleci)" value={form.stats.cleanSheets} onChange={(v) => updateStat("cleanSheets", v)} min={0} />
-              </div>
+              {form.position === "Kaleci" && (
+                <div className="grid grid-cols-2 gap-3">
+                  <ReadOnlyStat label="Yenilen Gol" value={form.stats.goalsConceded} color="text-orange-500" />
+                  <ReadOnlyStat label="Clean Sheet" value={form.stats.cleanSheets} color="text-emerald-500" />
+                </div>
+              )}
             </div>
           )}
 
@@ -336,6 +431,15 @@ function SliderField({
         className="flex-1 h-1.5 accent-[#c4111d]"
       />
       <span className={`text-sm font-bold w-7 text-right ${color}`}>{value}</span>
+    </div>
+  );
+}
+
+function ReadOnlyStat({ label, value, color }: { label: string; value: number; color?: string }) {
+  return (
+    <div className="bg-[#f8f9fb] rounded-lg p-3 text-center border border-[#e2e5e9]">
+      <p className={`text-lg font-bold ${color || "text-[#1a1a2e]"}`}>{value}</p>
+      <p className="text-[10px] text-[#8c919a] font-medium">{label}</p>
     </div>
   );
 }

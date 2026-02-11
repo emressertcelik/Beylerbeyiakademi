@@ -34,7 +34,7 @@ export default function PlayerCard({ player, onClick }: PlayerCardProps) {
               {player.firstName} {player.lastName}
             </h3>
             <p className="text-xs text-[#8c919a] mt-0.5">
-              {player.ageGroup} · {player.foot} Ayak
+              {player.ageGroup} · {player.foot} Ayak · {player.seasons.join(", ")}
             </p>
           </div>
         </div>
@@ -46,6 +46,15 @@ export default function PlayerCard({ player, onClick }: PlayerCardProps) {
 
       {/* Divider */}
       <div className="h-px bg-[#e2e5e9] mb-3" />
+
+      {/* Previous Team */}
+      {player.previousTeams && player.previousTeams.length > 0 && (
+        <div className="mb-3 flex items-center gap-1.5 text-[11px] text-[#8c919a]">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          <span className="truncate">{player.previousTeams[0].team}</span>
+          <span className="text-[10px] text-[#b0b5bd]">({player.previousTeams[0].years})</span>
+        </div>
+      )}
 
       {/* Stats */}
       <div className="grid grid-cols-4 gap-2">

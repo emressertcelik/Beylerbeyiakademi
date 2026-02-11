@@ -52,6 +52,8 @@ export interface Player {
   jerseyNumber: number;
   height: number;         // cm
   weight: number;         // kg
+  seasons: string[];        // Sezon bilgileri (örn: ["2024-2025", "2025-2026"])
+  previousTeams?: { team: string; years: string }[];  // Önceki takımlar ve yılları
   photo?: string;
   phone?: string;
   parentPhone?: string;
@@ -61,4 +63,17 @@ export interface Player {
   athletic: AthleticSkills;
   createdAt: string;
   updatedAt: string;
+}
+
+// Beceri değişim logu
+export type SkillCategory = "tactical" | "athletic";
+
+export interface SkillLog {
+  id: string;
+  playerId: string;
+  category: SkillCategory;
+  skillName: string;        // DB'deki alan adı (positioning, speed vs.)
+  oldValue: number;
+  newValue: number;
+  changedAt: string;
 }
