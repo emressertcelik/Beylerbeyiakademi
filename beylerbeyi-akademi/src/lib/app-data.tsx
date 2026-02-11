@@ -172,6 +172,7 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
       };
 
       for (const match of matches) {
+        if (match.status !== "played") continue;
         const ps = match.playerStats.find((p) => p.playerId === playerId);
         if (ps) {
           stats.matches += 1;

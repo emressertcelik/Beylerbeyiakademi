@@ -3,10 +3,11 @@
 import { useState, useEffect } from "react";
 import { Player, AgeGroup, Position, Foot } from "@/types/player";
 import { useAppData } from "@/lib/app-data";
-import { X, Plus, Trash2 } from "lucide-react";
+import { X, Plus, Trash2, Loader2 } from "lucide-react";
 
 interface PlayerFormModalProps {
   player?: Player | null;
+  saving?: boolean;
   onClose: () => void;
   onSave: (player: Player) => void;
 }
@@ -15,7 +16,7 @@ const defaultStats = { matches: 0, goals: 0, assists: 0, yellowCards: 0, redCard
 const defaultTactical = { positioning: 5, passing: 5, crossing: 5, shooting: 5, dribbling: 5, heading: 5, tackling: 5, marking: 5, gameReading: 5 };
 const defaultAthletic = { speed: 5, strength: 5, stamina: 5, agility: 5, jumping: 5, balance: 5, flexibility: 5 };
 
-export default function PlayerFormModal({ player, onClose, onSave }: PlayerFormModalProps) {
+export default function PlayerFormModal({ player, saving, onClose, onSave }: PlayerFormModalProps) {
   const { lookups } = useAppData();
   const AGE_GROUPS = lookups.ageGroups.filter((a) => a.isActive).map((a) => a.value);
   const POSITIONS = lookups.positions.filter((p) => p.isActive).map((p) => p.value);
@@ -342,9 +343,11 @@ export default function PlayerFormModal({ player, onClose, onSave }: PlayerFormM
           <button
             type="submit"
             onClick={handleSubmit}
-            className="px-5 py-2 text-sm font-semibold text-white bg-[#c4111d] hover:bg-[#9b0d16] rounded-lg transition-colors shadow-sm shadow-[#c4111d]/25"
+            disabled={saving}
+            className="px-5 py-2 text-sm font-semibold text-white bg-[#c4111d] hover:bg-[#9b0d16] disabled:opacity-60 disabled:cursor-not-allowed rounded-lg transition-colors shadow-sm shadow-[#c4111d]/25 flex items-center gap-2"
           >
-            {isEdit ? "Güncelle" : "Kaydet"}
+            {saving && <Loader2 size={14} className="animate-spin" />}
+            {saving ? "Kaydediliyor..." : isEdit ? "Güncelle" : "Kaydet"}
           </button>
         </div>
       </div>

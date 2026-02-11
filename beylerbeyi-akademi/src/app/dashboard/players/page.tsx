@@ -7,6 +7,7 @@ import PlayerCard from "@/components/PlayerCard";
 import PlayerDetailModal from "@/components/PlayerDetailModal";
 import PlayerFormModal from "@/components/PlayerFormModal";
 import { Plus, Search, Users, Calendar } from "lucide-react";
+import { useToast } from "@/components/Toast";
 
 export default function PlayersPage() {
   const { players, loading, lookups, savePlayer, removePlayer, refreshPlayers, getPlayerStatsFromMatches } = useAppData();
@@ -28,6 +29,7 @@ export default function PlayersPage() {
   const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
   const [editingPlayer, setEditingPlayer] = useState<Player | null | undefined>(undefined);
   const [saving, setSaving] = useState(false);
+  const { showToast } = useToast();
 
   // selectedPlayer'ı players değiştiğinde güncelle (stale data önleme)
   useEffect(() => {
@@ -79,12 +81,13 @@ export default function PlayersPage() {
       setSaving(true);
       const isEdit = !!editingPlayer;
       await savePlayer(saved, isEdit);
-      await refreshPlayers(); // Supabase'den taze veri çek
+      await refreshPlayers();
       setEditingPlayer(undefined);
       setSelectedPlayer(null);
+      showToast("success", isEdit ? "Oyuncu başarıyla güncellendi" : "Oyuncu başarıyla kaydedildi");
     } catch (err) {
       console.error("Oyuncu kaydedilemedi:", err);
-      alert("Oyuncu kaydedilirken bir hata oluştu.");
+      showToast("error", "Oyuncu kaydedilirken bir hata oluştu.");
     } finally {
       setSaving(false);
     }
@@ -99,9 +102,10 @@ export default function PlayersPage() {
     try {
       await removePlayer(playerId);
       setSelectedPlayer(null);
+      showToast("success", "Oyuncu başarıyla silindi");
     } catch (err) {
       console.error("Oyuncu silinemedi:", err);
-      alert("Oyuncu silinirken bir hata oluştu.");
+      showToast("error", "Oyuncu silinirken bir hata oluştu.");
     }
   };
 
@@ -239,6 +243,7 @@ export default function PlayersPage() {
       {editingPlayer !== undefined && (
         <PlayerFormModal
           player={editingPlayer}
+          saving={saving}
           onClose={() => setEditingPlayer(undefined)}
           onSave={handleSave}
         />

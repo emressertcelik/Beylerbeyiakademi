@@ -1,14 +1,15 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Match, MatchPlayerStat } from "@/types/match";
+import { Match, MatchPlayerStat, MatchStatus } from "@/types/match";
 import { Player, AgeGroup } from "@/types/player";
 import { useAppData } from "@/lib/app-data";
-import { X, Plus, Trash2, UserPlus } from "lucide-react";
+import { X, Plus, Trash2, UserPlus, Loader2, Star } from "lucide-react";
 
 interface MatchFormModalProps {
   match?: Match | null;
   players: Player[];
+  saving?: boolean;
   onClose: () => void;
   onSave: (match: Match) => void;
 }
@@ -19,7 +20,7 @@ function getResult(scoreHome: number, scoreAway: number): "W" | "D" | "L" {
   return "L";
 }
 
-export default function MatchFormModal({ match, players, onClose, onSave }: MatchFormModalProps) {
+export default function MatchFormModal({ match, players, saving, onClose, onSave }: MatchFormModalProps) {
   const { lookups } = useAppData();
   const AGE_GROUPS = lookups.ageGroups.filter((a) => a.isActive).map((a) => a.value);
   const SEASONS = lookups.seasons.filter((s) => s.isActive).map((s) => s.value);
@@ -31,6 +32,7 @@ export default function MatchFormModal({ match, players, onClose, onSave }: Matc
     ageGroup: (AGE_GROUPS[0] ?? "U15") as AgeGroup,
     opponent: "",
     homeAway: "home" as "home" | "away",
+    status: "scheduled" as MatchStatus,
     scoreHome: 0,
     scoreAway: 0,
     venue: "",
@@ -48,6 +50,7 @@ export default function MatchFormModal({ match, players, onClose, onSave }: Matc
         ageGroup: match.ageGroup,
         opponent: match.opponent,
         homeAway: match.homeAway,
+        status: match.status || "played",
         scoreHome: match.scoreHome,
         scoreAway: match.scoreAway,
         venue: match.venue || "",
@@ -80,6 +83,7 @@ export default function MatchFormModal({ match, players, onClose, onSave }: Matc
         redCards: 0,
         goalsConceded: 0,
         cleanSheet: false,
+        rating: undefined,
       },
     ]);
   };
@@ -98,13 +102,16 @@ export default function MatchFormModal({ match, players, onClose, onSave }: Matc
 
   const handleSubmit = () => {
     if (!form.opponent.trim()) return;
-    const result = getResult(form.scoreHome, form.scoreAway);
+    const isPlayed = form.status === "played";
+    const result = isPlayed ? getResult(form.scoreHome, form.scoreAway) : "D";
     const now = new Date().toISOString().split("T")[0];
     const saved: Match = {
       id: match?.id || crypto.randomUUID(),
       ...form,
+      scoreHome: isPlayed ? form.scoreHome : 0,
+      scoreAway: isPlayed ? form.scoreAway : 0,
       result,
-      playerStats,
+      playerStats: isPlayed ? playerStats : [],
       createdAt: match?.createdAt || now,
       updatedAt: now,
     };
@@ -130,7 +137,7 @@ export default function MatchFormModal({ match, players, onClose, onSave }: Matc
         <div className="border-b border-[#e2e5e9] px-6 flex gap-1 shrink-0">
           {[
             { key: "match" as const, label: "Maç Bilgisi" },
-            { key: "players" as const, label: `Oyuncu İstatistikleri (${playerStats.length})` },
+            ...(form.status === "played" ? [{ key: "players" as const, label: `Oyuncu İstatistikleri (${playerStats.length})` }] : []),
           ].map((t) => (
             <button
               key={t.key}
@@ -232,7 +239,37 @@ export default function MatchFormModal({ match, players, onClose, onSave }: Matc
                 </div>
               </div>
 
-              {/* Score */}
+              {/* Match Status */}
+              <div>
+                <label className="block text-xs font-medium text-[#5a6170] mb-1.5">Maç Durumu</label>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setForm({ ...form, status: "scheduled" })}
+                    className={`flex-1 px-3 py-2 text-xs font-semibold rounded-lg border transition-all ${
+                      form.status === "scheduled"
+                        ? "bg-amber-500 text-white border-amber-500"
+                        : "bg-white text-[#5a6170] border-[#e2e5e9] hover:border-amber-500"
+                    }`}
+                  >
+                    📅 Planlandı
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setForm({ ...form, status: "played" })}
+                    className={`flex-1 px-3 py-2 text-xs font-semibold rounded-lg border transition-all ${
+                      form.status === "played"
+                        ? "bg-green-600 text-white border-green-600"
+                        : "bg-white text-[#5a6170] border-[#e2e5e9] hover:border-green-600"
+                    }`}
+                  >
+                    ✅ Oynandı
+                  </button>
+                </div>
+              </div>
+
+              {/* Score - only when played */}
+              {form.status === "played" && (
               <div>
                 <label className="block text-xs font-medium text-[#5a6170] mb-2">Skor</label>
                 <div className="flex items-center gap-3 bg-[#f8f9fb] rounded-xl p-4 border border-[#e2e5e9]">
@@ -259,6 +296,7 @@ export default function MatchFormModal({ match, players, onClose, onSave }: Matc
                   </div>
                 </div>
               </div>
+              )}
 
               <div>
                 <label className="block text-xs font-medium text-[#5a6170] mb-1.5">Saha / Stat</label>
@@ -346,6 +384,33 @@ export default function MatchFormModal({ match, players, onClose, onSave }: Matc
                       </button>
                     </div>
 
+                    {/* Star Rating */}
+                    <div className="mb-2">
+                      <label className="block text-[10px] font-medium text-[#8c919a] mb-1">Yıldız Puanı</label>
+                      <div className="flex items-center gap-1">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <button
+                            key={star}
+                            type="button"
+                            onClick={() => updatePlayerStat(ps.playerId, "rating", (ps.rating === star ? undefined : star))}
+                            className="p-0.5 transition-transform hover:scale-110"
+                          >
+                            <Star
+                              size={20}
+                              className={`transition-colors ${
+                                ps.rating && star <= ps.rating
+                                  ? "fill-amber-400 text-amber-400"
+                                  : "fill-none text-[#d1d5db]"
+                              }`}
+                            />
+                          </button>
+                        ))}
+                        {ps.rating && (
+                          <span className="ml-1 text-xs font-semibold text-amber-600">{ps.rating}/5</span>
+                        )}
+                      </div>
+                    </div>
+
                     {/* Stats Grid */}
                     <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
                       <MiniInput label="Dakika" value={ps.minutesPlayed} onChange={(v) => updatePlayerStat(ps.playerId, "minutesPlayed", v)} max={120} />
@@ -390,9 +455,11 @@ export default function MatchFormModal({ match, players, onClose, onSave }: Matc
           </button>
           <button
             onClick={handleSubmit}
-            className="px-5 py-2 bg-[#c4111d] hover:bg-[#9b0d16] text-white text-sm font-semibold rounded-lg shadow-sm shadow-[#c4111d]/25 transition-all"
+            disabled={saving}
+            className="px-5 py-2 bg-[#c4111d] hover:bg-[#9b0d16] disabled:opacity-60 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-lg shadow-sm shadow-[#c4111d]/25 transition-all flex items-center gap-2"
           >
-            {isEdit ? "Güncelle" : "Kaydet"}
+            {saving && <Loader2 size={14} className="animate-spin" />}
+            {saving ? "Kaydediliyor..." : isEdit ? "Güncelle" : "Kaydet"}
           </button>
         </div>
       </div>

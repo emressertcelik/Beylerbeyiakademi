@@ -1,5 +1,5 @@
 import { createClient } from "./client";
-import { Match, MatchPlayerStat } from "@/types/match";
+import { Match, MatchPlayerStat, MatchStatus } from "@/types/match";
 
 function getClient() {
   return createClient();
@@ -31,6 +31,7 @@ interface DbMatch {
   age_group: string;
   opponent: string;
   home_away: string;
+  status: string;
   score_home: number;
   score_away: number;
   result: string;
@@ -64,6 +65,7 @@ function mapDbToMatch(db: DbMatch): Match {
     ageGroup: db.age_group,
     opponent: db.opponent,
     homeAway: db.home_away as "home" | "away",
+    status: (db.status || "played") as MatchStatus,
     scoreHome: db.score_home,
     scoreAway: db.score_away,
     result: db.result as Match["result"],
@@ -106,6 +108,7 @@ export async function createMatch(match: Match): Promise<Match> {
       age_group: match.ageGroup,
       opponent: match.opponent,
       home_away: match.homeAway,
+      status: match.status,
       score_home: match.scoreHome,
       score_away: match.scoreAway,
       result: match.result,
@@ -167,6 +170,7 @@ export async function updateMatch(match: Match): Promise<Match> {
       age_group: match.ageGroup,
       opponent: match.opponent,
       home_away: match.homeAway,
+      status: match.status,
       score_home: match.scoreHome,
       score_away: match.scoreAway,
       result: match.result,

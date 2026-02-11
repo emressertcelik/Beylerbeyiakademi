@@ -6,6 +6,7 @@ import { Match, TeamStats } from "@/types/match";
 import { useAppData } from "@/lib/app-data";
 import MatchFormModal from "@/components/MatchFormModal";
 import MatchDetailModal from "@/components/MatchDetailModal";
+import { useToast } from "@/components/Toast";
 import {
   Plus,
   Calendar,
@@ -29,7 +30,8 @@ function computeTeamStats(matches: Match[], ageGroup: AgeGroup | "ALL", season: 
   const filtered = matches.filter((m) => {
     const ageOk = ageGroup === "ALL" || m.ageGroup === ageGroup;
     const seasonOk = season === "ALL" || m.season === season;
-    return ageOk && seasonOk;
+    const played = m.status === "played";
+    return ageOk && seasonOk && played;
   });
 
   if (filtered.length === 0) return null;
@@ -73,6 +75,8 @@ export default function TeamsPage() {
   const seasonRef = useRef<HTMLDivElement>(null);
   const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
   const [editingMatch, setEditingMatch] = useState<Match | null | undefined>(undefined);
+  const [saving, setSaving] = useState(false);
+  const { showToast } = useToast();
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -102,13 +106,17 @@ export default function TeamsPage() {
 
   const handleSaveMatch = async (saved: Match) => {
     try {
+      setSaving(true);
       const isEdit = matches.some((m) => m.id === saved.id);
       await saveMatch(saved, isEdit);
       setEditingMatch(undefined);
       setSelectedMatch(null);
+      showToast("success", isEdit ? "Maç başarıyla güncellendi" : "Maç başarıyla kaydedildi");
     } catch (err) {
       console.error("Maç kaydedilemedi:", err);
-      alert("Maç kaydedilemedi. Lütfen tekrar deneyin.");
+      showToast("error", "Maç kaydedilemedi. Lütfen tekrar deneyin.");
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -121,9 +129,10 @@ export default function TeamsPage() {
     try {
       await removeMatch(matchId);
       setSelectedMatch(null);
+      showToast("success", "Maç başarıyla silindi");
     } catch (err) {
       console.error("Maç silinemedi:", err);
-      alert("Maç silinemedi. Lütfen tekrar deneyin.");
+      showToast("error", "Maç silinemedi. Lütfen tekrar deneyin.");
     }
   };
 
@@ -232,7 +241,8 @@ export default function TeamsPage() {
         <div className="space-y-2">
           <h2 className="text-sm font-bold text-[#1a1a2e]">Maçlar</h2>
           {filteredMatches.map((match) => {
-            const rc = resultColors[match.result];
+            const isPlayed = match.status === "played";
+            const rc = isPlayed ? resultColors[match.result] : { bg: "bg-blue-50", text: "text-blue-600", border: "border-blue-200" };
             return (
               <button
                 key={match.id}
@@ -240,17 +250,24 @@ export default function TeamsPage() {
                 className="w-full bg-white border border-[#e2e5e9] rounded-xl p-4 text-left hover:border-[#c4111d]/30 hover:shadow-md hover:shadow-[#c4111d]/5 transition-all duration-200 group"
               >
                 <div className="flex items-center gap-4">
-                  {/* Result Badge */}
+                  {/* Result / Status Badge */}
                   <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-sm font-black ${rc.bg} ${rc.text} border ${rc.border} shrink-0`}>
-                    {resultLabels[match.result]}
+                    {isPlayed ? resultLabels[match.result] : "📅"}
                   </div>
 
                   {/* Match Info */}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <p className="text-sm font-semibold text-[#1a1a2e] group-hover:text-[#c4111d] transition-colors truncate">
-                        Beylerbeyi <span className="font-black">{match.scoreHome} - {match.scoreAway}</span> {match.opponent}
-                      </p>
+                      {isPlayed ? (
+                        <p className="text-sm font-semibold text-[#1a1a2e] group-hover:text-[#c4111d] transition-colors truncate">
+                          Beylerbeyi <span className="font-black">{match.scoreHome} - {match.scoreAway}</span> {match.opponent}
+                        </p>
+                      ) : (
+                        <p className="text-sm font-semibold text-[#1a1a2e] group-hover:text-[#c4111d] transition-colors truncate">
+                          Beylerbeyi vs {match.opponent}
+                          <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-100 text-amber-700">Planlandı</span>
+                        </p>
+                      )}
                     </div>
                     <div className="flex items-center gap-2 mt-0.5 text-[11px] text-[#8c919a]">
                       <span>{new Date(match.date).toLocaleDateString("tr-TR", { day: "numeric", month: "short", year: "numeric" })}</span>
@@ -268,9 +285,11 @@ export default function TeamsPage() {
                   </div>
 
                   {/* Player count */}
-                  <div className="text-[11px] text-[#8c919a] font-medium shrink-0 hidden sm:block">
-                    {match.playerStats.length} oyuncu
-                  </div>
+                  {isPlayed && (
+                    <div className="text-[11px] text-[#8c919a] font-medium shrink-0 hidden sm:block">
+                      {match.playerStats.length} oyuncu
+                    </div>
+                  )}
 
                   <ChevronRight size={16} className="text-[#8c919a] shrink-0 group-hover:text-[#c4111d] transition-colors" />
                 </div>
@@ -295,6 +314,7 @@ export default function TeamsPage() {
         <MatchFormModal
           match={editingMatch}
           players={players}
+          saving={saving}
           onClose={() => setEditingMatch(undefined)}
           onSave={handleSaveMatch}
         />

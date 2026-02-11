@@ -1,7 +1,7 @@
 "use client";
 
 import { Match } from "@/types/match";
-import { X, Edit3, Trash2, MapPin, Calendar, Clock } from "lucide-react";
+import { X, Edit3, Trash2, MapPin, Calendar, Clock, Star } from "lucide-react";
 
 interface MatchDetailModalProps {
   match: Match;
@@ -18,6 +18,7 @@ const resultLabel: Record<string, { text: string; color: string; bg: string }> =
 
 export default function MatchDetailModal({ match, onClose, onEdit, onDelete }: MatchDetailModalProps) {
   const r = resultLabel[match.result] || resultLabel.D;
+  const isPlayed = match.status === "played";
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-fade-in">
@@ -57,6 +58,7 @@ export default function MatchDetailModal({ match, onClose, onEdit, onDelete }: M
 
         <div className="flex-1 overflow-y-auto p-6 space-y-6">
           {/* Score Card */}
+          {isPlayed ? (
           <div className="bg-[#f8f9fb] border border-[#e2e5e9] rounded-xl p-6">
             <div className="flex items-center justify-center gap-6">
               <div className="text-center flex-1">
@@ -81,6 +83,30 @@ export default function MatchDetailModal({ match, onClose, onEdit, onDelete }: M
               </span>
             </div>
           </div>
+          ) : (
+          <div className="bg-amber-50 border border-amber-200 rounded-xl p-6">
+            <div className="flex items-center justify-center gap-6">
+              <div className="text-center flex-1">
+                <p className="text-xs text-[#8c919a] font-semibold uppercase tracking-wider mb-1">
+                  {match.homeAway === "home" ? "Ev Sahibi" : "Deplasman"}
+                </p>
+                <p className="text-sm font-bold text-[#1a1a2e]">Beylerbeyi</p>
+              </div>
+              <div className="flex flex-col items-center">
+                <span className="text-sm font-bold text-amber-700">VS</span>
+              </div>
+              <div className="text-center flex-1">
+                <p className="text-xs text-[#8c919a] font-semibold uppercase tracking-wider mb-1">Rakip</p>
+                <p className="text-sm font-bold text-[#1a1a2e]">{match.opponent}</p>
+              </div>
+            </div>
+            <div className="flex justify-center mt-3">
+              <span className="text-xs font-semibold px-3 py-1 rounded-lg bg-amber-100 text-amber-700">
+                📅 Planlandı
+              </span>
+            </div>
+          </div>
+          )}
 
           {/* Match Info */}
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
@@ -116,7 +142,7 @@ export default function MatchDetailModal({ match, onClose, onEdit, onDelete }: M
           )}
 
           {/* Player Stats Table */}
-          {match.playerStats.length > 0 && (
+          {isPlayed && match.playerStats.length > 0 && (
             <div>
               <h3 className="text-sm font-bold text-[#1a1a2e] mb-3">Oyuncu İstatistikleri</h3>
               <div className="border border-[#e2e5e9] rounded-xl overflow-hidden">
@@ -131,6 +157,7 @@ export default function MatchDetailModal({ match, onClose, onEdit, onDelete }: M
                         <th className="text-center px-2 py-2.5 text-[10px] font-semibold text-[#8c919a] uppercase tracking-wider">Asist</th>
                         <th className="text-center px-2 py-2.5 text-[10px] font-semibold text-[#8c919a] uppercase tracking-wider">SK</th>
                         <th className="text-center px-2 py-2.5 text-[10px] font-semibold text-[#8c919a] uppercase tracking-wider">KK</th>
+                        <th className="text-center px-2 py-2.5 text-[10px] font-semibold text-[#8c919a] uppercase tracking-wider">⭐</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -149,6 +176,24 @@ export default function MatchDetailModal({ match, onClose, onEdit, onDelete }: M
                           </td>
                           <td className="text-center px-2 py-2.5">
                             {ps.redCards > 0 && <span className="inline-block w-3 h-4 rounded-[2px] bg-red-500" />}
+                          </td>
+                          <td className="text-center px-2 py-2.5">
+                            {ps.rating ? (
+                              <div className="flex items-center justify-center gap-0.5">
+                                {[1, 2, 3, 4, 5].map((s) => (
+                                  <Star
+                                    key={s}
+                                    size={11}
+                                    className={s <= ps.rating!
+                                      ? "fill-amber-400 text-amber-400"
+                                      : "fill-none text-gray-300"
+                                    }
+                                  />
+                                ))}
+                              </div>
+                            ) : (
+                              <span className="text-[#8c919a]">-</span>
+                            )}
                           </td>
                         </tr>
                       ))}

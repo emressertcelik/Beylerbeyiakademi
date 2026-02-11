@@ -12,10 +12,11 @@ export interface MatchPlayerStat {
   redCards: number;
   goalsConceded: number;    // kaleci için
   cleanSheet: boolean;      // kaleci için
-  rating?: number;          // 1-10 puan (opsiyonel)
+  rating?: number;          // 1-5 yıldız (opsiyonel)
 }
 
 export type MatchResult = "W" | "D" | "L"; // Win, Draw, Loss
+export type MatchStatus = "scheduled" | "played"; // Planlandı / Oynandı
 
 export interface Match {
   id: string;
@@ -24,6 +25,7 @@ export interface Match {
   ageGroup: AgeGroup;
   opponent: string;         // Rakip takım adı
   homeAway: "home" | "away";
+  status: MatchStatus;      // Maç durumu
   scoreHome: number;        // Bizim golümüz
   scoreAway: number;        // Rakip golü
   result: MatchResult;

@@ -6,6 +6,7 @@ import React, { useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { AppDataProvider } from "@/lib/app-data";
+import { ToastProvider } from "@/components/Toast";
 import { Users, LogOut, Home, Menu, X, ChevronRight, Swords, Settings } from "lucide-react";
 
 const NAV_ITEMS = [
@@ -33,6 +34,7 @@ export default function DashboardLayout({
 
   return (
     <AppDataProvider>
+    <ToastProvider>
     <div className="min-h-screen bg-[#f8f9fb] flex flex-col">
       {/* Top Navigation Bar */}
       <header className="w-full bg-white/95 backdrop-blur-lg border-b border-[#e2e5e9] sticky top-0 z-30">
@@ -184,6 +186,7 @@ export default function DashboardLayout({
         </div>
       </main>
     </div>
+    </ToastProvider>
     </AppDataProvider>
   );
 }
