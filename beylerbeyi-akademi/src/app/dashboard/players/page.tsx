@@ -1,31 +1,26 @@
 "use client";
 
 import { useState, useRef, useEffect, useMemo } from "react";
-import { Player, AgeGroup } from "@/types/player";
+import { Player } from "@/types/player";
 import { useAppData } from "@/lib/app-data";
-import { SEASONS } from "@/lib/seasons";
 import PlayerCard from "@/components/PlayerCard";
 import PlayerDetailModal from "@/components/PlayerDetailModal";
 import PlayerFormModal from "@/components/PlayerFormModal";
 import { Plus, Search, Users, Calendar } from "lucide-react";
 
-const AGE_FILTERS: { label: string; value: AgeGroup | "ALL" }[] = [
-  { label: "Tümü", value: "ALL" },
-  { label: "U14", value: "U14" },
-  { label: "U15", value: "U15" },
-  { label: "U16", value: "U16" },
-  { label: "U17", value: "U17" },
-  { label: "U19", value: "U19" },
-];
-
-const SEASON_FILTERS: { label: string; value: string }[] = [
-  { label: "Tüm Sezonlar", value: "ALL" },
-  ...SEASONS.map((s) => ({ label: s, value: s })),
-];
-
 export default function PlayersPage() {
-  const { players, loading, savePlayer, removePlayer, refreshPlayers, getPlayerStatsFromMatches } = useAppData();
-  const [selectedAge, setSelectedAge] = useState<AgeGroup | "ALL">("ALL");
+  const { players, loading, lookups, savePlayer, removePlayer, refreshPlayers, getPlayerStatsFromMatches } = useAppData();
+
+  const AGE_FILTERS = useMemo(() => [
+    { label: "Tümü", value: "ALL" },
+    ...lookups.ageGroups.filter((a) => a.isActive).map((a) => ({ label: a.value, value: a.value })),
+  ], [lookups.ageGroups]);
+
+  const SEASON_FILTERS = useMemo(() => [
+    { label: "Tüm Sezonlar", value: "ALL" },
+    ...lookups.seasons.filter((s) => s.isActive).map((s) => ({ label: s.value, value: s.value })),
+  ], [lookups.seasons]);
+  const [selectedAge, setSelectedAge] = useState<string>("ALL");
   const [selectedSeason, setSelectedSeason] = useState<string>("ALL");
   const [seasonOpen, setSeasonOpen] = useState(false);
   const seasonRef = useRef<HTMLDivElement>(null);

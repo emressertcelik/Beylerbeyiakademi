@@ -3,10 +3,8 @@
 import { useState, useEffect } from "react";
 import { Match, MatchPlayerStat } from "@/types/match";
 import { Player, AgeGroup } from "@/types/player";
-import { SEASONS } from "@/lib/seasons";
+import { useAppData } from "@/lib/app-data";
 import { X, Plus, Trash2, UserPlus } from "lucide-react";
-
-const AGE_GROUPS: AgeGroup[] = ["U14", "U15", "U16", "U17", "U19"];
 
 interface MatchFormModalProps {
   match?: Match | null;
@@ -22,12 +20,15 @@ function getResult(scoreHome: number, scoreAway: number): "W" | "D" | "L" {
 }
 
 export default function MatchFormModal({ match, players, onClose, onSave }: MatchFormModalProps) {
+  const { lookups } = useAppData();
+  const AGE_GROUPS = lookups.ageGroups.filter((a) => a.isActive).map((a) => a.value);
+  const SEASONS = lookups.seasons.filter((s) => s.isActive).map((s) => s.value);
   const isEdit = !!match;
 
   const [form, setForm] = useState({
     date: new Date().toISOString().split("T")[0],
     season: SEASONS[0] || "2025-2026",
-    ageGroup: "U15" as AgeGroup,
+    ageGroup: (AGE_GROUPS[0] ?? "U15") as AgeGroup,
     opponent: "",
     homeAway: "home" as "home" | "away",
     scoreHome: 0,

@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Player, SkillLog } from "@/types/player";
-import { fetchSkillLogs } from "@/lib/supabase/players";
-import { X, Edit3, Trash2, TrendingUp, TrendingDown, ArrowUp, ArrowDown } from "lucide-react";
+import { Player, SkillLog, BodyLog } from "@/types/player";
+import { fetchSkillLogs, fetchBodyLogs } from "@/lib/supabase/players";
+import { X, Edit3, Trash2, TrendingUp, TrendingDown, ArrowUp, ArrowDown, Ruler, Weight } from "lucide-react";
 
 interface PlayerDetailModalProps {
   player: Player;
@@ -53,14 +53,21 @@ function SkillBar({ label, value, max = 10 }: { label: string; value: number; ma
 export default function PlayerDetailModal({ player, onClose, onEdit, onDelete }: PlayerDetailModalProps) {
   const isGoalkeeper = player.position === "Kaleci";
   const [skillLogs, setSkillLogs] = useState<SkillLog[]>([]);
+  const [bodyLogs, setBodyLogs] = useState<BodyLog[]>([]);
   const [logsLoading, setLogsLoading] = useState(true);
 
   useEffect(() => {
     let cancelled = false;
     async function loadLogs() {
       try {
-        const logs = await fetchSkillLogs(player.id);
-        if (!cancelled) setSkillLogs(logs);
+        const [skills, body] = await Promise.all([
+          fetchSkillLogs(player.id),
+          fetchBodyLogs(player.id),
+        ]);
+        if (!cancelled) {
+          setSkillLogs(skills);
+          setBodyLogs(body);
+        }
       } catch {
         // hata halinde boş bırak
       } finally {
@@ -154,6 +161,70 @@ export default function PlayerDetailModal({ player, onClose, onEdit, onDelete }:
               <div className="mt-3 bg-[#f8f9fb] rounded-xl p-4 border border-[#e2e5e9]">
                 <p className="text-[11px] text-[#8c919a] font-medium uppercase tracking-wider mb-1.5">Notlar</p>
                 <p className="text-sm text-[#1a1a2e] leading-relaxed">{player.notes}</p>
+              </div>
+            )}
+          </Section>
+
+          {/* Fiziksel Gelişim */}
+          <Section title="Fiziksel Gelişim">
+            {logsLoading ? (
+              <div className="flex items-center justify-center py-6">
+                <div className="w-6 h-6 border-2 border-[#e2e5e9] border-t-[#c4111d] rounded-full animate-spin" />
+              </div>
+            ) : bodyLogs.length === 0 ? (
+              <div className="bg-[#f8f9fb] rounded-xl p-5 text-center border border-[#e2e5e9]">
+                <p className="text-sm text-[#8c919a]">Henüz boy/kilo değişikliği kaydı bulunmuyor.</p>
+                <p className="text-xs text-[#8c919a] mt-1">Boy veya kilo güncellendiğinde geçmiş burada görünür.</p>
+              </div>
+            ) : (
+              <div className="space-y-2 max-h-[240px] overflow-y-auto pr-1">
+                {bodyLogs.map((log) => {
+                  const diff = log.newValue - log.oldValue;
+                  const isUp = diff > 0;
+                  const isHeight = log.measurement === "height";
+                  const unit = isHeight ? "cm" : "kg";
+                  return (
+                    <div
+                      key={log.id}
+                      className="flex items-center gap-3 bg-[#f8f9fb] rounded-lg px-4 py-3 border border-[#e2e5e9]"
+                    >
+                      <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
+                        isHeight ? "bg-blue-50 text-blue-600" : "bg-amber-50 text-amber-600"
+                      }`}>
+                        {isHeight ? <Ruler size={16} /> : <Weight size={16} />}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-semibold text-[#1a1a2e]">
+                            {isHeight ? "Boy" : "Kilo"}
+                          </span>
+                          <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded ${
+                            isHeight ? "bg-blue-50 text-blue-600" : "bg-amber-50 text-amber-600"
+                          }`}>
+                            {unit}
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-[#8c919a] mt-0.5">
+                          {new Date(log.changedAt).toLocaleDateString("tr-TR", { day: "numeric", month: "long", year: "numeric" })}
+                          {" · "}
+                          {new Date(log.changedAt).toLocaleTimeString("tr-TR", { hour: "2-digit", minute: "2-digit" })}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <span className="text-sm font-medium text-[#8c919a]">{log.oldValue} {unit}</span>
+                        <div className={`flex items-center gap-0.5 px-2 py-1 rounded-md text-xs font-bold ${
+                          isUp
+                            ? "bg-emerald-50 text-emerald-600"
+                            : "bg-red-50 text-red-500"
+                        }`}>
+                          {isUp ? <ArrowUp size={12} /> : <ArrowDown size={12} />}
+                          {Math.abs(diff)}
+                        </div>
+                        <span className="text-sm font-bold text-[#1a1a2e]">{log.newValue} {unit}</span>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             )}
           </Section>

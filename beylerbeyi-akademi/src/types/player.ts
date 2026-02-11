@@ -1,12 +1,8 @@
-export type Position =
-  | "Kaleci"
-  | "Defans"
-  | "Orta Saha"
-  | "Forvet";
-
-export type Foot = "Sağ" | "Sol" | "Her İkisi";
-
-export type AgeGroup = "U14" | "U15" | "U16" | "U17" | "U19";
+// Dinamik lookup değerleri – artık DB'den geliyor.
+// Tip güvenliği için string alt tipi olarak tanımlanıyor.
+export type Position  = string;
+export type Foot      = string;
+export type AgeGroup  = string;
 
 export interface PlayerStats {
   matches: number;
@@ -73,6 +69,18 @@ export interface SkillLog {
   playerId: string;
   category: SkillCategory;
   skillName: string;        // DB'deki alan adı (positioning, speed vs.)
+  oldValue: number;
+  newValue: number;
+  changedAt: string;
+}
+
+// Boy/Kilo değişim logu
+export type MeasurementType = "height" | "weight";
+
+export interface BodyLog {
+  id: string;
+  playerId: string;
+  measurement: MeasurementType;
   oldValue: number;
   newValue: number;
   changedAt: string;

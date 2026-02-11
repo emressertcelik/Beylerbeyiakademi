@@ -6,7 +6,7 @@ import React, { useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { AppDataProvider } from "@/lib/app-data";
-import { Users, LogOut, Home, Menu, X, ChevronRight, Swords } from "lucide-react";
+import { Users, LogOut, Home, Menu, X, ChevronRight, Swords, Settings } from "lucide-react";
 
 const NAV_ITEMS = [
   { href: "/dashboard", label: "Ana Sayfa", icon: Home },
@@ -85,11 +85,23 @@ export default function DashboardLayout({
             </nav>
           </div>
 
-          {/* Right: User + Logout */}
-          <div className="flex items-center gap-3">
+          {/* Right: Settings + Logout */}
+          <div className="flex items-center gap-1">
+            <Link
+              href="/dashboard/settings"
+              className={`hidden md:flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                pathname.startsWith("/dashboard/settings")
+                  ? "text-[#c4111d] bg-red-50"
+                  : "text-[#5a6170] hover:text-[#1a1a2e] hover:bg-[#f1f3f5]"
+              }`}
+            >
+              <Settings size={16} />
+              <span>Ayarlar</span>
+            </Link>
+            <div className="hidden md:block w-px h-5 bg-[#e2e5e9] mx-1" />
             <button
               onClick={handleLogout}
-              className="hidden md:flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-[#5a6170] hover:text-[#c4111d] hover:bg-red-50 transition-all duration-200"
+              className="hidden md:flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-[#5a6170] hover:text-[#c4111d] hover:bg-red-50 transition-all duration-200"
             >
               <LogOut size={16} />
               <span>Çıkış</span>
@@ -133,7 +145,22 @@ export default function DashboardLayout({
                   </Link>
                 );
               })}
-              <div className="border-t border-[#e2e5e9] pt-2 mt-2">
+              <div className="border-t border-[#e2e5e9] pt-2 mt-2 space-y-1">
+                <Link
+                  href="/dashboard/settings"
+                  className={`flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 ${
+                    pathname.startsWith("/dashboard/settings")
+                      ? "bg-[#c4111d] text-white"
+                      : "text-[#5a6170] hover:bg-[#f1f3f5]"
+                  }`}
+                  onClick={() => setMenuOpen(false)}
+                >
+                  <div className="flex items-center gap-3">
+                    <Settings size={20} />
+                    Ayarlar
+                  </div>
+                  <ChevronRight size={16} className="opacity-40" />
+                </Link>
                 <button
                   onClick={() => {
                     setMenuOpen(false);

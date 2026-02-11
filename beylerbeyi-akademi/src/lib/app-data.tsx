@@ -10,14 +10,17 @@ import {
   updatePlayer as supabaseUpdatePlayer,
   deletePlayer as supabaseDeletePlayer,
 } from "@/lib/supabase/players";
+import { fetchAllLookups, Lookups } from "@/lib/supabase/lookups";
 
 interface AppData {
   players: Player[];
   matches: Match[];
+  lookups: Lookups;
   loading: boolean;
   setPlayers: React.Dispatch<React.SetStateAction<Player[]>>;
   setMatches: React.Dispatch<React.SetStateAction<Match[]>>;
   refreshPlayers: () => Promise<void>;
+  refreshLookups: () => Promise<void>;
   savePlayer: (player: Player, isEdit: boolean) => Promise<Player>;
   removePlayer: (playerId: string) => Promise<void>;
   getPlayerStatsFromMatches: (playerId: string) => {
@@ -37,6 +40,12 @@ const AppDataContext = createContext<AppData | null>(null);
 export function AppDataProvider({ children }: { children: React.ReactNode }) {
   const [players, setPlayers] = useState<Player[]>([]);
   const [matches, setMatches] = useState<Match[]>(MOCK_MATCHES);
+  const [lookups, setLookups] = useState<Lookups>({
+    positions: [],
+    feet: [],
+    ageGroups: [],
+    seasons: [],
+  });
   const [loading, setLoading] = useState(true);
 
   // Supabase'den oyuncuları çek
@@ -49,12 +58,26 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  // İlk yüklemede oyuncuları çek
+  // Lookup'ları yenile
+  const refreshLookups = useCallback(async () => {
+    try {
+      const data = await fetchAllLookups();
+      setLookups(data);
+    } catch (err) {
+      console.error("Lookup yüklenemedi:", err);
+    }
+  }, []);
+
+  // İlk yüklemede oyuncuları ve lookup'ları çek
   useEffect(() => {
     const init = async () => {
       try {
-        const data = await supabaseFetchPlayers();
-        setPlayers(data);
+        const [playersData, lookupsData] = await Promise.all([
+          supabaseFetchPlayers(),
+          fetchAllLookups(),
+        ]);
+        setPlayers(playersData);
+        setLookups(lookupsData);
       } catch (err) {
         console.error("İlk yükleme hatası:", err);
       } finally {
@@ -123,8 +146,8 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
   );
 
   const value = useMemo(
-    () => ({ players, matches, loading, setPlayers, setMatches, refreshPlayers, savePlayer, removePlayer, getPlayerStatsFromMatches }),
-    [players, matches, loading, refreshPlayers, savePlayer, removePlayer, getPlayerStatsFromMatches]
+    () => ({ players, matches, lookups, loading, setPlayers, setMatches, refreshPlayers, refreshLookups, savePlayer, removePlayer, getPlayerStatsFromMatches }),
+    [players, matches, lookups, loading, refreshPlayers, refreshLookups, savePlayer, removePlayer, getPlayerStatsFromMatches]
   );
 
   return (

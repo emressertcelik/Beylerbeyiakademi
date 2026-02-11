@@ -1,5 +1,5 @@
 import { createClient } from "./client";
-import { Player, SkillLog } from "@/types/player";
+import { Player, SkillLog, BodyLog } from "@/types/player";
 
 // Her çağrıda taze client oluştur (auth state güncel kalsın)
 function getClient() {
@@ -66,7 +66,7 @@ function mapDbToPlayer(db: DbPlayer): Player {
     jerseyNumber: db.jersey_number,
     height: db.height,
     weight: db.weight,
-    seasons: db.seasons || ["2025-2026"],
+    seasons: db.seasons || [],
     photo: db.photo || undefined,
     phone: db.phone || undefined,
     parentPhone: db.parent_phone || undefined,
@@ -338,6 +338,31 @@ export async function fetchSkillLogs(playerId: string): Promise<SkillLog[]> {
     playerId: row.player_id,
     category: row.category as SkillLog["category"],
     skillName: row.skill_name,
+    oldValue: row.old_value,
+    newValue: row.new_value,
+    changedAt: row.changed_at,
+  }));
+}
+
+// ===== BODY LOGS =====
+
+export async function fetchBodyLogs(playerId: string): Promise<BodyLog[]> {
+  const supabase = getClient();
+  const { data, error } = await supabase
+    .from("player_body_logs")
+    .select("id, player_id, measurement, old_value, new_value, changed_at")
+    .eq("player_id", playerId)
+    .order("changed_at", { ascending: false });
+
+  if (error) {
+    console.error("Boy/kilo logları yüklenirken hata:", error);
+    return [];
+  }
+
+  return (data || []).map((row) => ({
+    id: row.id,
+    playerId: row.player_id,
+    measurement: row.measurement as BodyLog["measurement"],
     oldValue: row.old_value,
     newValue: row.new_value,
     changedAt: row.changed_at,

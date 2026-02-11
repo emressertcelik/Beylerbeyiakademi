@@ -3,7 +3,6 @@
 import { useState, useRef, useEffect, useMemo } from "react";
 import { AgeGroup } from "@/types/player";
 import { Match, TeamStats } from "@/types/match";
-import { SEASONS } from "@/lib/seasons";
 import { useAppData } from "@/lib/app-data";
 import MatchFormModal from "@/components/MatchFormModal";
 import MatchDetailModal from "@/components/MatchDetailModal";
@@ -17,20 +16,6 @@ import {
   ChevronRight,
   Swords,
 } from "lucide-react";
-
-const AGE_FILTERS: { label: string; value: AgeGroup | "ALL" }[] = [
-  { label: "Tümü", value: "ALL" },
-  { label: "U14", value: "U14" },
-  { label: "U15", value: "U15" },
-  { label: "U16", value: "U16" },
-  { label: "U17", value: "U17" },
-  { label: "U19", value: "U19" },
-];
-
-const SEASON_FILTERS: { label: string; value: string }[] = [
-  { label: "Tüm Sezonlar", value: "ALL" },
-  ...SEASONS.map((s) => ({ label: s, value: s })),
-];
 
 const resultColors: Record<string, { bg: string; text: string; border: string }> = {
   W: { bg: "bg-emerald-50", text: "text-emerald-700", border: "border-emerald-200" },
@@ -71,7 +56,17 @@ function computeTeamStats(matches: Match[], ageGroup: AgeGroup | "ALL", season: 
 }
 
 export default function TeamsPage() {
-  const { players, matches, setMatches } = useAppData();
+  const { players, matches, lookups, setMatches } = useAppData();
+
+  const AGE_FILTERS = useMemo(() => [
+    { label: "Tümü", value: "ALL" as AgeGroup | "ALL" },
+    ...lookups.ageGroups.filter((a) => a.isActive).map((a) => ({ label: a.value, value: a.value as AgeGroup | "ALL" })),
+  ], [lookups.ageGroups]);
+
+  const SEASON_FILTERS = useMemo(() => [
+    { label: "Tüm Sezonlar", value: "ALL" },
+    ...lookups.seasons.filter((s) => s.isActive).map((s) => ({ label: s.value, value: s.value })),
+  ], [lookups.seasons]);
   const [selectedAge, setSelectedAge] = useState<AgeGroup | "ALL">("ALL");
   const [selectedSeason, setSelectedSeason] = useState<string>("ALL");
   const [seasonOpen, setSeasonOpen] = useState(false);

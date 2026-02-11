@@ -2,12 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { Player, AgeGroup, Position, Foot } from "@/types/player";
-import { SEASONS } from "@/lib/seasons";
+import { useAppData } from "@/lib/app-data";
 import { X, Plus, Trash2 } from "lucide-react";
-
-const AGE_GROUPS: AgeGroup[] = ["U14", "U15", "U16", "U17", "U19"];
-const POSITIONS: Position[] = ["Kaleci", "Defans", "Orta Saha", "Forvet"];
-const FEET: Foot[] = ["Sağ", "Sol", "Her İkisi"];
 
 interface PlayerFormModalProps {
   player?: Player | null;
@@ -20,22 +16,27 @@ const defaultTactical = { positioning: 5, passing: 5, crossing: 5, shooting: 5, 
 const defaultAthletic = { speed: 5, strength: 5, stamina: 5, agility: 5, jumping: 5, balance: 5, flexibility: 5 };
 
 export default function PlayerFormModal({ player, onClose, onSave }: PlayerFormModalProps) {
+  const { lookups } = useAppData();
+  const AGE_GROUPS = lookups.ageGroups.filter((a) => a.isActive).map((a) => a.value);
+  const POSITIONS = lookups.positions.filter((p) => p.isActive).map((p) => p.value);
+  const FEET = lookups.feet.filter((f) => f.isActive).map((f) => f.value);
+  const SEASONS = lookups.seasons.filter((s) => s.isActive).map((s) => s.value);
   const isEdit = !!player;
 
   const [form, setForm] = useState({
     firstName: "",
     lastName: "",
     birthDate: "",
-    ageGroup: "U15" as AgeGroup,
-    position: "Orta Saha" as Position,
-    foot: "Sağ" as Foot,
+    ageGroup: (AGE_GROUPS[0] ?? "U15") as AgeGroup,
+    position: (POSITIONS[0] ?? "Kaleci") as Position,
+    foot: (FEET[0] ?? "Sağ") as Foot,
     jerseyNumber: 1,
     height: 165,
     weight: 55,
     phone: "",
     parentPhone: "",
     notes: "",
-    seasons: ["2025-2026"] as string[],
+    seasons: SEASONS.length > 0 ? [SEASONS[0]] : [] as string[],
     previousTeams: [] as { team: string; years: string }[],
     stats: { ...defaultStats },
     tactical: { ...defaultTactical },
