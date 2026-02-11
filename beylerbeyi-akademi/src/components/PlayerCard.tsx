@@ -2,9 +2,11 @@
 
 import { Player } from "@/types/player";
 
+import Link from "next/link";
+
 interface PlayerCardProps {
   player: Player;
-  onClick: (player: Player) => void;
+  onClick?: (player: Player) => void;
 }
 
 const positionStyle: Record<string, { bg: string; text: string; dot: string }> = {
@@ -14,13 +16,13 @@ const positionStyle: Record<string, { bg: string; text: string; dot: string }> =
   Forvet: { bg: "bg-red-50", text: "text-red-700", dot: "bg-red-400" },
 };
 
-export default function PlayerCard({ player, onClick }: PlayerCardProps) {
+export default function PlayerCard({ player, onClick, showReportLink }: PlayerCardProps) {
   const isGoalkeeper = player.position === "Kaleci";
   const style = positionStyle[player.position] || { bg: "bg-slate-50", text: "text-slate-600", dot: "bg-slate-400" };
 
   return (
     <button
-      onClick={() => onClick(player)}
+      onClick={onClick ? () => onClick(player) : undefined}
       className="bg-white border border-[#e2e5e9] rounded-xl p-5 text-left hover:border-[#c4111d]/30 hover:shadow-lg hover:shadow-[#c4111d]/5 transition-all duration-200 w-full group"
     >
       {/* Header */}

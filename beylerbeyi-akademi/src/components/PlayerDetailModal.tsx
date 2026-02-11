@@ -1,9 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Player, SkillLog, BodyLog } from "@/types/player";
+import { Match } from "@/types/match";
 import { fetchSkillLogs, fetchBodyLogs } from "@/lib/supabase/players";
-import { X, Edit3, Trash2, TrendingUp, TrendingDown, ArrowUp, ArrowDown, Ruler, Weight } from "lucide-react";
+import { fetchMatchesByPlayer } from "@/lib/supabase/matches";
+import { X, Edit3, Trash2, TrendingUp, TrendingDown, ArrowUp, ArrowDown, Ruler, Weight, ChevronDown, UserCheck, ArrowRightLeft, Cross, ShieldBan, UserX, Clock } from "lucide-react";
 
 interface PlayerDetailModalProps {
   player: Player;
@@ -55,18 +57,25 @@ export default function PlayerDetailModal({ player, onClose, onEdit, onDelete }:
   const [skillLogs, setSkillLogs] = useState<SkillLog[]>([]);
   const [bodyLogs, setBodyLogs] = useState<BodyLog[]>([]);
   const [logsLoading, setLogsLoading] = useState(true);
+  const [tacticalOpen, setTacticalOpen] = useState(false);
+  const [athleticOpen, setAthleticOpen] = useState(false);
+  const [physicalOpen, setPhysicalOpen] = useState(false);
+  const [historyOpen, setHistoryOpen] = useState(false);
+  const [playerMatches, setPlayerMatches] = useState<Match[]>([]);
 
   useEffect(() => {
     let cancelled = false;
     async function loadLogs() {
       try {
-        const [skills, body] = await Promise.all([
+        const [skills, body, matches] = await Promise.all([
           fetchSkillLogs(player.id),
           fetchBodyLogs(player.id),
+          fetchMatchesByPlayer(player.id),
         ]);
         if (!cancelled) {
           setSkillLogs(skills);
           setBodyLogs(body);
+          setPlayerMatches(matches);
         }
       } catch {
         // hata halinde boş bırak
@@ -77,6 +86,33 @@ export default function PlayerDetailModal({ player, onClose, onEdit, onDelete }:
     loadLogs();
     return () => { cancelled = true; };
   }, [player.id]);
+
+  // Katılım istatistiklerini hesapla
+  const participationStats = useMemo(() => {
+    const stats = { ilk11: 0, yedek: 0, sureAlmadi: 0, kadroYok: 0, sakat: 0, cezali: 0 };
+    playerMatches.forEach(match => {
+      if (match.status !== "played") return;
+      const ps = match.playerStats.find(p => p.playerId === player.id);
+      if (!ps) return;
+      const s = (ps.participationStatus || "").toLowerCase();
+      if (s === "İlk 11".toLowerCase() || s === "ilk 11") stats.ilk11++;
+      else if (s === "sonradan girdi") stats.yedek++;
+      else if (s.includes("süre")) stats.sureAlmadi++;
+      else if (s === "kadroda yok") stats.kadroYok++;
+      else if (s === "sakat") stats.sakat++;
+      else if (s.includes("ceza")) stats.cezali++;
+    });
+    return stats;
+  }, [playerMatches, player.id]);
+
+  const playerAllMatches = useMemo(() => {
+    return playerMatches
+      .filter(m => m.status === "played")
+      .map(match => ({
+        match,
+        playerStat: match.playerStats.find(ps => ps.playerId === player.id),
+      }));
+  }, [playerMatches, player.id]);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-fade-in">
@@ -102,9 +138,18 @@ export default function PlayerDetailModal({ player, onClose, onEdit, onDelete }:
               </div>
             </div>
             <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+              <a
+                href={`/dashboard/reports/${player.id}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1.5 px-3 sm:px-4 py-2 bg-[#c4111d] hover:bg-[#9b0d16] text-white text-xs sm:text-sm font-medium rounded-lg transition-all duration-200 shadow-sm"
+                title="Özel Raporu Gör"
+              >
+                <span>Rapor</span>
+              </a>
               <button
                 onClick={() => onEdit(player)}
-                className="flex items-center gap-1.5 px-3 sm:px-4 py-2 bg-[#c4111d] hover:bg-[#9b0d16] text-white text-xs sm:text-sm font-medium rounded-lg transition-all duration-200 shadow-sm"
+                className="flex items-center gap-1.5 px-3 sm:px-4 py-2 bg-[#f1f3f5] hover:bg-[#e2e5e9] text-[#c4111d] text-xs sm:text-sm font-medium rounded-lg transition-all duration-200 border border-[#e2e5e9]"
               >
                 <Edit3 size={14} />
                 <span className="hidden sm:inline">Düzenle</span>
@@ -168,7 +213,7 @@ export default function PlayerDetailModal({ player, onClose, onEdit, onDelete }:
           </Section>
 
           {/* Fiziksel Gelişim */}
-          <Section title="Fiziksel Gelişim">
+          <CollapsibleSection title="Fiziksel Gelişim" isOpen={physicalOpen} onToggle={() => setPhysicalOpen(!physicalOpen)}>
             {logsLoading ? (
               <div className="flex items-center justify-center py-6">
                 <div className="w-6 h-6 border-2 border-[#e2e5e9] border-t-[#c4111d] rounded-full animate-spin" />
@@ -231,7 +276,7 @@ export default function PlayerDetailModal({ player, onClose, onEdit, onDelete }:
                 })}
               </div>
             )}
-          </Section>
+          </CollapsibleSection>
 
           {/* İstatistikler */}
           <Section title="Maç İstatistikleri">
@@ -266,10 +311,123 @@ export default function PlayerDetailModal({ player, onClose, onEdit, onDelete }:
                 </div>
               </div>
             </div>
+            {/* Katılım Durumu */}
+            <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 mt-3">
+              <StatBox label="İlk 11" value={participationStats.ilk11} color="text-emerald-500" />
+              <StatBox label="Yedek" value={participationStats.yedek} color="text-blue-500" />
+              <StatBox label="Süre Almadı" value={participationStats.sureAlmadi} color="text-amber-500" />
+              <StatBox label="Kadroda Yok" value={participationStats.kadroYok} />
+              <StatBox label="Sakat" value={participationStats.sakat} color="text-orange-500" />
+              <StatBox label="Cezalı" value={participationStats.cezali} color="text-red-500" />
+            </div>
+            {/* Oyuncunun Maçları */}
+            <div className="mt-4">
+              <p className="text-[11px] text-[#8c919a] font-medium uppercase tracking-wider mb-2">Oynadığı Maçlar</p>
+              {logsLoading ? (
+                <div className="flex items-center justify-center py-4">
+                  <div className="w-5 h-5 border-2 border-[#e2e5e9] border-t-[#c4111d] rounded-full animate-spin" />
+                </div>
+              ) : playerAllMatches.length === 0 ? (
+                <p className="text-xs text-[#8c919a] text-center py-3">Henüz oynanan maç bulunmuyor.</p>
+              ) : (
+                <div className="space-y-2.5 max-h-[400px] overflow-y-auto pr-1">
+                  {playerAllMatches.map(({ match, playerStat }) => {
+                    const isWin = match.result === "W";
+                    const isLoss = match.result === "L";
+                    const resultBorder = isWin ? "border-l-emerald-500" : isLoss ? "border-l-red-400" : "border-l-amber-400";
+                    const resultBg = isWin ? "bg-emerald-500" : isLoss ? "bg-red-400" : "bg-amber-400";
+                    const resultText = isWin ? "G" : isLoss ? "M" : "B";
+                    const isOwnAgeGroup = match.ageGroup === player.ageGroup;
+                    const ageGroupColor = isOwnAgeGroup ? "bg-[#c4111d]/10 text-[#c4111d]" : "bg-purple-100 text-purple-700";
+                    const played = playerStat?.participationStatus === "İlk 11" || playerStat?.participationStatus === "Sonradan Girdi";
+                    const statusLookup: Record<string, { icon: typeof UserCheck; bg: string; text: string }> = {
+                      "İlk 11":         { icon: UserCheck, bg: "bg-emerald-50", text: "text-emerald-600" },
+                      "ilk 11":         { icon: UserCheck, bg: "bg-emerald-50", text: "text-emerald-600" },
+                      "Sonradan Girdi": { icon: ArrowRightLeft, bg: "bg-blue-50", text: "text-blue-600" },
+                      "sonradan girdi": { icon: ArrowRightLeft, bg: "bg-blue-50", text: "text-blue-600" },
+                      "Süre almadı":    { icon: Clock, bg: "bg-amber-50", text: "text-amber-600" },
+                      "Süre Almadı":    { icon: Clock, bg: "bg-amber-50", text: "text-amber-600" },
+                      "süre almadı":    { icon: Clock, bg: "bg-amber-50", text: "text-amber-600" },
+                      "Sakat":          { icon: Cross, bg: "bg-orange-50", text: "text-orange-600" },
+                      "sakat":          { icon: Cross, bg: "bg-orange-50", text: "text-orange-600" },
+                      "Cezalı":         { icon: ShieldBan, bg: "bg-red-50", text: "text-red-500" },
+                      "cezalı":         { icon: ShieldBan, bg: "bg-red-50", text: "text-red-500" },
+                      "Kadroda Yok":    { icon: UserX, bg: "bg-gray-100", text: "text-gray-400" },
+                      "kadroda yok":    { icon: UserX, bg: "bg-gray-100", text: "text-gray-400" },
+                    };
+                    const status = statusLookup[playerStat?.participationStatus || ""];
+                    const StatusIcon = status?.icon;
+                    return (
+                      <div
+                        key={match.id}
+                        className={`rounded-xl border border-[#e2e5e9] border-l-[3px] ${resultBorder} overflow-hidden bg-white shadow-sm hover:shadow-md transition-shadow`}
+                      >
+                        {/* Üst satır: tarih, yaş grubu, skor, durum */}
+                        <div className="flex items-center gap-2 px-3 py-2.5">
+                          {/* Sonuç rozeti */}
+                          <span className={`w-6 h-6 rounded-md flex items-center justify-center text-[10px] font-black text-white shrink-0 ${resultBg}`}>
+                            {resultText}
+                          </span>
+                          {/* Yaş grubu */}
+                          <span className={`text-[9px] font-bold px-2 py-0.5 rounded-md shrink-0 ${ageGroupColor}`}>
+                            {match.ageGroup}
+                          </span>
+                          {/* Skor ve rakip */}
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-1.5">
+                              <span className="text-[12px] font-bold text-[#1a1a2e]">
+                                {match.homeAway === "home"
+                                  ? `${match.scoreHome} - ${match.scoreAway}`
+                                  : `${match.scoreAway} - ${match.scoreHome}`}
+                              </span>
+                              <span className="text-[11px] text-[#5a6170] truncate">
+                                vs {match.opponent}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-1.5 mt-0.5">
+                              <span className="text-[9px] text-[#8c919a]">
+                                {new Date(match.date).toLocaleDateString("tr-TR", { day: "numeric", month: "short", year: "numeric" })}
+                              </span>
+                              <span className="text-[8px] text-[#8c919a]">·</span>
+                              <span className="text-[9px] text-[#8c919a]">
+                                {match.homeAway === "home" ? "İç Saha" : "Deplasman"}
+                              </span>
+                            </div>
+                          </div>
+                          {/* Katılım durumu */}
+                          {status && StatusIcon ? (
+                            <div className={`flex items-center gap-1 px-2 py-1 rounded-lg shrink-0 ${status.bg}`}>
+                              <StatusIcon size={12} className={status.text} />
+                              <span className={`text-[9px] font-semibold ${status.text}`}>{playerStat?.participationStatus}</span>
+                            </div>
+                          ) : (
+                            <div className="flex items-center gap-1 px-2 py-1 rounded-lg shrink-0 bg-gray-50">
+                              <span className="text-[9px] text-gray-300">—</span>
+                            </div>
+                          )}
+                        </div>
+                        {/* Alt satır: istatistikler (sadece oynayan oyuncular) */}
+                        {played && playerStat && (
+                          <div className="flex items-center gap-0 border-t border-[#f0f1f3] bg-[#fafbfc]">
+                            <MatchMiniStat label="DK" value={String(playerStat.minutesPlayed)} />
+                            <MatchMiniStat label="GOL" value={String(playerStat.goals)} highlight={playerStat.goals > 0} color="emerald" />
+                            <MatchMiniStat label="AST" value={String(playerStat.assists)} highlight={playerStat.assists > 0} color="blue" />
+                            <MatchMiniStat label="SK" value={String(playerStat.yellowCards)} highlight={playerStat.yellowCards > 0} color="yellow" />
+                            <MatchMiniStat label="KK" value={String(playerStat.redCards)} highlight={playerStat.redCards > 0} color="red" />
+                            <MatchMiniStat label="YG" value={String(playerStat.goalsConceded)} highlight={playerStat.goalsConceded > 0} color="orange" />
+                            <MatchMiniStat label="CS" value={playerStat.cleanSheet ? "✓" : "—"} highlight={playerStat.cleanSheet} color="emerald" />
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
           </Section>
 
           {/* Taktik Değerler */}
-          <Section title="Taktik Değerler">
+          <CollapsibleSection title="Taktik Değerler" isOpen={tacticalOpen} onToggle={() => setTacticalOpen(!tacticalOpen)}>
             <div className="bg-[#f8f9fb] rounded-xl p-5 space-y-3 border border-[#e2e5e9]">
               <SkillBar label="Pozisyon Alma" value={player.tactical.positioning} />
               <SkillBar label="Pas" value={player.tactical.passing} />
@@ -281,10 +439,10 @@ export default function PlayerDetailModal({ player, onClose, onEdit, onDelete }:
               <SkillBar label="Markaj" value={player.tactical.marking} />
               <SkillBar label="Oyun Okuma" value={player.tactical.gameReading} />
             </div>
-          </Section>
+          </CollapsibleSection>
 
           {/* Atletik Değerler */}
-          <Section title="Atletik Değerler">
+          <CollapsibleSection title="Atletik Değerler" isOpen={athleticOpen} onToggle={() => setAthleticOpen(!athleticOpen)}>
             <div className="bg-[#f8f9fb] rounded-xl p-5 space-y-3 border border-[#e2e5e9]">
               <SkillBar label="Hız" value={player.athletic.speed} />
               <SkillBar label="Güç" value={player.athletic.strength} />
@@ -294,10 +452,10 @@ export default function PlayerDetailModal({ player, onClose, onEdit, onDelete }:
               <SkillBar label="Denge" value={player.athletic.balance} />
               <SkillBar label="Esneklik" value={player.athletic.flexibility} />
             </div>
-          </Section>
+          </CollapsibleSection>
 
           {/* Gelişim Logu */}
-          <Section title="Gelişim Geçmişi">
+          <CollapsibleSection title="Gelişim Geçmişi" isOpen={historyOpen} onToggle={() => setHistoryOpen(!historyOpen)}>
             {logsLoading ? (
               <div className="flex items-center justify-center py-8">
                 <div className="w-6 h-6 border-2 border-[#e2e5e9] border-t-[#c4111d] rounded-full animate-spin" />
@@ -360,7 +518,7 @@ export default function PlayerDetailModal({ player, onClose, onEdit, onDelete }:
                 })}
               </div>
             )}
-          </Section>
+          </CollapsibleSection>
         </div>
       </div>
     </div>
@@ -372,6 +530,36 @@ function Section({ title, children }: { title: string; children: React.ReactNode
     <section>
       <h3 className="text-xs font-semibold text-[#8c919a] uppercase tracking-wider mb-3">{title}</h3>
       {children}
+    </section>
+  );
+}
+
+function CollapsibleSection({ title, isOpen, onToggle, children }: {
+  title: string;
+  isOpen: boolean;
+  onToggle: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <section>
+      <button
+        onClick={onToggle}
+        className="flex items-center justify-between w-full py-1 group"
+        type="button"
+      >
+        <h3 className="text-xs font-semibold text-[#8c919a] uppercase tracking-wider group-hover:text-[#1a1a2e] transition-colors">{title}</h3>
+        <ChevronDown
+          size={16}
+          className={`text-[#8c919a] group-hover:text-[#1a1a2e] transition-all duration-200 ${isOpen ? "rotate-180" : ""}`}
+        />
+      </button>
+      <div
+        className={`overflow-hidden transition-all duration-300 ease-in-out ${
+          isOpen ? "max-h-[600px] opacity-100 mt-3" : "max-h-0 opacity-0"
+        }`}
+      >
+        {children}
+      </div>
     </section>
   );
 }
@@ -390,6 +578,38 @@ function StatBox({ label, value, color }: { label: string; value: number; color?
     <div className="bg-[#f8f9fb] rounded-lg p-3 text-center border border-[#e2e5e9]">
       <p className={`text-lg font-bold ${color || "text-[#1a1a2e]"}`}>{value}</p>
       <p className="text-[10px] text-[#8c919a] font-medium">{label}</p>
+    </div>
+  );
+}
+
+function MiniStat({ label, value, color }: { label: string; value: number; color?: string }) {
+  return (
+    <span className="flex items-center gap-1">
+      <span className="text-[9px] text-[#8c919a]">{label}</span>
+      <span className={`text-[10px] font-bold ${color || "text-[#1a1a2e]"}`}>{value}</span>
+    </span>
+  );
+}
+
+function MatchMiniStat({ label, value, highlight, color }: {
+  label: string;
+  value: string;
+  highlight?: boolean;
+  color?: "emerald" | "blue" | "yellow" | "red" | "orange";
+}) {
+  const colorMap = {
+    emerald: "text-emerald-600",
+    blue: "text-blue-600",
+    yellow: "text-yellow-600",
+    red: "text-red-600",
+    orange: "text-orange-500",
+  };
+  return (
+    <div className="flex-1 flex flex-col items-center py-1.5 border-r border-[#f0f1f3] last:border-r-0">
+      <span className={`text-[11px] font-bold leading-none ${highlight && color ? colorMap[color] : "text-[#1a1a2e]"}`}>
+        {value}
+      </span>
+      <span className="text-[8px] text-[#8c919a] mt-0.5 uppercase tracking-wider">{label}</span>
     </div>
   );
 }

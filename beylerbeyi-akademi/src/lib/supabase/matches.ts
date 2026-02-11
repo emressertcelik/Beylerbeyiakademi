@@ -256,3 +256,49 @@ export async function deleteMatch(matchId: string): Promise<void> {
 
   if (error) throw error;
 }
+
+// ===== FETCH BY AGE GROUP =====
+
+export async function fetchMatchesByAgeGroup(ageGroup: string): Promise<Match[]> {
+  const supabase = getClient();
+  const { data, error } = await supabase
+    .from("matches")
+    .select(`
+      *,
+      match_player_stats ( * )
+    `)
+    .eq("age_group", ageGroup)
+    .order("date", { ascending: false });
+
+  if (error) throw error;
+  return (data as unknown as DbMatch[]).map(mapDbToMatch);
+}
+
+// ===== FETCH BY PLAYER (tüm yaş grupları) =====
+
+export async function fetchMatchesByPlayer(playerId: string): Promise<Match[]> {
+  const supabase = getClient();
+
+  // Önce oyuncunun yer aldığı maç id'lerini bul
+  const { data: statRows, error: statErr } = await supabase
+    .from("match_player_stats")
+    .select("match_id")
+    .eq("player_id", playerId);
+
+  if (statErr) throw statErr;
+  if (!statRows || statRows.length === 0) return [];
+
+  const matchIds = [...new Set(statRows.map((r) => r.match_id))];
+
+  const { data, error } = await supabase
+    .from("matches")
+    .select(`
+      *,
+      match_player_stats ( * )
+    `)
+    .in("id", matchIds)
+    .order("date", { ascending: false });
+
+  if (error) throw error;
+  return (data as unknown as DbMatch[]).map(mapDbToMatch);
+}

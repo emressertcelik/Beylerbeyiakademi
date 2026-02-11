@@ -57,6 +57,7 @@ export default function MatchFormModal({ match, players, saving, onClose, onSave
   const [squad, setSquad] = useState<SquadPlayer[]>([]);
   const [playerStats, setPlayerStats] = useState<MatchPlayerStat[]>([]);
   const [activeTab, setActiveTab] = useState<"match" | "squad" | "players">("match");
+  const [showOtherAgeGroups, setShowOtherAgeGroups] = useState(false);
 
   useEffect(() => {
     if (match) {
@@ -81,9 +82,13 @@ export default function MatchFormModal({ match, players, saving, onClose, onSave
   }, [match]);
 
   // Filter players by selected age group and season
-  const availablePlayers = players.filter(
+  const ageGroupPlayers = players.filter(
     (p) => p.ageGroup === form.ageGroup && p.seasons.includes(form.season)
   );
+  const otherAgeGroupPlayers = players.filter(
+    (p) => p.ageGroup !== form.ageGroup && p.seasons.includes(form.season)
+  );
+  const availablePlayers = [...ageGroupPlayers, ...otherAgeGroupPlayers];
 
   const addedPlayerIds = playerStats.map((ps) => ps.playerId);
   const unaddedPlayers = availablePlayers.filter((p) => !addedPlayerIds.includes(p.id));
@@ -108,7 +113,7 @@ export default function MatchFormModal({ match, players, saving, onClose, onSave
   };
 
   const selectAllForSquad = () => {
-    const allSquad: SquadPlayer[] = availablePlayers.map((p) => ({
+    const allSquad: SquadPlayer[] = ageGroupPlayers.map((p) => ({
       playerId: p.id,
       playerName: `${p.firstName} ${p.lastName}`,
       jerseyNumber: p.jerseyNumber,
@@ -469,15 +474,15 @@ export default function MatchFormModal({ match, players, saving, onClose, onSave
                 </div>
               </div>
 
-              {availablePlayers.length === 0 && (
+              {ageGroupPlayers.length === 0 && (
                 <div className="text-center py-8 text-sm text-[#8c919a]">
                   Bu yaş grubu ve sezonda kayıtlı oyuncu bulunamadı.
                 </div>
               )}
 
-              {/* Player Grid for Selection */}
+              {/* Player Grid for Selection - Same Age Group */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                {availablePlayers
+                {ageGroupPlayers
                   .sort((a, b) => a.jerseyNumber - b.jerseyNumber)
                   .map((p) => {
                     const selected = isInSquad(p.id);
@@ -511,6 +516,62 @@ export default function MatchFormModal({ match, players, saving, onClose, onSave
                   })}
               </div>
 
+              {/* Other Age Groups */}
+              {otherAgeGroupPlayers.length > 0 && (
+                <div>
+                  <button
+                    type="button"
+                    onClick={() => setShowOtherAgeGroups(!showOtherAgeGroups)}
+                    className="flex items-center gap-2 w-full py-2 text-xs font-semibold text-[#5a6170] hover:text-[#1a1a2e] transition-colors"
+                  >
+                    <UserPlus size={14} />
+                    <span>Diğer Yaş Gruplarından Oyuncu Ekle ({otherAgeGroupPlayers.length})</span>
+                    <span className={`ml-auto transition-transform duration-200 ${showOtherAgeGroups ? "rotate-180" : ""}`}>▾</span>
+                  </button>
+                  {showOtherAgeGroups && (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2">
+                      {otherAgeGroupPlayers
+                        .sort((a, b) => a.ageGroup.localeCompare(b.ageGroup) || a.jerseyNumber - b.jerseyNumber)
+                        .map((p) => {
+                          const selected = isInSquad(p.id);
+                          return (
+                            <button
+                              key={p.id}
+                              type="button"
+                              onClick={() => toggleSquadPlayer(p)}
+                              className={`flex items-center gap-3 p-3 rounded-xl border transition-all text-left ${
+                                selected
+                                  ? "bg-purple-50 border-purple-300 ring-1 ring-purple-200"
+                                  : "bg-white border-[#e2e5e9] hover:border-purple-300"
+                              }`}
+                            >
+                              <span className={`w-9 h-9 rounded-lg flex items-center justify-center text-xs font-black shrink-0 ${
+                                selected ? "bg-purple-600 text-white" : "bg-[#f1f3f5] text-[#5a6170]"
+                              }`}>
+                                {p.jerseyNumber}
+                              </span>
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-1.5">
+                                  <p className={`text-sm font-semibold truncate ${selected ? "text-[#1a1a2e]" : "text-[#5a6170]"}`}>
+                                    {p.firstName} {p.lastName}
+                                  </p>
+                                  <span className="text-[8px] font-bold px-1.5 py-0.5 rounded bg-purple-100 text-purple-700 shrink-0">
+                                    {p.ageGroup}
+                                  </span>
+                                </div>
+                                <p className="text-[10px] text-[#8c919a]">{p.position}</p>
+                              </div>
+                              {selected && (
+                                <Check size={16} className="text-purple-600 shrink-0" />
+                              )}
+                            </button>
+                          );
+                        })}
+                    </div>
+                  )}
+                </div>
+              )}
+
               {/* Selected Squad Summary */}
               {squad.length > 0 && (
                 <div className="bg-[#f8f9fb] border border-[#e2e5e9] rounded-xl p-4">
@@ -520,15 +581,25 @@ export default function MatchFormModal({ match, players, saving, onClose, onSave
                   <div className="flex flex-wrap gap-1.5">
                     {squad
                       .sort((a, b) => a.jerseyNumber - b.jerseyNumber)
-                      .map((s) => (
-                        <span
-                          key={s.playerId}
-                          className="inline-flex items-center gap-1 px-2.5 py-1 bg-white border border-[#e2e5e9] rounded-lg text-xs"
-                        >
-                          <span className="font-black text-[#c4111d]">#{s.jerseyNumber}</span>
-                          <span className="font-medium text-[#1a1a2e]">{s.playerName}</span>
-                        </span>
-                      ))}
+                      .map((s) => {
+                        const isOtherGroup = players.find(p => p.id === s.playerId)?.ageGroup !== form.ageGroup;
+                        return (
+                          <span
+                            key={s.playerId}
+                            className={`inline-flex items-center gap-1 px-2.5 py-1 bg-white border rounded-lg text-xs ${
+                              isOtherGroup ? "border-purple-200" : "border-[#e2e5e9]"
+                            }`}
+                          >
+                            <span className={`font-black ${isOtherGroup ? "text-purple-600" : "text-[#c4111d]"}`}>#{s.jerseyNumber}</span>
+                            <span className="font-medium text-[#1a1a2e]">{s.playerName}</span>
+                            {isOtherGroup && (
+                              <span className="text-[7px] font-bold px-1 py-0.5 rounded bg-purple-100 text-purple-700">
+                                {players.find(p => p.id === s.playerId)?.ageGroup}
+                              </span>
+                            )}
+                          </span>
+                        );
+                      })}
                   </div>
                 </div>
               )}
@@ -569,15 +640,23 @@ export default function MatchFormModal({ match, players, saving, onClose, onSave
               )}
 
               <div className="space-y-3">
-                {playerStats.map((ps) => (
-                  <div key={ps.playerId} className="bg-white border border-[#e2e5e9] rounded-xl p-4">
+                {playerStats.map((ps) => {
+                  const psPlayer = players.find(p => p.id === ps.playerId);
+                  const isOtherGroup = psPlayer && psPlayer.ageGroup !== form.ageGroup;
+                  return (
+                  <div key={ps.playerId} className={`bg-white border rounded-xl p-4 ${isOtherGroup ? "border-purple-200" : "border-[#e2e5e9]"}`}>
                     {/* Player Header */}
                     <div className="flex items-center gap-2 mb-3">
-                      <span className="w-8 h-8 rounded-lg bg-[#c4111d]/10 flex items-center justify-center text-xs font-black text-[#c4111d]">
+                      <span className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-black ${isOtherGroup ? "bg-purple-100 text-purple-700" : "bg-[#c4111d]/10 text-[#c4111d]"}`}>
                           {ps.jerseyNumber}
                         </span>
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-semibold text-[#1a1a2e]">{ps.playerName}</p>
+                          <div className="flex items-center gap-1.5">
+                            <p className="text-sm font-semibold text-[#1a1a2e]">{ps.playerName}</p>
+                            {isOtherGroup && (
+                              <span className="text-[8px] font-bold px-1.5 py-0.5 rounded bg-purple-100 text-purple-700">{psPlayer.ageGroup}</span>
+                            )}
+                          </div>
                           <p className="text-[10px] text-[#8c919a]">{ps.position}</p>
                         </div>
                         <button
@@ -671,7 +750,8 @@ export default function MatchFormModal({ match, players, saving, onClose, onSave
                       )}
                     </div>
                   </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           )}
