@@ -213,15 +213,15 @@ export default function DashboardPage() {
           </div>
 
           {/* Mini stats */}
-          <div className="flex items-center gap-4">
-            <MiniStat label="Atılan Gol" value={loading ? "—" : String(weeklyStats.goalsScored)} color="text-emerald-600" />
-            <div className="w-px h-6 bg-[#e2e5e9]" />
-            <MiniStat label="Yenilen Gol" value={loading ? "—" : String(weeklyStats.goalsConceded)} color="text-red-500" />
-            <div className="w-px h-6 bg-[#e2e5e9]" />
-            <MiniStat label="Galibiyet" value={loading ? "—" : String(weeklyStats.wins)} color="text-emerald-600" />
-            <div className="w-px h-6 bg-[#e2e5e9]" />
-            <MiniStat label="Beraberlik" value={loading ? "—" : String(weeklyStats.draws)} color="text-amber-600" />
-            <div className="w-px h-6 bg-[#e2e5e9]" />
+          <div className="grid grid-cols-5 gap-2 sm:flex sm:items-center sm:gap-4">
+            <MiniStat label="At\u0131lan Gol" value={loading ? "\u2014" : String(weeklyStats.goalsScored)} color="text-emerald-600" />
+            <div className="hidden sm:block w-px h-6 bg-[#e2e5e9]" />
+            <MiniStat label="Yenilen Gol" value={loading ? "\u2014" : String(weeklyStats.goalsConceded)} color="text-red-500" />
+            <div className="hidden sm:block w-px h-6 bg-[#e2e5e9]" />
+            <MiniStat label="Galibiyet" value={loading ? "\u2014" : String(weeklyStats.wins)} color="text-emerald-600" />
+            <div className="hidden sm:block w-px h-6 bg-[#e2e5e9]" />
+            <MiniStat label="Beraberlik" value={loading ? "\u2014" : String(weeklyStats.draws)} color="text-amber-600" />
+            <div className="hidden sm:block w-px h-6 bg-[#e2e5e9]" />
             <MiniStat label="Mağlubiyet" value={loading ? "—" : String(weeklyStats.losses)} color="text-red-600" />
           </div>
         </div>
@@ -495,8 +495,8 @@ export default function DashboardPage() {
 function MiniStat({ label, value, color }: { label: string; value: string; color?: string }) {
   return (
     <div className="text-center">
-      <p className={`text-lg font-bold ${color || "text-[#1a1a2e]"}`}>{value}</p>
-      <p className="text-[10px] text-[#8c919a] font-medium">{label}</p>
+      <p className={`text-base sm:text-lg font-bold ${color || "text-[#1a1a2e]"}`}>{value}</p>
+      <p className="text-[9px] sm:text-[10px] text-[#8c919a] font-medium whitespace-nowrap">{label}</p>
     </div>
   );
 }

@@ -38,7 +38,7 @@ function SkillBar({ label, value, max = 10 }: { label: string; value: number; ma
   const percent = Math.max(0, Math.min(100, (value / max) * 100));
   return (
     <div className="flex items-center gap-3">
-      <span className="text-xs text-[#5a6170] w-24 shrink-0">{label}</span>
+      <span className="text-xs text-[#5a6170] w-20 sm:w-24 shrink-0">{label}</span>
       <div className="flex-1 bg-[#e2e5e9] rounded-full h-1.5 overflow-hidden">
         <div
           className={`h-full rounded-full ${color} transition-all duration-500`}
@@ -86,47 +86,49 @@ export default function PlayerDetailModal({ player, onClose, onEdit, onDelete }:
       {/* Modal */}
       <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto border border-[#e2e5e9] animate-slide-in-up">
         {/* Header */}
-        <div className="sticky top-0 bg-white/95 backdrop-blur-md border-b border-[#e2e5e9] px-6 py-5 flex items-center justify-between z-10 rounded-t-2xl">
-          <div className="flex items-center gap-4">
-            <div className="w-14 h-14 rounded-xl bg-[#c4111d]/10 flex items-center justify-center text-xl font-black text-[#c4111d]">
-              {player.jerseyNumber}
+        <div className="sticky top-0 bg-white/95 backdrop-blur-md border-b border-[#e2e5e9] px-4 sm:px-6 py-4 sm:py-5 z-10 rounded-t-2xl">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
+              <div className="w-11 h-11 sm:w-14 sm:h-14 rounded-xl bg-[#c4111d]/10 flex items-center justify-center text-lg sm:text-xl font-black text-[#c4111d] shrink-0">
+                {player.jerseyNumber}
+              </div>
+              <div className="min-w-0">
+                <h2 className="text-base sm:text-lg font-bold text-[#1a1a2e] truncate">
+                  {player.firstName} {player.lastName}
+                </h2>
+                <p className="text-xs sm:text-sm text-[#5a6170] truncate">
+                  {player.position} · {player.ageGroup} · {player.foot} Ayak
+                </p>
+              </div>
             </div>
-            <div>
-              <h2 className="text-lg font-bold text-[#1a1a2e]">
-                {player.firstName} {player.lastName}
-              </h2>
-              <p className="text-sm text-[#5a6170]">
-                {player.position} · {player.ageGroup} · {player.foot} Ayak · {player.seasons.join(", ")}
-              </p>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => onEdit(player)}
-              className="flex items-center gap-2 px-4 py-2 bg-[#c4111d] hover:bg-[#9b0d16] text-white text-sm font-medium rounded-lg transition-all duration-200 shadow-sm"
-            >
-              <Edit3 size={14} />
-              Düzenle
-            </button>
-            {onDelete && (
+            <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
               <button
-                onClick={() => { if (confirm(`${player.firstName} ${player.lastName} silinecek. Emin misiniz?`)) onDelete(player.id); }}
-                className="flex items-center gap-2 px-4 py-2 bg-white hover:bg-red-50 text-[#c4111d] text-sm font-medium rounded-lg transition-all duration-200 border border-[#e2e5e9] hover:border-[#c4111d]/30"
+                onClick={() => onEdit(player)}
+                className="flex items-center gap-1.5 px-3 sm:px-4 py-2 bg-[#c4111d] hover:bg-[#9b0d16] text-white text-xs sm:text-sm font-medium rounded-lg transition-all duration-200 shadow-sm"
               >
-                <Trash2 size={14} />
-                Sil
+                <Edit3 size={14} />
+                <span className="hidden sm:inline">Düzenle</span>
               </button>
-            )}
-            <button
-              onClick={onClose}
-              className="p-2 hover:bg-[#f1f3f5] rounded-lg transition-colors text-[#5a6170]"
-            >
-              <X size={20} />
-            </button>
+              {onDelete && (
+                <button
+                  onClick={() => { if (confirm(`${player.firstName} ${player.lastName} silinecek. Emin misiniz?`)) onDelete(player.id); }}
+                  className="flex items-center gap-1.5 px-3 sm:px-4 py-2 bg-white hover:bg-red-50 text-[#c4111d] text-xs sm:text-sm font-medium rounded-lg transition-all duration-200 border border-[#e2e5e9] hover:border-[#c4111d]/30"
+                >
+                  <Trash2 size={14} />
+                  <span className="hidden sm:inline">Sil</span>
+                </button>
+              )}
+              <button
+                onClick={onClose}
+                className="p-2 hover:bg-[#f1f3f5] rounded-lg transition-colors text-[#5a6170]"
+              >
+                <X size={20} />
+              </button>
+            </div>
           </div>
         </div>
 
-        <div className="p-6 space-y-6">
+        <div className="p-4 sm:p-6 space-y-5 sm:space-y-6">
           {/* Genel Bilgiler */}
           <Section title="Genel Bilgiler">
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -186,31 +188,33 @@ export default function PlayerDetailModal({ player, onClose, onEdit, onDelete }:
                   return (
                     <div
                       key={log.id}
-                      className="flex items-center gap-3 bg-[#f8f9fb] rounded-lg px-4 py-3 border border-[#e2e5e9]"
+                      className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 bg-[#f8f9fb] rounded-lg px-3 sm:px-4 py-3 border border-[#e2e5e9]"
                     >
-                      <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
-                        isHeight ? "bg-blue-50 text-blue-600" : "bg-amber-50 text-amber-600"
-                      }`}>
-                        {isHeight ? <Ruler size={16} /> : <Weight size={16} />}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2">
-                          <span className="text-xs font-semibold text-[#1a1a2e]">
-                            {isHeight ? "Boy" : "Kilo"}
-                          </span>
-                          <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded ${
-                            isHeight ? "bg-blue-50 text-blue-600" : "bg-amber-50 text-amber-600"
-                          }`}>
-                            {unit}
-                          </span>
+                      <div className="flex items-center gap-2 sm:gap-3">
+                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
+                          isHeight ? "bg-blue-50 text-blue-600" : "bg-amber-50 text-amber-600"
+                        }`}>
+                          {isHeight ? <Ruler size={16} /> : <Weight size={16} />}
                         </div>
-                        <p className="text-[11px] text-[#8c919a] mt-0.5">
-                          {new Date(log.changedAt).toLocaleDateString("tr-TR", { day: "numeric", month: "long", year: "numeric" })}
-                          {" · "}
-                          {new Date(log.changedAt).toLocaleTimeString("tr-TR", { hour: "2-digit", minute: "2-digit" })}
-                        </p>
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs font-semibold text-[#1a1a2e]">
+                              {isHeight ? "Boy" : "Kilo"}
+                            </span>
+                            <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded ${
+                              isHeight ? "bg-blue-50 text-blue-600" : "bg-amber-50 text-amber-600"
+                            }`}>
+                              {unit}
+                            </span>
+                          </div>
+                          <p className="text-[11px] text-[#8c919a] mt-0.5">
+                            {new Date(log.changedAt).toLocaleDateString("tr-TR", { day: "numeric", month: "long", year: "numeric" })}
+                            {" · "}
+                            {new Date(log.changedAt).toLocaleTimeString("tr-TR", { hour: "2-digit", minute: "2-digit" })}
+                          </p>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-2 shrink-0">
+                      <div className="flex items-center gap-2 shrink-0 ml-10 sm:ml-auto">
                         <span className="text-sm font-medium text-[#8c919a]">{log.oldValue} {unit}</span>
                         <div className={`flex items-center gap-0.5 px-2 py-1 rounded-md text-xs font-bold ${
                           isUp
@@ -311,33 +315,35 @@ export default function PlayerDetailModal({ player, onClose, onEdit, onDelete }:
                   return (
                     <div
                       key={log.id}
-                      className="flex items-center gap-3 bg-[#f8f9fb] rounded-lg px-4 py-3 border border-[#e2e5e9]"
+                      className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 bg-[#f8f9fb] rounded-lg px-3 sm:px-4 py-3 border border-[#e2e5e9]"
                     >
-                      <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
-                        isUp ? "bg-emerald-50 text-emerald-600" : "bg-red-50 text-red-500"
-                      }`}>
-                        {isUp ? <TrendingUp size={16} /> : <TrendingDown size={16} />}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2">
-                          <span className="text-xs font-semibold text-[#1a1a2e]">
-                            {SKILL_LABELS[log.skillName] || log.skillName}
-                          </span>
-                          <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded ${
-                            log.category === "tactical"
-                              ? "bg-blue-50 text-blue-600"
-                              : "bg-purple-50 text-purple-600"
-                          }`}>
-                            {log.category === "tactical" ? "Taktik" : "Atletik"}
-                          </span>
+                      <div className="flex items-center gap-2 sm:gap-3">
+                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
+                          isUp ? "bg-emerald-50 text-emerald-600" : "bg-red-50 text-red-500"
+                        }`}>
+                          {isUp ? <TrendingUp size={16} /> : <TrendingDown size={16} />}
                         </div>
-                        <p className="text-[11px] text-[#8c919a] mt-0.5">
-                          {new Date(log.changedAt).toLocaleDateString("tr-TR", { day: "numeric", month: "long", year: "numeric" })}
-                          {" · "}
-                          {new Date(log.changedAt).toLocaleTimeString("tr-TR", { hour: "2-digit", minute: "2-digit" })}
-                        </p>
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs font-semibold text-[#1a1a2e]">
+                              {SKILL_LABELS[log.skillName] || log.skillName}
+                            </span>
+                            <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded ${
+                              log.category === "tactical"
+                                ? "bg-blue-50 text-blue-600"
+                                : "bg-purple-50 text-purple-600"
+                            }`}>
+                              {log.category === "tactical" ? "Taktik" : "Atletik"}
+                            </span>
+                          </div>
+                          <p className="text-[11px] text-[#8c919a] mt-0.5">
+                            {new Date(log.changedAt).toLocaleDateString("tr-TR", { day: "numeric", month: "long", year: "numeric" })}
+                            {" · "}
+                            {new Date(log.changedAt).toLocaleTimeString("tr-TR", { hour: "2-digit", minute: "2-digit" })}
+                          </p>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-2 shrink-0">
+                      <div className="flex items-center gap-2 shrink-0 ml-10 sm:ml-auto">
                         <span className="text-sm font-medium text-[#8c919a]">{log.oldValue}</span>
                         <div className={`flex items-center gap-0.5 px-2 py-1 rounded-md text-xs font-bold ${
                           isUp

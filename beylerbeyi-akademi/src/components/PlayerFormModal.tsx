@@ -108,7 +108,7 @@ export default function PlayerFormModal({ player, saving, onClose, onSave }: Pla
 
       <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col border border-[#e2e5e9] animate-slide-in-up">
         {/* Header */}
-        <div className="border-b border-[#e2e5e9] px-6 py-5 flex items-center justify-between rounded-t-2xl shrink-0">
+        <div className="border-b border-[#e2e5e9] px-4 sm:px-6 py-4 sm:py-5 flex items-center justify-between rounded-t-2xl shrink-0">
           <h2 className="text-lg font-bold text-[#1a1a2e]">
             {isEdit ? "Oyuncu Düzenle" : "Yeni Oyuncu Ekle"}
           </h2>
@@ -118,12 +118,12 @@ export default function PlayerFormModal({ player, saving, onClose, onSave }: Pla
         </div>
 
         {/* Tabs */}
-        <div className="border-b border-[#e2e5e9] px-6 flex gap-1 shrink-0">
+        <div className="border-b border-[#e2e5e9] px-4 sm:px-6 flex gap-1 shrink-0 overflow-x-auto">
           {tabs.map((t) => (
             <button
               key={t.key}
               onClick={() => setActiveTab(t.key)}
-              className={`px-4 py-3 text-sm font-medium border-b-2 transition-all duration-200 -mb-px ${
+              className={`px-2.5 sm:px-4 py-3 text-xs sm:text-sm font-medium border-b-2 transition-all duration-200 -mb-px whitespace-nowrap ${
                 activeTab === t.key
                   ? "border-[#c4111d] text-[#c4111d]"
                   : "border-transparent text-[#5a6170] hover:text-[#1a1a2e] hover:border-[#e2e5e9]"
@@ -135,14 +135,14 @@ export default function PlayerFormModal({ player, saving, onClose, onSave }: Pla
         </div>
 
         {/* Form content */}
-        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6">
+        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-4 sm:p-6">
           {activeTab === "general" && (
             <div className="space-y-5">
               <div className="grid grid-cols-2 gap-4">
                 <Field label="Ad" value={form.firstName} onChange={(v) => updateField("firstName", v)} required />
                 <Field label="Soyad" value={form.lastName} onChange={(v) => updateField("lastName", v)} required />
               </div>
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <Field label="Doğum Tarihi" value={form.birthDate} onChange={(v) => updateField("birthDate", v)} type="date" required />
                 <SelectField label="Yaş Grubu" value={form.ageGroup} onChange={(v) => updateField("ageGroup", v)} options={AGE_GROUPS} />
                 <div>
@@ -176,7 +176,7 @@ export default function PlayerFormModal({ player, saving, onClose, onSave }: Pla
                   </div>
                 </div>
               </div>
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                 <SelectField label="Pozisyon" value={form.position} onChange={(v) => updateField("position", v)} options={POSITIONS} />
                 <SelectField label="Ayak" value={form.foot} onChange={(v) => updateField("foot", v)} options={FEET} />
                 <NumberField label="Forma No" value={form.jerseyNumber} onChange={(v) => updateField("jerseyNumber", v)} min={1} max={99} />
@@ -214,7 +214,7 @@ export default function PlayerFormModal({ player, saving, onClose, onSave }: Pla
                           updated[index] = { ...updated[index], years: e.target.value };
                           updateField("previousTeams", updated);
                         }}
-                        className="w-32 px-3 py-2 bg-white border border-[#e2e5e9] rounded-lg text-[#1a1a2e] text-sm focus:outline-none focus:border-[#c4111d] focus:ring-2 focus:ring-[#c4111d]/10 transition-all duration-200"
+                        className="w-24 sm:w-32 px-3 py-2 bg-white border border-[#e2e5e9] rounded-lg text-[#1a1a2e] text-sm focus:outline-none focus:border-[#c4111d] focus:ring-2 focus:ring-[#c4111d]/10 transition-all duration-200"
                       />
                       <button
                         type="button"
@@ -332,7 +332,7 @@ export default function PlayerFormModal({ player, saving, onClose, onSave }: Pla
         </form>
 
         {/* Footer */}
-        <div className="border-t border-[#e2e5e9] px-6 py-4 flex justify-end gap-3 shrink-0 rounded-b-2xl">
+        <div className="border-t border-[#e2e5e9] px-4 sm:px-6 py-4 flex justify-end gap-3 shrink-0 rounded-b-2xl">
           <button
             type="button"
             onClick={onClose}
@@ -424,8 +424,8 @@ function SliderField({
   const color =
     value >= 8 ? "text-emerald-600" : value >= 6 ? "text-amber-600" : value >= 4 ? "text-orange-500" : "text-red-500";
   return (
-    <div className="flex items-center gap-3 bg-[#f8f9fb] rounded-lg px-4 py-3 border border-[#e2e5e9]">
-      <span className="text-xs text-[#5a6170] font-medium w-28 shrink-0">{label}</span>
+    <div className="flex items-center gap-3 bg-[#f8f9fb] rounded-lg px-3 sm:px-4 py-3 border border-[#e2e5e9]">
+      <span className="text-xs text-[#5a6170] font-medium w-20 sm:w-28 shrink-0">{label}</span>
       <input
         type="range"
         min={1}

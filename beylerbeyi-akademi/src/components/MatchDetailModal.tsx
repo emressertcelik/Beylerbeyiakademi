@@ -56,11 +56,11 @@ export default function MatchDetailModal({ match, onClose, onEdit, onDelete }: M
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-6 space-y-6">
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-5 sm:space-y-6">
           {/* Score Card */}
           {isPlayed ? (
-          <div className="bg-[#f8f9fb] border border-[#e2e5e9] rounded-xl p-6">
-            <div className="flex items-center justify-center gap-6">
+          <div className="bg-[#f8f9fb] border border-[#e2e5e9] rounded-xl p-4 sm:p-6">
+            <div className="flex items-center justify-center gap-4 sm:gap-6">
               <div className="text-center flex-1">
                 <p className="text-xs text-[#8c919a] font-semibold uppercase tracking-wider mb-1">
                   {match.homeAway === "home" ? "Ev Sahibi" : "Deplasman"}
@@ -84,8 +84,8 @@ export default function MatchDetailModal({ match, onClose, onEdit, onDelete }: M
             </div>
           </div>
           ) : (
-          <div className="bg-amber-50 border border-amber-200 rounded-xl p-6">
-            <div className="flex items-center justify-center gap-6">
+          <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 sm:p-6">
+            <div className="flex items-center justify-center gap-4 sm:gap-6">
               <div className="text-center flex-1">
                 <p className="text-xs text-[#8c919a] font-semibold uppercase tracking-wider mb-1">
                   {match.homeAway === "home" ? "Ev Sahibi" : "Deplasman"}
@@ -147,7 +147,7 @@ export default function MatchDetailModal({ match, onClose, onEdit, onDelete }: M
               <h3 className="text-sm font-bold text-[#1a1a2e] mb-3">Oyuncu İstatistikleri</h3>
               <div className="border border-[#e2e5e9] rounded-xl overflow-hidden">
                 <div className="overflow-x-auto">
-                  <table className="w-full text-xs">
+                  <table className="w-full text-xs min-w-[500px]">
                     <thead>
                       <tr className="bg-[#f8f9fb] border-b border-[#e2e5e9]">
                         <th className="text-left px-3 py-2.5 text-[10px] font-semibold text-[#8c919a] uppercase tracking-wider">#</th>
@@ -165,8 +165,8 @@ export default function MatchDetailModal({ match, onClose, onEdit, onDelete }: M
                         <tr key={ps.playerId} className={`border-b border-[#e2e5e9] last:border-0 ${i % 2 === 0 ? "bg-white" : "bg-[#fafbfc]"}`}>
                           <td className="px-3 py-2.5 font-bold text-[#c4111d]">{ps.jerseyNumber}</td>
                           <td className="px-3 py-2.5">
-                            <span className="font-medium text-[#1a1a2e]">{ps.playerName}</span>
-                            <span className="text-[#8c919a] ml-1">({ps.position})</span>
+                            <span className="font-medium text-[#1a1a2e] whitespace-nowrap">{ps.playerName}</span>
+                            <span className="text-[#8c919a] ml-1 whitespace-nowrap">({ps.position})</span>
                           </td>
                           <td className="text-center px-2 py-2.5 text-[#1a1a2e]">{ps.minutesPlayed}&apos;</td>
                           <td className="text-center px-2 py-2.5 font-semibold text-emerald-600">{ps.goals || "-"}</td>
