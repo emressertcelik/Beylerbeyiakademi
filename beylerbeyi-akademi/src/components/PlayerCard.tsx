@@ -16,7 +16,7 @@ const positionStyle: Record<string, { bg: string; text: string; dot: string }> =
   Forvet: { bg: "bg-red-50", text: "text-red-700", dot: "bg-red-400" },
 };
 
-export default function PlayerCard({ player, onClick, showReportLink }: PlayerCardProps) {
+export default function PlayerCard({ player, onClick }: PlayerCardProps) {
   const isGoalkeeper = player.position === "Kaleci";
   const style = positionStyle[player.position] || { bg: "bg-slate-50", text: "text-slate-600", dot: "bg-slate-400" };
 
