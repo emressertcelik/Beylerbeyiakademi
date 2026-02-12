@@ -222,7 +222,15 @@ export default function MatchDetailModal({ match, onClose, onEdit, onDelete }: M
               </div>
               <div className="bg-[#f8f9fb] divide-y divide-[#e2e5e9]">
                 {match.playerStats
-                  .sort((a, b) => a.jerseyNumber - b.jerseyNumber)
+                  .slice()
+                  .sort((a, b) => {
+                    // Önce İlk 11, sonra Sonradan Girdi, sonra diğerleri
+                    const statusOrder = (s: string | undefined) =>
+                      s === "İlk 11" ? 0 : s === "Sonradan Girdi" ? 1 : 2;
+                    const cmp = statusOrder(a.participationStatus) - statusOrder(b.participationStatus);
+                    if (cmp !== 0) return cmp;
+                    return a.jerseyNumber - b.jerseyNumber;
+                  })
                   .map((ps, i) => (
                     <div
                       key={ps.playerId}

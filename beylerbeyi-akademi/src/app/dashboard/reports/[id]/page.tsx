@@ -634,6 +634,9 @@ export default function PlayerReportPage() {
                           {match.homeAway === "home" ? "vs" : "@"} {match.opponent}
                         </p>
                         <span className="text-[8px] bg-[#1a1a2e]/5 text-[#5a6170] px-1.5 py-0.5 rounded font-semibold shrink-0">{match.ageGroup}</span>
+                        {match.week && (
+                          <span className="text-[8px] bg-[#c4111d]/10 text-[#c4111d] px-1.5 py-0.5 rounded font-bold ml-2">Hafta {match.week}</span>
+                        )}
                       </div>
                       <div className="flex items-center gap-2 mt-0.5 flex-wrap">
                         <span className="text-[10px] text-[#8c919a]">

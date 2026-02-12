@@ -38,6 +38,7 @@ export interface Match {
   scoreAway: number;        // Rakip golü
   result: MatchResult;
   venue?: string;           // Saha / Stat
+  week?: number;            // Hafta bilgisi (opsiyonel)
   notes?: string;
   matchTime?: string;       // Maç saati (ör: "14:00")
   gatheringTime?: string;   // Toplanma saati (ör: "12:15")

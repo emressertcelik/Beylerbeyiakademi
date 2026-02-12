@@ -252,8 +252,7 @@ export default function TeamsPage() {
           <p className="text-xs text-[#8c919a] mt-1">Bu filtre için henüz maç eklenmemiş</p>
         </div>
       ) : (
-        <div className="space-y-2 overflow-x-auto">
-          <h2 className="text-sm font-bold text-[#1a1a2e]">Maçlar</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mt-4">
           {filteredMatches.map((match) => {
             const isPlayed = match.status === "played";
             const rc = isPlayed ? resultColors[match.result] : { bg: "bg-blue-50", text: "text-blue-600", border: "border-blue-200" };
@@ -261,51 +260,49 @@ export default function TeamsPage() {
               <button
                 key={match.id}
                 onClick={() => setSelectedMatch(match)}
-                className="w-full bg-white border border-[#e2e5e9] rounded-xl p-3 sm:p-4 text-left hover:border-[#c4111d]/30 hover:shadow-md hover:shadow-[#c4111d]/5 transition-all duration-200 group min-w-[320px]"
+                className="bg-white border border-[#e2e5e9] rounded-2xl p-0 flex flex-col shadow-sm hover:border-[#c4111d]/30 hover:shadow-md transition-all duration-200 group min-w-[260px] overflow-hidden"
               >
-                <div className="flex flex-col xs:flex-row items-start xs:items-center gap-2 xs:gap-4">
-                  {/* Result / Status Badge */}
-                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-sm font-black ${rc.bg} ${rc.text} border ${rc.border} shrink-0`}>
+                <div className="flex items-center gap-0 p-0">
+                  {/* Sonuç/Statü Badge */}
+                  <div className={`w-12 h-12 rounded-br-2xl flex items-center justify-center text-lg font-black ${rc.bg} ${rc.text} border-b ${rc.border} shrink-0`}>
                     {isPlayed ? resultLabels[match.result] : "📅"}
                   </div>
-
-                  {/* Match Info */}
-                  <div className="flex-1 min-w-0 max-w-full">
-                    <div className="flex items-center gap-2">
-                      {isPlayed ? (
-                        <p className="text-sm font-semibold text-[#1a1a2e] group-hover:text-[#c4111d] transition-colors truncate">
-                          Beylerbeyi <span className="font-black">{match.scoreHome} - {match.scoreAway}</span> {match.opponent}
-                        </p>
-                      ) : (
-                        <p className="text-sm font-semibold text-[#1a1a2e] group-hover:text-[#c4111d] transition-colors truncate">
-                          Beylerbeyi vs {match.opponent}
-                          <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-100 text-amber-700">Planlandı</span>
-                        </p>
-                      )}
+                  <div className="flex-1 min-w-0 flex items-center gap-2 px-3 py-2">
+                    <div className="w-8 h-8 relative flex items-center justify-center">
+                      <img src="/Logo_S.png" alt="Beylerbeyi" className="w-8 h-8 object-contain" />
                     </div>
-                    <div className="flex flex-wrap items-center gap-2 mt-0.5 text-[11px] text-[#8c919a] max-w-full overflow-x-auto">
-                      <span>{new Date(match.date).toLocaleDateString("tr-TR", { day: "numeric", month: "short", year: "numeric" })}</span>
-                      <span>·</span>
-                      <span>{match.ageGroup}</span>
-                      <span>·</span>
-                      <span>{match.homeAway === "home" ? "Ev" : "Deplasman"}</span>
-                      {match.venue && (
-                        <>
-                          <span>·</span>
-                          <span className="truncate">{match.venue}</span>
-                        </>
-                      )}
-                    </div>
+                    {isPlayed ? (
+                      <span className="text-lg font-black text-[#c4111d]">{match.scoreHome} - {match.scoreAway}</span>
+                    ) : (
+                      <span className="ml-2 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-100 text-amber-700">Planlandı</span>
+                    )}
+                    <span className="text-base font-bold text-[#1a1a2e] truncate">{match.opponent}</span>
                   </div>
-
-                  {/* Player count */}
-                  {isPlayed && (
-                    <div className="text-[11px] text-[#8c919a] font-medium shrink-0 hidden xs:block">
-                      {match.playerStats.length} oyuncu
-                    </div>
+                </div>
+                <div className="flex flex-wrap items-center gap-2 text-[12px] text-[#8c919a] px-4 pb-3 pt-1">
+                  {match.week && (
+                    <>
+                      <span className="font-bold text-[#c4111d]">Hafta {match.week}</span>
+                      <span>·</span>
+                    </>
                   )}
-
-                  <ChevronRight size={16} className="text-[#8c919a] shrink-0 group-hover:text-[#c4111d] transition-colors" />
+                  <span>{new Date(match.date).toLocaleDateString("tr-TR", { day: "numeric", month: "short", year: "numeric" })}</span>
+                  <span>·</span>
+                  <span>{match.ageGroup}</span>
+                  <span>·</span>
+                  <span>{match.homeAway === "home" ? "Ev" : "Deplasman"}</span>
+                  {match.venue && (
+                    <>
+                      <span>·</span>
+                      <span className="truncate">{match.venue}</span>
+                    </>
+                  )}
+                  {isPlayed && (
+                    <>
+                      <span>·</span>
+                      <span className="font-medium text-[#c4111d]">{match.playerStats.length} oyuncu</span>
+                    </>
+                  )}
                 </div>
               </button>
             );

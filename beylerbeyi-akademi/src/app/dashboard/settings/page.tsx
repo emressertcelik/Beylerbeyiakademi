@@ -278,7 +278,7 @@ export default function SettingsPage() {
                     <input
                       autoFocus
                       type="text"
-                      value={editValue}
+                      value={editValue ?? ''}
                       onChange={(e) => setEditValue(e.target.value)}
                       onKeyDown={(e) => {
                         if (e.key === "Enter") handleUpdate(item.id);

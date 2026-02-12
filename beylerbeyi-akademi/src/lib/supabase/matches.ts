@@ -41,6 +41,7 @@ interface DbMatch {
   match_time: string | null;
   gathering_time: string | null;
   gathering_location: string | null;
+  week: number | null;
   squad: SquadPlayer[] | null;
   created_at: string;
   updated_at: string;
@@ -80,6 +81,7 @@ function mapDbToMatch(db: DbMatch): Match {
     matchTime: db.match_time || undefined,
     gatheringTime: db.gathering_time || undefined,
     gatheringLocation: db.gathering_location || undefined,
+    week: db.week ?? undefined,
     squad: Array.isArray(db.squad) ? db.squad : (typeof db.squad === "string" ? JSON.parse(db.squad) : []),
     playerStats: stats,
     createdAt: db.created_at,
@@ -127,6 +129,7 @@ export async function createMatch(match: Match): Promise<Match> {
       match_time: match.matchTime || null,
       gathering_time: match.gatheringTime || null,
       gathering_location: match.gatheringLocation || null,
+      week: typeof match.week === 'number' ? match.week : match.week ? Number(match.week) : null,
       squad: (match.squad ?? []).length > 0 ? JSON.stringify(match.squad) : '[]',
     })
     .select()
@@ -194,6 +197,7 @@ export async function updateMatch(match: Match): Promise<Match> {
       match_time: match.matchTime || null,
       gathering_time: match.gatheringTime || null,
       gathering_location: match.gatheringLocation || null,
+      week: typeof match.week === 'number' ? match.week : match.week ? Number(match.week) : null,
       squad: (match.squad ?? []).length > 0 ? JSON.stringify(match.squad) : '[]',
     })
     .eq("id", match.id);

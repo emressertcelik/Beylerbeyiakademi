@@ -57,6 +57,7 @@ export default function MatchFormModal({ match, players, saving, onClose, onSave
     matchTime: "",
     gatheringTime: "",
     gatheringLocation: "",
+    week: "",
   });
 
   const [squad, setSquad] = useState<SquadPlayer[]>([]);
@@ -80,6 +81,8 @@ export default function MatchFormModal({ match, players, saving, onClose, onSave
         matchTime: match.matchTime || "",
         gatheringTime: match.gatheringTime || "",
         gatheringLocation: match.gatheringLocation || "",
+        // league kaldırıldı
+        week: match.week?.toString() || "",
       });
       setSquad([...(match.squad || [])]);
       setPlayerStats([...match.playerStats]);
@@ -201,6 +204,8 @@ export default function MatchFormModal({ match, players, saving, onClose, onSave
     const saved: Match = {
       id: match?.id || crypto.randomUUID(),
       ...form,
+      // league kaldırıldı
+      week: form.week ? Number(form.week) : undefined,
       matchTime: form.matchTime || undefined,
       gatheringTime: form.gatheringTime || undefined,
       gatheringLocation: form.gatheringLocation || undefined,
@@ -255,7 +260,7 @@ export default function MatchFormModal({ match, players, saving, onClose, onSave
         <div className="flex-1 overflow-y-auto p-2 sm:p-6">
           {activeTab === "match" && (
             <div className="space-y-5">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 sm:gap-4">
                 <div>
                   <label className="block text-xs font-medium text-[#5a6170] mb-1.5">Tarih</label>
                   <input
@@ -272,6 +277,17 @@ export default function MatchFormModal({ match, players, saving, onClose, onSave
                     value={form.opponent}
                     onChange={(e) => setForm({ ...form, opponent: e.target.value })}
                     placeholder="Rakip takım adı"
+                    className="w-full px-3 py-2 bg-[#f8f9fb] border border-[#e2e5e9] rounded-lg text-sm text-[#1a1a2e] placeholder-[#8c919a] focus:outline-none focus:ring-2 focus:ring-[#c4111d]/20 focus:border-[#c4111d]/30 transition-all"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-[#5a6170] mb-1.5">Hafta</label>
+                  <input
+                    type="number"
+                    min={1}
+                    value={form.week}
+                    onChange={(e) => setForm({ ...form, week: e.target.value })}
+                    placeholder="Hafta"
                     className="w-full px-3 py-2 bg-[#f8f9fb] border border-[#e2e5e9] rounded-lg text-sm text-[#1a1a2e] placeholder-[#8c919a] focus:outline-none focus:ring-2 focus:ring-[#c4111d]/20 focus:border-[#c4111d]/30 transition-all"
                   />
                 </div>
