@@ -84,6 +84,11 @@ export default function PlayerCard({ player, onClick }: PlayerCardProps) {
           }
         />
       </div>
+      {/* Ana Kadro/Yedek Özet */}
+      <div className="flex gap-2 mt-2">
+        <span className="text-[11px] px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 font-semibold">{player.stats.anaKadro ?? 0} i11</span>
+        <span className="text-[11px] px-2 py-0.5 rounded bg-blue-50 text-blue-700 font-semibold">{player.stats.yedek ?? 0} Yedek</span>
+      </div>
     </button>
   );
 }

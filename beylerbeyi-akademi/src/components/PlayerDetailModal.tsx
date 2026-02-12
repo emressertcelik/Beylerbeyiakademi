@@ -95,7 +95,7 @@ export default function PlayerDetailModal({ player, onClose, onEdit, onDelete }:
       const ps = match.playerStats.find(p => p.playerId === player.id);
       if (!ps) return;
       const s = (ps.participationStatus || "").toLowerCase();
-      if (s === "İlk 11".toLowerCase() || s === "ilk 11") stats.ilk11++;
+      if (s === "ana kadro") stats.ilk11++;
       else if (s === "sonradan girdi") stats.yedek++;
       else if (s.includes("süre")) stats.sureAlmadi++;
       else if (s === "kadroda yok") stats.kadroYok++;

@@ -13,6 +13,8 @@ export interface PlayerStats {
   goalsConceded: number; // kaleci için
   cleanSheets: number;   // kaleci için
   minutesPlayed: number;
+    anaKadro?: number;
+    yedek?: number;
 }
 
 export interface TacticalSkills {

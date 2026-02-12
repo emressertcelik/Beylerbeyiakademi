@@ -139,7 +139,7 @@ export default function PlayerReportPage() {
 
   /* ── Aggregate stats ── */
   const matchStats = useMemo(() => {
-    let starts = 0, subs = 0, totalMin = 0, goals = 0, assists = 0;
+    let starts = 0, subs = 0, anaKadro = 0, yedek = 0, totalMin = 0, goals = 0, assists = 0;
     let yellowCards = 0, redCards = 0, goalsConceded = 0, cleanSheets = 0;
     let ratingSum = 0, ratingCount = 0;
     const monthlyGoals = new Map<string, number>();
@@ -150,6 +150,8 @@ export default function PlayerReportPage() {
       const ps = match.playerStats.find((p) => p.playerId === playerId);
       if (!ps) continue;
       const sl = (ps.participationStatus || "").toLowerCase();
+      if (sl.includes("ana kadro")) anaKadro++;
+      if (sl.includes("yedek") || sl.includes("sonradan")) yedek++;
       if (sl.includes("ilk")) starts++;
       if (
         sl.includes("yedek") ||
@@ -171,7 +173,7 @@ export default function PlayerReportPage() {
     }
 
     return {
-      total: playerMatches.length, starts, subs, totalMin, goals, assists,
+      total: playerMatches.length, starts, subs, anaKadro, yedek, totalMin, goals, assists,
       yellowCards, redCards, goalsConceded, cleanSheets,
       avgRating: ratingCount > 0 ? ratingSum / ratingCount : 0, ratingCount,
       goalsPerMatch: playerMatches.length > 0 ? goals / playerMatches.length : 0,
@@ -314,8 +316,8 @@ export default function PlayerReportPage() {
           </div>
           <p className="text-4xl font-extrabold text-[#c4111d] drop-shadow-sm">{matchStats.total}</p>
           <div className="flex gap-2 mt-2">
-            <span className="text-[10px] bg-emerald-50 text-emerald-700 px-1.5 py-0.5 rounded font-semibold">{matchStats.starts} İ11</span>
-            <span className="text-[10px] bg-blue-50 text-blue-700 px-1.5 py-0.5 rounded font-semibold">{matchStats.subs} Yedek</span>
+            <span className="text-[10px] bg-emerald-50 text-emerald-700 px-1.5 py-0.5 rounded font-semibold">{matchStats.anaKadro} İlk 11</span>
+            <span className="text-[10px] bg-blue-50 text-blue-700 px-1.5 py-0.5 rounded font-semibold">{matchStats.yedek} Yedek</span>
           </div>
         </div>
         {player.position === "Kaleci" ? (
@@ -649,6 +651,7 @@ export default function PlayerReportPage() {
                         {/* Participation Status Badge */}
                         {(() => {
                           const status = (ps.participationStatus || "").toLowerCase();
+                          if (status.includes("ana kadro")) return <span className="text-[8px] bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded-md font-bold">İlk 11</span>;
                           if (status.includes("ilk")) return <span className="text-[8px] bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded-md font-bold">İlk 11</span>;
                           if (status.includes("yedek") || status.includes("sonradan")) return <span className="text-[8px] bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded-md font-bold">Yedek</span>;
                           if (status.includes("ceza")) return <span className="text-[8px] bg-red-100 text-red-600 px-1.5 py-0.5 rounded-md font-bold">Cezalı</span>;

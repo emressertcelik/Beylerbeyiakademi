@@ -184,6 +184,8 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
         goalsConceded: 0,
         cleanSheets: 0,
         minutesPlayed: 0,
+        anaKadro: 0,
+        yedek: 0,
       };
 
       for (const match of matches) {
@@ -198,6 +200,9 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
           stats.goalsConceded += ps.goalsConceded;
           if (ps.cleanSheet) stats.cleanSheets += 1;
           stats.minutesPlayed += ps.minutesPlayed;
+          const status = (ps.participationStatus || "").toLowerCase();
+          if (status === "ana kadro") stats.anaKadro += 1;
+          else if (status === "sonradan girdi" || status === "yedek") stats.yedek += 1;
         }
       }
 

@@ -1,7 +1,5 @@
-
 "use client";
-import React from "react";
-
+import * as React from "react";
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useAppData } from "@/lib/app-data";
@@ -47,6 +45,11 @@ interface PlayerReport {
 export default function ReportsPage() {
   // ...existing code...
   const { players, matches, lookups, loading } = useAppData();
+
+  // DEBUG: matches içeriğini konsola yaz
+  if (typeof window !== "undefined") {
+    console.log("DEBUG matches:", matches);
+  }
   const AGE_GROUPS = lookups.ageGroups.filter((a) => a.isActive).map((a) => a.value);
   const SEASONS = lookups.seasons.filter((s) => s.isActive).map((s) => s.value);
 
@@ -71,20 +74,30 @@ export default function ReportsPage() {
     });
 
     const map = new Map<string, PlayerReport>();
-
+    // Oyuncu istatistiklerini tüm maçlardan global olarak biriktir
+    const playerStatsById: Record<string, { starts: number; sub: number; sakat: number; cezali: number; kadroYok: number; sureAlmadi: number; matches: number; psList: any[] }> = {};
     for (const match of playedMatches) {
-      // Aynı maçta bir oyuncu birden fazla satırda olabilir, hepsini toplamalıyız
-      const playerStatsById: Record<string, { starts: number; sub: number; sakat: number; cezali: number; kadroYok: number; sureAlmadi: number; matches: number; psList: any[] }> = {};
+      // DEBUG: Her maçın playerStats'ını konsola yaz
+      if (typeof window !== "undefined") {
+        console.log("DEBUG match", match.id, "playerStats:", match.playerStats);
+      }
       for (const ps of match.playerStats) {
         const statusRaw = ps.participationStatus;
         const status = (statusRaw || "").trim().toLowerCase();
-        // Esnek eşleşme: 'ilk' geçen her durum İlk 11 sayılır
-        const isStart = status.includes("ilk");
-        const isSub = status.includes("yedek") || status.includes("sonradan");
-        const isSakat = status.includes("sakat");
-        const isCezali = status.includes("cezalı") || status.includes("ceza");
-        const isKadroYok = status.includes("kadroda yok") || status.includes("kadro yok");
-        const isSureAlmadi = status.includes("süre almadı") || status.includes("süre yok");
+        let isStart = false, isSub = false, isSakat = false, isCezali = false, isKadroYok = false, isSureAlmadi = false;
+        if (status.includes("ana kadro")) {
+          isStart = true;
+        } else if (status.includes("yedek") || status.includes("sonradan")) {
+          isSub = true;
+        } else if (status.includes("sakat")) {
+          isSakat = true;
+        } else if (status.includes("cezalı") || status.includes("ceza")) {
+          isCezali = true;
+        } else if (status.includes("kadroda yok") || status.includes("kadro yok")) {
+          isKadroYok = true;
+        } else if (status.includes("süre almadı") || status.includes("süre yok")) {
+          isSureAlmadi = true;
+        }
         if (!playerStatsById[ps.playerId]) {
           playerStatsById[ps.playerId] = { starts: 0, sub: 0, sakat: 0, cezali: 0, kadroYok: 0, sureAlmadi: 0, matches: 0, psList: [] };
         }
@@ -97,82 +110,61 @@ export default function ReportsPage() {
         playerStatsById[ps.playerId].matches++;
         playerStatsById[ps.playerId].psList.push(ps);
       }
-      for (const playerId in playerStatsById) {
-        const { starts, sub, sakat, cezali, kadroYok, sureAlmadi, matches: matchCount, psList } = playerStatsById[playerId];
-        const existing = map.get(playerId);
-        // Tüm istatistikleri topla
-        let minutesPlayed = 0, goals = 0, assists = 0, yellowCards = 0, redCards = 0, goalsConceded = 0, cleanSheets = 0, avgRating = 0, ratingCount = 0;
-        for (const ps of psList) {
-          minutesPlayed += ps.minutesPlayed;
-          goals += ps.goals;
-          assists += ps.assists;
-          yellowCards += ps.yellowCards;
-          redCards += ps.redCards;
-          goalsConceded += ps.goalsConceded;
-          if (ps.cleanSheet) cleanSheets++;
-          if (ps.rating) {
-            avgRating += ps.rating;
-            ratingCount++;
-          }
-        }
-        const player = players.find((p) => p.id === playerId);
-        if (existing) {
-          existing.matches++;
-          existing.starts += starts;
-          existing.sub += sub;
-          existing.minutesPlayed += minutesPlayed;
-          existing.goals += goals;
-          existing.assists += assists;
-          existing.yellowCards += yellowCards;
-          existing.redCards += redCards;
-          existing.goalsConceded += goalsConceded;
-          existing.cleanSheets += cleanSheets;
-          if (ratingCount > 0) {
-            existing.avgRating = ((existing.avgRating * existing.ratingCount) + avgRating) / (existing.ratingCount + ratingCount);
-            existing.ratingCount += ratingCount;
-          }
-        } else {
-          map.set(playerId, {
-            id: playerId,
-            name: player?.firstName + " " + player?.lastName,
-            jerseyNumber: player?.jerseyNumber || 0,
-            position: player?.position || psList[0].position,
-            ageGroup: player?.ageGroup || "",
-            matches: 1,
-            starts: starts,
-            sub: sub,
-            sakat: sakat,
-            cezali: cezali,
-            kadroYok: kadroYok,
-            sureAlmadi: sureAlmadi,
-            minutesPlayed,
-            goals,
-            assists,
-            yellowCards,
-            redCards,
-            goalsConceded,
-            cleanSheets,
-            avgRating: ratingCount > 0 ? avgRating / ratingCount : 0,
-            ratingCount,
-            goalsPerMatch: 0,
-            assistsPerMatch: 0,
-            tacticalAvg: player
-              ? +(
-                  (player.tactical.positioning + player.tactical.passing + player.tactical.crossing +
-                   player.tactical.shooting + player.tactical.dribbling + player.tactical.heading +
-                   player.tactical.tackling + player.tactical.marking + player.tactical.gameReading) / 9
-                ).toFixed(1)
-              : 0,
-            athleticAvg: player
-              ? +(
-                  (player.athletic.speed + player.athletic.strength + player.athletic.stamina +
-                   player.athletic.agility + player.athletic.jumping + player.athletic.balance +
-                   player.athletic.flexibility) / 7
-                ).toFixed(1)
-              : 0,
-          });
+    }
+    // DEBUG: playerStatsById içeriğini konsola yaz
+    if (typeof window !== "undefined") {
+      console.log("DEBUG playerStatsById:", playerStatsById);
+    }
+    for (const playerId in playerStatsById) {
+      const { starts, sub, sakat, cezali, kadroYok, sureAlmadi, matches: matchCount, psList } = playerStatsById[playerId];
+      // DEBUG: Hesaplanan istatistikleri konsola yaz
+      if (typeof window !== "undefined") {
+        console.log("DEBUG istatistik:", playerId, "starts:", starts, "sub:", sub, "sakat:", sakat, "cezali:", cezali, "kadroYok:", kadroYok, "sureAlmadi:", sureAlmadi);
+      }
+      // Diğer istatistikleri de topla
+      let minutesPlayed = 0, goals = 0, assists = 0, yellowCards = 0, redCards = 0, goalsConceded = 0, cleanSheets = 0, avgRating = 0, ratingCount = 0;
+      for (const ps of psList) {
+        minutesPlayed += ps.minutesPlayed || 0;
+        goals += ps.goals || 0;
+        assists += ps.assists || 0;
+        yellowCards += ps.yellowCards || 0;
+        redCards += ps.redCards || 0;
+        goalsConceded += ps.goalsConceded || 0;
+        if (ps.cleanSheet) cleanSheets++;
+        if (ps.rating) {
+          avgRating += ps.rating;
+          ratingCount++;
         }
       }
+      const player = players.find((p) => p.id === playerId);
+      map.set(playerId, {
+        id: playerId,
+        name: player?.firstName + " " + player?.lastName,
+        jerseyNumber: player?.jerseyNumber || 0,
+        position: player?.position || psList[0].position,
+        ageGroup: player?.ageGroup || "",
+        matches: matchCount,
+        starts: starts,
+        sub: sub,
+        sakat: sakat,
+        cezali: cezali,
+        kadroYok: kadroYok,
+        sureAlmadi: sureAlmadi,
+        minutesPlayed,
+        goals,
+        assists,
+        yellowCards,
+        redCards,
+        goalsConceded,
+        cleanSheets,
+        avgRating: ratingCount > 0 ? avgRating / ratingCount : 0,
+        ratingCount,
+        goalsPerMatch: 0,
+        assistsPerMatch: 0,
+        tacticalAvg: player && player.tactical ? +((player.tactical.positioning + player.tactical.passing + player.tactical.crossing + player.tactical.shooting + player.tactical.dribbling + player.tactical.heading + player.tactical.tackling + player.tactical.marking + player.tactical.gameReading) / 9).toFixed(1) : 0,
+        athleticAvg: player && player.athletic ? +((player.athletic.speed + player.athletic.strength + player.athletic.stamina + player.athletic.agility + player.athletic.jumping + player.athletic.balance + player.athletic.flexibility) / 7).toFixed(1) : 0,
+        ...player,
+      });
     }
 
     // Maç başı istatistikleri hesapla
@@ -434,14 +426,18 @@ export default function ReportsPage() {
         </div>
 
         {sortedReports.length === 0 ? (
-          <tbody>
-            <tr>
-              <td colSpan={15} className="text-center py-12">
-                <BarChart3 size={40} className="mx-auto text-[#e2e5e9] mb-3" />
-                <p className="text-sm text-[#8c919a]">Seçilen filtrelere uygun veri bulunamadı.</p>
-              </td>
-            </tr>
-          </tbody>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left">
+              <tbody>
+                <tr>
+                  <td colSpan={15} className="text-center py-12">
+                    <BarChart3 size={40} className="mx-auto text-[#e2e5e9] mb-3" />
+                    <p className="text-sm text-[#8c919a]">Seçilen filtrelere uygun veri bulunamadı.</p>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left">

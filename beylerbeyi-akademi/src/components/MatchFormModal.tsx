@@ -137,8 +137,16 @@ export default function MatchFormModal({ match, players, saving, onClose, onSave
     setPlayerStats((prev) => {
       // Mevcut istatistikleri koru (zaten girilmişse)
       const existingMap = new Map(prev.map((ps) => [ps.playerId, ps]));
-      return currentSquad.map((s) =>
-        existingMap.get(s.playerId) || {
+      return currentSquad.map((s) => {
+        const existing = existingMap.get(s.playerId);
+        // participationStatus yoksa otomatik olarak 'İlk 11' ata
+        if (existing) {
+          return {
+            ...existing,
+            participationStatus: existing.participationStatus || "İlk 11",
+          };
+        }
+        return {
           playerId: s.playerId,
           playerName: s.playerName,
           jerseyNumber: s.jerseyNumber,
@@ -151,8 +159,9 @@ export default function MatchFormModal({ match, players, saving, onClose, onSave
           goalsConceded: 0,
           cleanSheet: false,
           rating: undefined,
-        }
-      );
+          participationStatus: "İlk 11",
+        };
+      });
     });
   };
 
@@ -180,6 +189,7 @@ export default function MatchFormModal({ match, players, saving, onClose, onSave
         goalsConceded: 0,
         cleanSheet: false,
         rating: undefined,
+        participationStatus: "İlk 11",
       },
     ]);
   };
@@ -199,6 +209,11 @@ export default function MatchFormModal({ match, players, saving, onClose, onSave
   const handleSubmit = () => {
     if (!form.opponent.trim()) return;
     const isPlayed = form.status === "played";
+    // ParticipationStatus kontrolü: Boş olan varsa uyarı ver ve kaydetme
+    if (isPlayed && playerStats.some(ps => !ps.participationStatus)) {
+      alert("Tüm oyuncular için Katılım Durumu seçmelisiniz!");
+      return;
+    }
     const result = isPlayed ? getResult(form.scoreHome, form.scoreAway) : "D";
     const now = new Date().toISOString().split("T")[0];
     const saved: Match = {
