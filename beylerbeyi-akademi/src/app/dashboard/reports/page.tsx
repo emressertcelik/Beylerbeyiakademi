@@ -410,10 +410,14 @@ export default function ReportsPage() {
         </div>
 
         {sortedReports.length === 0 ? (
-          <div className="text-center py-12">
-            <BarChart3 size={40} className="mx-auto text-[#e2e5e9] mb-3" />
-            <p className="text-sm text-[#8c919a]">Seçilen filtrelere uygun veri bulunamadı.</p>
-          </div>
+          <tbody>
+            <tr>
+              <td colSpan={15} className="text-center py-12">
+                <BarChart3 size={40} className="mx-auto text-[#e2e5e9] mb-3" />
+                <p className="text-sm text-[#8c919a]">Seçilen filtrelere uygun veri bulunamadı.</p>
+              </td>
+            </tr>
+          </tbody>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left">
