@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Users, TrendingUp, Calendar, Award, Trophy, Target, Shield, MapPin, Star } from "lucide-react";
+import { Users, TrendingUp, Calendar, Award, Trophy, Target, Shield, MapPin, Star, Clock } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { useAppData } from "@/lib/app-data";
@@ -214,13 +214,13 @@ export default function DashboardPage() {
 
           {/* Mini stats */}
           <div className="grid grid-cols-5 gap-2 sm:flex sm:items-center sm:gap-4">
-            <MiniStat label="At\u0131lan Gol" value={loading ? "\u2014" : String(weeklyStats.goalsScored)} color="text-emerald-600" />
+            <MiniStat label="Atılan Gol" value={loading ? "—" : String(weeklyStats.goalsScored)} color="text-emerald-600" />
             <div className="hidden sm:block w-px h-6 bg-[#e2e5e9]" />
-            <MiniStat label="Yenilen Gol" value={loading ? "\u2014" : String(weeklyStats.goalsConceded)} color="text-red-500" />
+            <MiniStat label="Yenilen Gol" value={loading ? "—" : String(weeklyStats.goalsConceded)} color="text-red-500" />
             <div className="hidden sm:block w-px h-6 bg-[#e2e5e9]" />
-            <MiniStat label="Galibiyet" value={loading ? "\u2014" : String(weeklyStats.wins)} color="text-emerald-600" />
+            <MiniStat label="Galibiyet" value={loading ? "—" : String(weeklyStats.wins)} color="text-emerald-600" />
             <div className="hidden sm:block w-px h-6 bg-[#e2e5e9]" />
-            <MiniStat label="Beraberlik" value={loading ? "\u2014" : String(weeklyStats.draws)} color="text-amber-600" />
+            <MiniStat label="Beraberlik" value={loading ? "—" : String(weeklyStats.draws)} color="text-amber-600" />
             <div className="hidden sm:block w-px h-6 bg-[#e2e5e9]" />
             <MiniStat label="Mağlubiyet" value={loading ? "—" : String(weeklyStats.losses)} color="text-red-600" />
           </div>
@@ -352,30 +352,128 @@ export default function DashboardPage() {
       </div>
 
       {/* ── Haftalık Maç Takvimi ── */}
-      <div className="rounded-2xl bg-gradient-to-br from-[#fff5f5] via-white to-[#fef2f2] border border-[#f5d0d0] overflow-hidden">
-        <div className="flex items-center gap-3 px-6 py-4 md:px-8 md:py-5 border-b border-[#f5d0d0]/60">
-          <div className="w-9 h-9 rounded-lg bg-red-50 flex items-center justify-center">
-            <Calendar size={18} className="text-[#c4111d]" />
+      <div className="rounded-2xl bg-white border border-[#e2e5e9] overflow-hidden">
+        <div className="flex items-center justify-between px-6 py-4 md:px-8 md:py-5 border-b border-[#e2e5e9]">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-lg bg-[#c4111d] flex items-center justify-center">
+              <Calendar size={18} className="text-white" />
+            </div>
+            <div>
+              <h2 className="text-base font-bold text-[#1a1a2e]">Haftalık Maç Takvimi</h2>
+              <p className="text-xs text-[#8c919a]">Önümüzdeki 7 gün</p>
+            </div>
           </div>
-          <div>
-            <h2 className="text-base font-bold text-[#1a1a2e]">Haftalık Maç Takvimi</h2>
-            <p className="text-xs text-[#8c919a]">Önümüzdeki 7 gün</p>
-          </div>
+          {!loading && upcomingMatches.length > 0 && (
+            <span className="text-xs font-bold text-[#c4111d] bg-[#fef2f2] px-2.5 py-1 rounded-full">
+              {upcomingMatches.length} maç
+            </span>
+          )}
         </div>
 
-        <div className="p-6 md:p-8">
+        <div className="p-5 md:p-6">
           {loading ? (
             <div className="text-center text-sm text-[#8c919a] py-6">Yükleniyor...</div>
           ) : upcomingMatches.length === 0 ? (
-            <div className="text-center py-6">
-              <Calendar size={32} className="mx-auto mb-2 text-[#f5d0d0]" />
-              <p className="text-sm text-[#8c919a]">Önümüzdeki 7 gün içinde planlanmış maç yok.</p>
+            <div className="text-center py-10">
+              <Calendar size={36} className="mx-auto mb-3 text-[#e2e5e9]" />
+              <p className="text-sm font-medium text-[#5a6170]">Planlanmış maç yok</p>
+              <p className="text-xs text-[#8c919a] mt-1">Önümüzdeki 7 gün içinde maç bulunmuyor.</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-              {upcomingMatches.map((m) => (
-                <MatchCard key={m.id} match={m} formatDate={formatDate} onClick={() => setSelectedMatch(m)} />
-              ))}
+            <div className="space-y-3">
+              {upcomingMatches.map((m) => {
+                const d = new Date(m.date);
+                const dayName = d.toLocaleDateString("tr-TR", { weekday: "long" });
+                const dayNum = d.getDate();
+                const monthStr = d.toLocaleDateString("tr-TR", { month: "long" });
+                const isHome = m.homeAway === "home";
+                const isToday = d.toDateString() === new Date().toDateString();
+
+                return (
+                  <button
+                    key={m.id}
+                    onClick={() => setSelectedMatch(m)}
+                    className={`w-full flex items-stretch rounded-xl border transition-all duration-200 text-left group hover:shadow-md ${
+                      isToday
+                        ? "border-[#c4111d]/30 bg-[#fef8f8] hover:border-[#c4111d]/50 hover:shadow-[#c4111d]/10"
+                        : "border-[#e2e5e9] bg-white hover:border-[#c4111d]/25 hover:shadow-[#c4111d]/5"
+                    }`}
+                  >
+                    {/* Tarih bloğu */}
+                    <div className={`w-20 shrink-0 flex flex-col items-center justify-center py-4 rounded-l-xl ${
+                      isToday ? "bg-[#c4111d]" : "bg-[#f8f9fb]"
+                    }`}>
+                      <span className={`text-[10px] font-semibold uppercase ${isToday ? "text-white/70" : "text-[#8c919a]"}`}>
+                        {isToday ? "BUGÜN" : dayName.slice(0, 3)}
+                      </span>
+                      <span className={`text-2xl font-black leading-none ${isToday ? "text-white" : "text-[#1a1a2e]"}`}>
+                        {dayNum}
+                      </span>
+                      <span className={`text-[10px] font-medium ${isToday ? "text-white/60" : "text-[#8c919a]"}`}>
+                        {monthStr.slice(0, 3)}
+                      </span>
+                    </div>
+
+                    {/* İçerik */}
+                    <div className="flex-1 p-4 flex flex-col sm:flex-row sm:items-center gap-3">
+                      {/* Maç bilgisi */}
+                      <div className="flex-1 min-w-0">
+                        {/* Etiketler */}
+                        <div className="flex items-center gap-1.5 mb-1.5">
+                          <span className="text-[10px] font-bold text-white bg-[#1a1a2e] px-1.5 py-0.5 rounded">
+                            {m.ageGroup}
+                          </span>
+                          <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded ${
+                            isHome ? "bg-blue-50 text-blue-600" : "bg-amber-50 text-amber-600"
+                          }`}>
+                            {isHome ? "EV" : "DEPLASMAN"}
+                          </span>
+                          {m.status === "played" && (
+                            <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-600">
+                              OYNANDI
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Takımlar */}
+                        <div className="flex items-center gap-2">
+                          <Image src="/Logo_S.png" alt="Beylerbeyi" width={18} height={18} className="rounded shrink-0" />
+                          <span className="text-sm font-bold text-[#c4111d]">Beylerbeyi</span>
+                          <span className="text-xs font-bold text-[#8c919a]">vs</span>
+                          <span className="text-sm font-semibold text-[#1a1a2e] truncate">{m.opponent}</span>
+                        </div>
+                      </div>
+
+                      {/* Saat & Konum bilgisi */}
+                      <div className="flex sm:flex-col items-start sm:items-end gap-2 sm:gap-1 shrink-0">
+                        {m.matchTime && (
+                          <div className="flex items-center gap-1.5 bg-[#f8f9fb] border border-[#e2e5e9] rounded-lg px-2.5 py-1.5">
+                            <Clock size={12} className="text-[#c4111d]" />
+                            <span className="text-xs font-bold text-[#1a1a2e]">{m.matchTime}</span>
+                          </div>
+                        )}
+                        {m.gatheringTime && (
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-[10px] text-[#8c919a]">Toplanma: <span className="font-semibold text-[#5a6170]">{m.gatheringTime}</span></span>
+                          </div>
+                        )}
+                        {m.venue && (
+                          <div className="flex items-center gap-1 text-[10px] text-[#8c919a]">
+                            <MapPin size={10} className="shrink-0" />
+                            <span className="truncate max-w-[140px]">{m.venue}</span>
+                          </div>
+                        )}
+                        {m.gatheringLocation && !m.venue && (
+                          <div className="flex items-center gap-1 text-[10px] text-[#8c919a]">
+                            <MapPin size={10} className="shrink-0" />
+                            <span className="truncate max-w-[140px]">{m.gatheringLocation}</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </button>
+                );
+              })}
             </div>
           )}
         </div>
@@ -498,55 +596,6 @@ function MiniStat({ label, value, color }: { label: string; value: string; color
       <p className={`text-base sm:text-lg font-bold ${color || "text-[#1a1a2e]"}`}>{value}</p>
       <p className="text-[9px] sm:text-[10px] text-[#8c919a] font-medium whitespace-nowrap">{label}</p>
     </div>
-  );
-}
-
-function MatchCard({ match, formatDate, onClick }: { match: Match; formatDate: (d: string) => string; onClick: () => void }) {
-  const isHome = match.homeAway === "home";
-  const dayName = new Date(match.date).toLocaleDateString("tr-TR", { weekday: "short" }).toUpperCase();
-  const dayNum = new Date(match.date).getDate();
-
-  return (
-    <button onClick={onClick} className="bg-white border border-[#e2e5e9] rounded-xl overflow-hidden hover:shadow-lg hover:border-[#c4111d]/25 transition-all duration-200 text-left group">
-      {/* Date strip */}
-      <div className="flex items-stretch">
-        <div className="w-14 bg-[#c4111d] flex flex-col items-center justify-center py-3 shrink-0">
-          <span className="text-[10px] font-bold text-white/70 uppercase">{dayName}</span>
-          <span className="text-xl font-black text-white leading-none">{dayNum}</span>
-        </div>
-
-        <div className="flex-1 p-3">
-          {/* Badges */}
-          <div className="flex items-center gap-1.5 mb-2">
-            <span className="text-[10px] font-bold text-white bg-[#1a1a2e] px-1.5 py-0.5 rounded">{match.ageGroup}</span>
-            <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded ${isHome ? "bg-blue-50 text-blue-600" : "bg-amber-50 text-amber-600"}`}>
-              {isHome ? "İÇ SAHA" : "DEPLASMAN"}
-            </span>
-          </div>
-
-          {/* Teams vertical */}
-          <div className="space-y-1">
-            <div className="flex items-center gap-2">
-              <Image src="/Logo_S.png" alt="Beylerbeyi" width={20} height={20} className="rounded shrink-0" />
-              <span className="text-sm font-bold text-[#c4111d] group-hover:text-[#9b0d16] transition-colors">Beylerbeyi</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-5 h-5 rounded bg-[#f1f3f5] flex items-center justify-center shrink-0">
-                <span className="text-[9px] font-bold text-[#8c919a]">{match.opponent.charAt(0)}</span>
-              </div>
-              <span className="text-sm font-semibold text-[#1a1a2e] truncate">{match.opponent}</span>
-            </div>
-          </div>
-
-          {/* Venue */}
-          {match.venue && (
-            <p className="text-[10px] text-[#8c919a] flex items-center gap-1 mt-2">
-              <MapPin size={9} /> {match.venue}
-            </p>
-          )}
-        </div>
-      </div>
-    </button>
   );
 }
 
