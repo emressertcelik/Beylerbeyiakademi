@@ -66,10 +66,10 @@ export default function ReportsPage() {
         const statusLower = (ps.participationStatus || "").toLowerCase();
         const isStart = statusLower.includes("ilk");
         const isSub = statusLower.includes("yedek") || statusLower.includes("sonradan");
-        const played = isStart || isSub;
 
         if (existing) {
-          if (played) existing.matches++;
+          // Maçta istatistik satırı varsa, maç sayısı 1 artmalı
+          existing.matches++;
           if (isStart) existing.starts++;
           if (isSub) existing.sub++;
           existing.minutesPlayed += ps.minutesPlayed;
@@ -91,7 +91,7 @@ export default function ReportsPage() {
             jerseyNumber: ps.jerseyNumber,
             position: player?.position || ps.position,
             ageGroup: player?.ageGroup || "",
-            matches: played ? 1 : 0,
+            matches: 1,
             starts: isStart ? 1 : 0,
             sub: isSub ? 1 : 0,
             minutesPlayed: ps.minutesPlayed,
