@@ -1,4 +1,6 @@
+
 "use client";
+import React from "react";
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
@@ -294,14 +296,14 @@ export default function ReportsPage() {
         </div>
       </div>
 
-      {/* Top Performers */}
+      {/* Top Performers - Modern Glassmorphism Grid */}
       {(topScorer || topAssist || topMinutes || topRated || topContributor || topCleanSheet) && (
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {topScorer && (
             <TopCard
               icon={Trophy}
               iconColor="text-amber-500"
-              iconBg="bg-amber-50"
+              iconBg="bg-gradient-to-br from-amber-100/80 to-amber-200/60"
               title="Gol Kralı"
               name={topScorer.name}
               jersey={topScorer.jerseyNumber}
@@ -313,7 +315,7 @@ export default function ReportsPage() {
             <TopCard
               icon={Target}
               iconColor="text-blue-500"
-              iconBg="bg-blue-50"
+              iconBg="bg-gradient-to-br from-blue-100/80 to-blue-200/60"
               title="Asist Kralı"
               name={topAssist.name}
               jersey={topAssist.jerseyNumber}
@@ -325,7 +327,7 @@ export default function ReportsPage() {
             <TopCard
               icon={Handshake}
               iconColor="text-teal-500"
-              iconBg="bg-teal-50"
+              iconBg="bg-gradient-to-br from-teal-100/80 to-teal-200/60"
               title="Gol Katkısı"
               name={topContributor.name}
               jersey={topContributor.jerseyNumber}
@@ -337,7 +339,7 @@ export default function ReportsPage() {
             <TopCard
               icon={Clock}
               iconColor="text-emerald-500"
-              iconBg="bg-emerald-50"
+              iconBg="bg-gradient-to-br from-emerald-100/80 to-emerald-200/60"
               title="En Çok Süre"
               name={topMinutes.name}
               jersey={topMinutes.jerseyNumber}
@@ -349,7 +351,7 @@ export default function ReportsPage() {
             <TopCard
               icon={Star}
               iconColor="text-purple-500"
-              iconBg="bg-purple-50"
+              iconBg="bg-gradient-to-br from-purple-100/80 to-purple-200/60"
               title="En İyi Puan"
               name={topRated.name}
               jersey={topRated.jerseyNumber}
@@ -361,7 +363,7 @@ export default function ReportsPage() {
             <TopCard
               icon={ShieldCheck}
               iconColor="text-cyan-500"
-              iconBg="bg-cyan-50"
+              iconBg="bg-gradient-to-br from-cyan-100/80 to-cyan-200/60"
               title="Gole Kapatan"
               name={topCleanSheet.name}
               jersey={topCleanSheet.jerseyNumber}
@@ -588,20 +590,18 @@ function TopCard({ icon: Icon, iconColor, iconBg, title, name, jersey, value, su
   sub: string;
 }) {
   return (
-    <div className="bg-white rounded-xl border border-[#e2e5e9] p-4 shadow-sm">
-      <div className="flex items-center gap-2 mb-2">
-        <div className={`w-7 h-7 rounded-lg flex items-center justify-center ${iconBg}`}>
-          <Icon size={14} className={iconColor} />
-        </div>
-        <span className="text-[10px] font-semibold text-[#8c919a] uppercase tracking-wider">{title}</span>
+    <div className="bg-white/80 border border-[#e5e7eb] rounded-xl shadow p-3 flex flex-col items-center text-center transition hover:shadow-md duration-150 min-w-0">
+      <div className={`w-8 h-8 rounded-lg flex items-center justify-center mb-2 ${iconBg}`}>
+        <Icon size={18} className={iconColor} />
       </div>
-      <div className="flex items-center gap-2">
-        <span className="text-[10px] font-black text-[#c4111d]">#{jersey}</span>
-        <span className="text-sm font-bold text-[#1a1a2e] truncate">{name}</span>
+      <div className="text-[10px] font-semibold text-[#c4111d] uppercase tracking-wider mb-0.5">{title}</div>
+      <div className="flex items-center justify-center gap-1 mb-1 max-w-full">
+        <span className="text-[10px] font-bold text-[#c4111d] bg-[#fff0f3] rounded px-1 py-0.5">#{jersey}</span>
+        <span className="text-xs font-semibold text-[#1a1a2e] truncate max-w-[140px] sm:max-w-[180px] md:max-w-[220px] lg:max-w-[260px] xl:max-w-[320px]">{name}</span>
       </div>
-      <div className="flex items-center gap-1.5 mt-1">
-        <span className="text-lg font-black text-[#1a1a2e]">{value}</span>
-        <span className="text-[10px] text-[#8c919a]">{sub}</span>
+      <div className="flex flex-col items-center gap-0.5 mt-0.5">
+        <span className="text-lg font-extrabold text-[#1a1a2e]">{value}</span>
+        <span className="text-[10px] text-[#64748b] font-medium">{sub}</span>
       </div>
     </div>
   );
