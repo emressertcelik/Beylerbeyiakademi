@@ -6,7 +6,7 @@ import { X, Edit3, Trash2, MapPin, Calendar, Clock, Star, Users, Navigation } fr
 interface MatchDetailModalProps {
   match: Match;
   onClose: () => void;
-  onEdit: (match: Match) => void;
+  onEdit?: (match: Match) => void;
   onDelete?: (matchId: string) => void;
 }
 
