@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { useAppData } from "@/lib/app-data";
 import { fetchSkillLogs, fetchBodyLogs } from "@/lib/supabase/players";
 import { SkillLog, BodyLog } from "@/types/player";
@@ -257,7 +258,11 @@ export default function PlayerReportPage() {
   return (
     <div className="space-y-5 max-w-4xl mx-auto">
       {/* ═══ Header Card ═══ */}
-      <div className="bg-gradient-to-br from-[#1a1a2e] to-[#2d2d44] rounded-2xl p-5 sm:p-6 text-white relative overflow-hidden">
+      <div className="bg-gradient-to-br from-[#c4111d] to-[#e94a5a] rounded-2xl p-5 sm:p-6 text-white relative overflow-hidden border border-[#f8d7da] shadow-sm">
+        {/* Logo */}
+        <div className="absolute top-4 left-4 z-10">
+          <Image src="/Logo_S.png" alt="Logo" width={48} height={48} className="rounded-xl shadow-md bg-white/80 p-1" />
+        </div>
         <div className="absolute top-0 right-0 w-40 h-40 bg-[#c4111d]/10 rounded-full -translate-y-12 translate-x-12" />
         <div className="absolute bottom-0 left-0 w-28 h-28 bg-[#c4111d]/5 rounded-full translate-y-10 -translate-x-10" />
         <div className="relative flex items-start gap-3 sm:gap-4">
@@ -266,30 +271,30 @@ export default function PlayerReportPage() {
           </button>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-3 flex-wrap">
-              <div className="w-14 h-14 rounded-2xl bg-[#c4111d] flex items-center justify-center text-xl font-black shadow-lg shadow-[#c4111d]/30 shrink-0">
+              <div className="w-14 h-14 rounded-2xl bg-[#c4111d] flex items-center justify-center text-xl font-black shadow-lg shadow-[#c4111d]/30 shrink-0 text-white">
                 {player.jerseyNumber}
               </div>
               <div>
-                <h1 className="text-xl sm:text-2xl font-black tracking-tight">
+                <h1 className="text-xl sm:text-2xl font-black tracking-tight text-white">
                   {player.firstName} {player.lastName}
                 </h1>
-                <div className="flex items-center gap-2 text-xs text-white/60 mt-1 flex-wrap">
-                  <span className="bg-white/10 px-2 py-0.5 rounded-md font-medium">{player.position}</span>
-                  <span className="bg-white/10 px-2 py-0.5 rounded-md font-medium">{player.ageGroup}</span>
+                <div className="flex items-center gap-2 text-xs text-white/90 mt-1 flex-wrap">
+                  <span className="bg-white/20 px-2 py-0.5 rounded-md font-medium text-white">{player.position}</span>
+                  <span className="bg-white/20 px-2 py-0.5 rounded-md font-medium text-white">{player.ageGroup}</span>
                   <span>{age} yaş</span>
-                  <span className="text-white/30">·</span>
+                  <span className="text-white/50">·</span>
                   <span>{player.foot}</span>
-                  <span className="text-white/30">·</span>
+                  <span className="text-white/50">·</span>
                   <span>{player.height}cm · {player.weight}kg</span>
                 </div>
               </div>
             </div>
             {/* Skill Rings */}
             <div className="flex items-center gap-6 mt-5">
-              <RadialRing value={tacticalAvg} label="Taktik" color="#3b82f6" />
-              <RadialRing value={athleticAvg} label="Atletik" color="#10b981" />
+              <RadialRing value={tacticalAvg} label="Taktik" color="#fff" />
+              <RadialRing value={athleticAvg} label="Atletik" color="#fff" />
               {matchStats.avgRating > 0 && (
-                <RadialRing value={matchStats.avgRating} max={5} label="Puan" color="#a855f7" size={64} />
+                <RadialRing value={matchStats.avgRating} max={5} label="Puan" color="#fff" size={64} />
               )}
             </div>
           </div>
@@ -297,42 +302,68 @@ export default function PlayerReportPage() {
       </div>
 
       {/* ═══ Big Stat Cards ═══ */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <div className="bg-white rounded-2xl border border-[#e2e5e9] p-4 shadow-sm">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-2">
+        <div className="bg-white rounded-2xl border border-[#e2e5e9] p-5 shadow-md flex flex-col items-center">
           <div className="flex items-center gap-2 mb-2">
             <div className="w-8 h-8 rounded-lg bg-[#c4111d]/10 flex items-center justify-center"><Swords size={16} className="text-[#c4111d]" /></div>
             <span className="text-[10px] font-semibold text-[#8c919a] uppercase">Maç</span>
           </div>
-          <p className="text-3xl font-black text-[#1a1a2e]">{matchStats.total}</p>
-          <div className="flex gap-2 mt-1">
+          <p className="text-4xl font-extrabold text-[#c4111d] drop-shadow-sm">{matchStats.total}</p>
+          <div className="flex gap-2 mt-2">
             <span className="text-[10px] bg-emerald-50 text-emerald-700 px-1.5 py-0.5 rounded font-semibold">{matchStats.starts} İ11</span>
             <span className="text-[10px] bg-blue-50 text-blue-700 px-1.5 py-0.5 rounded font-semibold">{matchStats.subs} Yedek</span>
           </div>
         </div>
-        <div className="bg-white rounded-2xl border border-[#e2e5e9] p-4 shadow-sm">
-          <div className="flex items-center gap-2 mb-2">
-            <div className="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center"><Trophy size={16} className="text-emerald-600" /></div>
-            <span className="text-[10px] font-semibold text-[#8c919a] uppercase">Gol</span>
-          </div>
-          <p className="text-3xl font-black text-emerald-600">{matchStats.goals}</p>
-          <p className="text-[10px] text-[#8c919a] mt-1">{matchStats.goalsPerMatch.toFixed(2)} / maç</p>
-        </div>
-        <div className="bg-white rounded-2xl border border-[#e2e5e9] p-4 shadow-sm">
-          <div className="flex items-center gap-2 mb-2">
-            <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center"><Target size={16} className="text-blue-600" /></div>
-            <span className="text-[10px] font-semibold text-[#8c919a] uppercase">Asist</span>
-          </div>
-          <p className="text-3xl font-black text-blue-600">{matchStats.assists}</p>
-          <p className="text-[10px] text-[#8c919a] mt-1">{matchStats.assistsPerMatch.toFixed(2)} / maç</p>
-        </div>
-        <div className="bg-white rounded-2xl border border-[#e2e5e9] p-4 shadow-sm">
-          <div className="flex items-center gap-2 mb-2">
-            <div className="w-8 h-8 rounded-lg bg-teal-50 flex items-center justify-center"><Flame size={16} className="text-teal-600" /></div>
-            <span className="text-[10px] font-semibold text-[#8c919a] uppercase">Gol Katkısı</span>
-          </div>
-          <p className="text-3xl font-black text-teal-600">{matchStats.goals + matchStats.assists}</p>
-          <p className="text-[10px] text-[#8c919a] mt-1">{matchStats.total > 0 ? ((matchStats.goals + matchStats.assists) / matchStats.total).toFixed(2) : "0"} / maç</p>
-        </div>
+        {player.position === "Kaleci" ? (
+          <>
+            <div className="bg-white rounded-2xl border border-[#e2e5e9] p-5 shadow-md flex flex-col items-center">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="w-8 h-8 rounded-lg bg-orange-50 flex items-center justify-center"><Trophy size={16} className="text-orange-600" /></div>
+                <span className="text-[10px] font-semibold text-[#8c919a] uppercase">Yediği Gol</span>
+              </div>
+              <p className="text-4xl font-extrabold text-orange-600 drop-shadow-sm">{matchStats.goalsConceded}</p>
+              <p className="text-xs text-[#8c919a] mt-1">{matchStats.total > 0 ? (matchStats.goalsConceded / matchStats.total).toFixed(2) : "0"} / maç</p>
+            </div>
+            <div className="bg-white rounded-2xl border border-[#e2e5e9] p-5 shadow-md flex flex-col items-center">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="w-8 h-8 rounded-lg bg-cyan-50 flex items-center justify-center"><Shield size={16} className="text-cyan-600" /></div>
+                <span className="text-[10px] font-semibold text-[#8c919a] uppercase">Gole Kapatan</span>
+              </div>
+              <p className="text-4xl font-extrabold text-cyan-600 drop-shadow-sm">{matchStats.cleanSheets}</p>
+              <p className="text-xs text-[#8c919a] mt-1">{matchStats.total > 0 ? (matchStats.cleanSheets / matchStats.total * 100).toFixed(0) : "0"}%</p>
+            </div>
+            <div className="bg-white rounded-2xl border border-[#e2e5e9] p-5 shadow-none flex items-center justify-center">
+              <span className="text-xs text-[#8c919a]">Kaleci için gol/asist istatistiği gösterilmez.</span>
+            </div>
+          </>
+        ) : (
+          <>
+            <div className="bg-white rounded-2xl border border-[#e2e5e9] p-5 shadow-md flex flex-col items-center">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center"><Trophy size={16} className="text-emerald-600" /></div>
+                <span className="text-[10px] font-semibold text-[#8c919a] uppercase">Gol</span>
+              </div>
+              <p className="text-4xl font-extrabold text-emerald-600 drop-shadow-sm">{matchStats.goals}</p>
+              <p className="text-xs text-[#8c919a] mt-1">{matchStats.goalsPerMatch.toFixed(2)} / maç</p>
+            </div>
+            <div className="bg-white rounded-2xl border border-[#e2e5e9] p-5 shadow-md flex flex-col items-center">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center"><Target size={16} className="text-blue-600" /></div>
+                <span className="text-[10px] font-semibold text-[#8c919a] uppercase">Asist</span>
+              </div>
+              <p className="text-4xl font-extrabold text-blue-600 drop-shadow-sm">{matchStats.assists}</p>
+              <p className="text-xs text-[#8c919a] mt-1">{matchStats.assistsPerMatch.toFixed(2)} / maç</p>
+            </div>
+            <div className="bg-white rounded-2xl border border-[#e2e5e9] p-5 shadow-md flex flex-col items-center">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="w-8 h-8 rounded-lg bg-teal-50 flex items-center justify-center"><Flame size={16} className="text-teal-600" /></div>
+                <span className="text-[10px] font-semibold text-[#8c919a] uppercase">Gol Katkısı</span>
+              </div>
+              <p className="text-4xl font-extrabold text-teal-600 drop-shadow-sm">{matchStats.goals + matchStats.assists}</p>
+              <p className="text-xs text-[#8c919a] mt-1">{matchStats.total > 0 ? ((matchStats.goals + matchStats.assists) / matchStats.total).toFixed(2) : "0"} / maç</p>
+            </div>
+          </>
+        )}
       </div>
 
       {/* ═══ Extended Stats Row ═══ */}

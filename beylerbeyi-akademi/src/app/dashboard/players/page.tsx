@@ -10,7 +10,7 @@ import { Plus, Search, Users, Calendar } from "lucide-react";
 import { useToast } from "@/components/Toast";
 
 export default function PlayersPage() {
-  const { players, loading, lookups, savePlayer, removePlayer, refreshPlayers, getPlayerStatsFromMatches } = useAppData();
+  const { players, loading, lookups, savePlayer, removePlayer, refreshPlayers, getPlayerStatsFromMatches, userRole } = useAppData();
 
   const AGE_FILTERS = useMemo(() => [
     { label: "Tümü", value: "ALL" },
@@ -55,26 +55,31 @@ export default function PlayersPage() {
   const selectedSeasonLabel = SEASON_FILTERS.find((f) => f.value === selectedSeason)?.label || "Tüm Sezonlar";
 
   // Enrich players with match-based stats
-  const enrichedPlayers = useMemo(() => {
-    return players.map((p) => {
+  // Filter by userRole (antrenor: only own age group)
+  const filteredPlayers = useMemo(() => {
+    let filtered = players;
+    if (userRole?.role === "antrenor" && userRole.age_group) {
+      filtered = filtered.filter((p) => p.ageGroup === userRole.age_group);
+    }
+    // Apply UI filters
+    filtered = filtered.filter((p) => {
+      const matchAge = selectedAge === "ALL" || p.ageGroup === selectedAge;
+      const matchSeason = selectedSeason === "ALL" || p.seasons.includes(selectedSeason);
+      const matchSearch =
+        search === "" ||
+        `${p.firstName} ${p.lastName}`.toLowerCase().includes(search.toLowerCase()) ||
+        p.position.toLowerCase().includes(search.toLowerCase()) ||
+        String(p.jerseyNumber).includes(search);
+      return matchAge && matchSeason && matchSearch;
+    });
+    return filtered.map((p) => {
       const matchStats = getPlayerStatsFromMatches(p.id);
       if (matchStats.matches > 0) {
         return { ...p, stats: matchStats };
       }
       return p;
     });
-  }, [players, getPlayerStatsFromMatches]);
-
-  const filtered = enrichedPlayers.filter((p) => {
-    const matchAge = selectedAge === "ALL" || p.ageGroup === selectedAge;
-    const matchSeason = selectedSeason === "ALL" || p.seasons.includes(selectedSeason);
-    const matchSearch =
-      search === "" ||
-      `${p.firstName} ${p.lastName}`.toLowerCase().includes(search.toLowerCase()) ||
-      p.position.toLowerCase().includes(search.toLowerCase()) ||
-      String(p.jerseyNumber).includes(search);
-    return matchAge && matchSeason && matchSearch;
-  });
+  }, [players, userRole, selectedAge, selectedSeason, search, getPlayerStatsFromMatches]);
 
   const handleSave = async (saved: Player) => {
     try {
@@ -109,6 +114,10 @@ export default function PlayersPage() {
     }
   };
 
+  // Only allow add/edit for own age group (antrenor)
+  const canEdit = userRole?.role === "yonetici" || (userRole?.role === "antrenor" && !!userRole.age_group);
+  const canAddPlayer = userRole?.role === "yonetici" || (userRole?.role === "antrenor" && !!userRole.age_group);
+
   return (
     <div className="space-y-6 animate-slide-up">
       {/* Header */}
@@ -118,16 +127,18 @@ export default function PlayersPage() {
             Oyuncular
           </h1>
           <p className="text-sm text-[#5a6170] mt-1">
-            {filtered.length} oyuncu {selectedAge !== "ALL" ? `· ${selectedAge}` : ""}
+            {filteredPlayers.length} oyuncu {selectedAge !== "ALL" ? `· ${selectedAge}` : ""}
           </p>
         </div>
-        <button
-          onClick={() => setEditingPlayer(null)}
-          className="flex items-center gap-2 px-4 py-2.5 bg-[#c4111d] hover:bg-[#9b0d16] text-white text-sm font-semibold rounded-xl transition-all duration-200 shadow-sm shadow-[#c4111d]/25 focus-ring"
-        >
-          <Plus size={18} />
-          Oyuncu Ekle
-        </button>
+        {canAddPlayer && (
+          <button
+            onClick={() => setEditingPlayer(null)}
+            className="flex items-center gap-2 px-4 py-2.5 bg-[#c4111d] hover:bg-[#9b0d16] text-white text-sm font-semibold rounded-xl transition-all duration-200 shadow-sm shadow-[#c4111d]/25 focus-ring"
+          >
+            <Plus size={18} />
+            Oyuncu Ekle
+          </button>
+        )}
       </div>
 
       {/* Filters Bar */}
@@ -209,7 +220,7 @@ export default function PlayersPage() {
           <div className="w-10 h-10 border-3 border-[#e2e5e9] border-t-[#c4111d] rounded-full animate-spin mb-4" />
           <p className="text-sm font-medium text-[#5a6170]">Oyuncular yükleniyor...</p>
         </div>
-      ) : filtered.length === 0 ? (
+      ) : filteredPlayers.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 animate-fade-in">
           <div className="w-16 h-16 rounded-2xl bg-[#f1f3f5] flex items-center justify-center mb-4">
             <Users size={28} className="text-[#8c919a]" />
@@ -219,7 +230,7 @@ export default function PlayersPage() {
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filtered.map((player) => (
+          {filteredPlayers.map((player) => (
             <PlayerCard
               key={player.id}
               player={player}
@@ -234,13 +245,21 @@ export default function PlayersPage() {
         <PlayerDetailModal
           player={selectedPlayer}
           onClose={() => setSelectedPlayer(null)}
-          onEdit={handleEditFromDetail}
-          onDelete={handleDeletePlayer}
+          onEdit={(player) => {
+            if (
+              canEdit &&
+              (userRole?.role === "yonetici" ||
+                (userRole?.role === "antrenor" && player.ageGroup === userRole.age_group))
+            ) {
+              handleEditFromDetail(player);
+            }
+          }}
+          onDelete={userRole?.role === "yonetici" ? handleDeletePlayer : undefined}
         />
       )}
 
       {/* Form Modal */}
-      {editingPlayer !== undefined && (
+      {editingPlayer !== undefined && canEdit && (
         <PlayerFormModal
           player={editingPlayer}
           saving={saving}

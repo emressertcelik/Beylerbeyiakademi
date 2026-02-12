@@ -45,13 +45,15 @@ export default function MatchDetailModal({ match, onClose, onEdit, onDelete }: M
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <button
-              onClick={() => onEdit(match)}
-              className="flex items-center gap-2 px-4 py-2 bg-[#c4111d] hover:bg-[#9b0d16] text-white text-sm font-medium rounded-lg transition-all duration-200 shadow-sm"
-            >
-              <Edit3 size={14} />
-              Düzenle
-            </button>
+            {onEdit && (
+              <button
+                onClick={() => onEdit(match)}
+                className="flex items-center gap-2 px-4 py-2 bg-[#c4111d] hover:bg-[#9b0d16] text-white text-sm font-medium rounded-lg transition-all duration-200 shadow-sm"
+              >
+                <Edit3 size={14} />
+                Düzenle
+              </button>
+            )}
             {onDelete && (
               <button
                 onClick={() => { if (confirm(`${match.opponent} maçı silinecek. Emin misiniz?`)) onDelete(match.id); }}

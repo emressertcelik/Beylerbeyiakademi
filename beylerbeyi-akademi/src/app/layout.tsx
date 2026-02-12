@@ -15,6 +15,9 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Beylerbeyi Akademi",
   description: "Beylerbeyi Akademi Yönetim Sistemi",
+  icons: {
+    icon: "/Logo_S.png",
+  },
 };
 
 export default function RootLayout({

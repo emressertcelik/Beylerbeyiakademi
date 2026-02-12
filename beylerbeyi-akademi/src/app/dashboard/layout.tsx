@@ -5,7 +5,7 @@ import Image from "next/image";
 import React, { useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { AppDataProvider } from "@/lib/app-data";
+import { AppDataProvider, useAppData } from "@/lib/app-data";
 import { ToastProvider } from "@/components/Toast";
 import { Users, LogOut, Home, Menu, X, ChevronRight, Shield, Settings, BarChart3 } from "lucide-react";
 
@@ -90,18 +90,10 @@ export default function DashboardLayout({
 
           {/* Right: Settings + Logout */}
           <div className="flex items-center gap-1">
-            <Link
-              href="/dashboard/settings"
-              className={`hidden md:flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-                pathname.startsWith("/dashboard/settings")
-                  ? "text-[#c4111d] bg-red-50"
-                  : "text-[#5a6170] hover:text-[#1a1a2e] hover:bg-[#f1f3f5]"
-              }`}
-            >
-              <Settings size={16} />
-              <span>Ayarlar</span>
-            </Link>
-            <div className="hidden md:block w-px h-5 bg-[#e2e5e9] mx-1" />
+            <SettingsMenuButton pathname={pathname} />
+            <nav className="flex md:hidden items-center gap-1">
+              <MobileNavItems pathname={pathname} />
+            </nav>
             <button
               onClick={handleLogout}
               className="hidden md:flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-[#5a6170] hover:text-[#c4111d] hover:bg-red-50 transition-all duration-200"
@@ -109,29 +101,6 @@ export default function DashboardLayout({
               <LogOut size={16} />
               <span>Çıkış</span>
             </button>
-
-          {/* Mobile Nav Tabs */}
-            <nav className="flex md:hidden items-center gap-1">
-              {NAV_ITEMS.map((item) => {
-                const isActive =
-                  item.href === "/dashboard"
-                    ? pathname === "/dashboard"
-                    : pathname.startsWith(item.href);
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className={`flex items-center justify-center w-9 h-9 rounded-lg transition-all duration-200 ${
-                      isActive
-                        ? "bg-[#c4111d] text-white shadow-sm shadow-[#c4111d]/25"
-                        : "text-[#5a6170] hover:text-[#1a1a2e] hover:bg-[#f1f3f5]"
-                    }`}
-                  >
-                    <item.icon size={18} />
-                  </Link>
-                );
-              })}
-            </nav>
 
             {/* Mobile menu button */}
             <button
@@ -171,33 +140,17 @@ export default function DashboardLayout({
                   </Link>
                 );
               })}
-              <div className="border-t border-[#e2e5e9] pt-2 mt-2 space-y-1">
-                <Link
-                  href="/dashboard/settings"
-                  className={`flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 ${
-                    pathname.startsWith("/dashboard/settings")
-                      ? "bg-[#c4111d] text-white"
-                      : "text-[#5a6170] hover:bg-[#f1f3f5]"
-                  }`}
-                  onClick={() => setMenuOpen(false)}
-                >
-                  <div className="flex items-center gap-3">
-                    <Settings size={20} />
-                    Ayarlar
-                  </div>
-                  <ChevronRight size={16} className="opacity-40" />
-                </Link>
-                <button
-                  onClick={() => {
-                    setMenuOpen(false);
-                    handleLogout();
-                  }}
-                  className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-[#c4111d] hover:bg-red-50 transition-all duration-200"
-                >
-                  <LogOut size={20} />
-                  Çıkış Yap
-                </button>
-              </div>
+              <MobileSettingsMenuLink pathname={pathname} setMenuOpen={setMenuOpen} />
+              <button
+                onClick={() => {
+                  setMenuOpen(false);
+                  handleLogout();
+                }}
+                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-[#c4111d] hover:bg-red-50 transition-all duration-200"
+              >
+                <LogOut size={20} />
+                Çıkış Yap
+              </button>
             </nav>
           </div>
         )}
@@ -212,5 +165,88 @@ export default function DashboardLayout({
     </div>
     </ToastProvider>
     </AppDataProvider>
+  );
+}
+
+// Ayarlar butonunu context ile kontrol eden ayrı bir component
+function SettingsMenuButton({ pathname }: { pathname: string }) {
+  const { userRole } = useAppData();
+  if (userRole?.role === "oyuncu") return null;
+  return (
+    <Link
+      href="/dashboard/settings"
+      className={`hidden md:flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+        pathname.startsWith("/dashboard/settings")
+          ? "text-[#c4111d] bg-red-50"
+          : "text-[#5a6170] hover:text-[#1a1a2e] hover:bg-[#f1f3f5]"
+      }`}
+    >
+      <Settings size={16} />
+      <span>Ayarlar</span>
+    </Link>
+  );
+}
+
+// Mobile nav items contextli component
+function MobileNavItems({ pathname }: { pathname: string }) {
+  const { userRole } = useAppData();
+  return (
+    <>
+      {NAV_ITEMS.filter(item => item.href !== "/dashboard/settings").map((item) => {
+        const isActive =
+          item.href === "/dashboard"
+            ? pathname === "/dashboard"
+            : pathname.startsWith(item.href);
+        return (
+          <Link
+            key={item.href}
+            href={item.href}
+            className={`flex items-center justify-center w-9 h-9 rounded-lg transition-all duration-200 ${
+              isActive
+                ? "bg-[#c4111d] text-white shadow-sm shadow-[#c4111d]/25"
+                : "text-[#5a6170] hover:text-[#1a1a2e] hover:bg-[#f1f3f5]"
+            }`}
+          >
+            <item.icon size={18} />
+          </Link>
+        );
+      })}
+      {/* Ayarlar sadece oyuncu dışı */}
+      {userRole?.role !== "oyuncu" && (
+        <Link
+          href="/dashboard/settings"
+          className={`flex items-center justify-center w-9 h-9 rounded-lg transition-all duration-200 ${
+            pathname.startsWith("/dashboard/settings")
+              ? "bg-[#c4111d] text-white shadow-sm shadow-[#c4111d]/25"
+              : "text-[#5a6170] hover:text-[#1a1a2e] hover:bg-[#f1f3f5]"
+          }`}
+        >
+          <Settings size={18} />
+        </Link>
+      )}
+    </>
+  );
+}
+
+// Mobile settings menu link contextli component
+function MobileSettingsMenuLink({ pathname, setMenuOpen }: { pathname: string, setMenuOpen: (v: boolean) => void }) {
+  const { userRole } = useAppData();
+  if (userRole?.role === "oyuncu") return null;
+  return (
+    <Link
+      href="/dashboard/settings"
+      className={`flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 ${
+        pathname.startsWith("/dashboard/settings")
+          ? "bg-[#c4111d] text-white"
+          : "text-[#5a6170] hover:bg-[#f1f3f5]"
+      }`}
+      onClick={() => setMenuOpen(false)}
+    >
+      <div className="flex items-center gap-3">
+        <Settings size={20} />
+        Ayarlar
+      </div>
+      <ChevronRight size={16} className="opacity-40" />
+    </Link>
   );
 }

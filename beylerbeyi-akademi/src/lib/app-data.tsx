@@ -1,6 +1,8 @@
 "use client";
 
 import React, { createContext, useContext, useState, useCallback, useMemo, useEffect } from "react";
+import { fetchCurrentUserRole } from "@/lib/supabase/userRole";
+import { UserRoleInfo } from "@/types/userRole";
 import { Player } from "@/types/player";
 import { Match } from "@/types/match";
 import {
@@ -41,6 +43,8 @@ interface AppData {
     cleanSheets: number;
     minutesPlayed: number;
   };
+  userRole: UserRoleInfo | null;
+  refreshUserRole: () => Promise<void>;
 }
 
 const AppDataContext = createContext<AppData | null>(null);
@@ -56,6 +60,16 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
     participationStatuses: [],
   });
   const [loading, setLoading] = useState(true);
+  const [userRole, setUserRole] = useState<UserRoleInfo | null>(null);
+  // Kullanıcı rolünü çek
+  const refreshUserRole = useCallback(async () => {
+    const role = await fetchCurrentUserRole();
+    setUserRole(role);
+  }, []);
+
+  useEffect(() => {
+    refreshUserRole();
+  }, [refreshUserRole]);
 
   // Supabase'den oyuncuları çek
   const refreshPlayers = useCallback(async () => {
@@ -193,8 +207,8 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
   );
 
   const value = useMemo(
-    () => ({ players, matches, lookups, loading, setPlayers, setMatches, refreshPlayers, refreshMatches, refreshLookups, savePlayer, removePlayer, saveMatch, removeMatch, getPlayerStatsFromMatches }),
-    [players, matches, lookups, loading, refreshPlayers, refreshMatches, refreshLookups, savePlayer, removePlayer, saveMatch, removeMatch, getPlayerStatsFromMatches]
+    () => ({ players, matches, lookups, loading, setPlayers, setMatches, refreshPlayers, refreshMatches, refreshLookups, savePlayer, removePlayer, saveMatch, removeMatch, getPlayerStatsFromMatches, userRole, refreshUserRole }),
+    [players, matches, lookups, loading, refreshPlayers, refreshMatches, refreshLookups, savePlayer, removePlayer, saveMatch, removeMatch, getPlayerStatsFromMatches, userRole, refreshUserRole]
   );
 
   return (

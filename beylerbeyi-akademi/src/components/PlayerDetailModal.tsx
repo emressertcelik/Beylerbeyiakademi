@@ -147,13 +147,15 @@ export default function PlayerDetailModal({ player, onClose, onEdit, onDelete }:
               >
                 <span>Rapor</span>
               </a>
-              <button
-                onClick={() => onEdit(player)}
-                className="flex items-center gap-1.5 px-3 sm:px-4 py-2 bg-[#f1f3f5] hover:bg-[#e2e5e9] text-[#c4111d] text-xs sm:text-sm font-medium rounded-lg transition-all duration-200 border border-[#e2e5e9]"
-              >
-                <Edit3 size={14} />
-                <span className="hidden sm:inline">Düzenle</span>
-              </button>
+              {onEdit && (
+                <button
+                  onClick={() => onEdit(player)}
+                  className="flex items-center gap-1.5 px-3 sm:px-4 py-2 bg-[#f1f3f5] hover:bg-[#e2e5e9] text-[#c4111d] text-xs sm:text-sm font-medium rounded-lg transition-all duration-200 border border-[#e2e5e9]"
+                >
+                  <Edit3 size={14} />
+                  <span className="hidden sm:inline">Düzenle</span>
+                </button>
+              )}
               {onDelete && (
                 <button
                   onClick={() => { if (confirm(`${player.firstName} ${player.lastName} silinecek. Emin misiniz?`)) onDelete(player.id); }}

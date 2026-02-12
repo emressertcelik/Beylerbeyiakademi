@@ -57,7 +57,7 @@ function computeTeamStats(matches: Match[], ageGroup: AgeGroup | "ALL", season: 
 }
 
 export default function TeamsPage() {
-  const { players, matches, lookups, saveMatch, removeMatch } = useAppData();
+  const { players, matches, lookups, saveMatch, removeMatch, userRole } = useAppData();
 
   const AGE_FILTERS = useMemo(() => [
     { label: "Tümü", value: "ALL" as AgeGroup | "ALL" },
@@ -89,14 +89,19 @@ export default function TeamsPage() {
 
   const selectedSeasonLabel = SEASON_FILTERS.find((f) => f.value === selectedSeason)?.label || "Tüm Sezonlar";
 
-  const filteredMatches = useMemo(
-    () => matches.filter((m) => {
+  // Filter by userRole (antrenor: only own age group)
+  const filteredMatches = useMemo(() => {
+    let filtered = matches;
+    if (userRole?.role === "antrenor" && userRole.age_group) {
+      filtered = filtered.filter((m) => m.ageGroup === userRole.age_group);
+    }
+    filtered = filtered.filter((m) => {
       const ageOk = selectedAge === "ALL" || m.ageGroup === selectedAge;
       const seasonOk = selectedSeason === "ALL" || m.season === selectedSeason;
       return ageOk && seasonOk;
-    }).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()),
-    [matches, selectedAge, selectedSeason]
-  );
+    });
+    return filtered.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  }, [matches, userRole, selectedAge, selectedSeason]);
 
   const teamStats = useMemo(
     () => computeTeamStats(matches, selectedAge, selectedSeason),
@@ -107,6 +112,12 @@ export default function TeamsPage() {
     try {
       setSaving(true);
       const isEdit = matches.some((m) => m.id === saved.id);
+      // Antrenör ise sadece kendi yaş grubuna kayıt yapılabilir
+      if (userRole?.role === "antrenor" && userRole.age_group && saved.ageGroup !== userRole.age_group) {
+        showToast("error", "Sadece kendi yaş grubunuz için maç ekleyebilirsiniz.");
+        setSaving(false);
+        return;
+      }
       await saveMatch(saved, isEdit);
       setEditingMatch(undefined);
       setSelectedMatch(null);
@@ -135,6 +146,9 @@ export default function TeamsPage() {
     }
   };
 
+  // Only allow add/edit for own age group (antrenor)
+  const canEdit = userRole?.role === "yonetici" || (userRole?.role === "antrenor" && !!userRole.age_group);
+
   return (
     <div className="space-y-6 animate-slide-up">
       {/* ...puan durumu linki kaldırıldı... */}
@@ -146,13 +160,15 @@ export default function TeamsPage() {
             {filteredMatches.length} maç {selectedAge !== "ALL" ? `· ${selectedAge}` : ""}
           </p>
         </div>
-        <button
-          onClick={() => setEditingMatch(null)}
-          className="flex items-center gap-2 px-4 py-2.5 bg-[#c4111d] hover:bg-[#9b0d16] text-white text-sm font-semibold rounded-xl transition-all duration-200 shadow-sm shadow-[#c4111d]/25 focus-ring"
-        >
-          <Plus size={18} />
-          Yeni Maç Ekle
-        </button>
+        {canEdit && (
+          <button
+            onClick={() => setEditingMatch(null)}
+            className="flex items-center gap-2 px-4 py-2.5 bg-[#c4111d] hover:bg-[#9b0d16] text-white text-sm font-semibold rounded-xl transition-all duration-200 shadow-sm shadow-[#c4111d]/25 focus-ring"
+          >
+            <Plus size={18} />
+            Yeni Maç Ekle
+          </button>
+        )}
       </div>
 
       {/* Filters Bar */}
@@ -304,13 +320,13 @@ export default function TeamsPage() {
         <MatchDetailModal
           match={selectedMatch}
           onClose={() => setSelectedMatch(null)}
-          onEdit={handleEditFromDetail}
-          onDelete={handleDeleteMatch}
+          onEdit={canEdit && (userRole?.role === "yonetici" || (userRole?.role === "antrenor" && selectedMatch.ageGroup === userRole.age_group)) ? handleEditFromDetail : undefined}
+          onDelete={userRole?.role === "yonetici" ? handleDeleteMatch : undefined}
         />
       )}
 
       {/* Form Modal */}
-      {editingMatch !== undefined && (
+      {editingMatch !== undefined && canEdit && (
         <MatchFormModal
           match={editingMatch}
           players={players}

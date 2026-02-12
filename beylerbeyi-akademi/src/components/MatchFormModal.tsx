@@ -32,8 +32,12 @@ function statusColor(status: string): string {
 }
 
 export default function MatchFormModal({ match, players, saving, onClose, onSave }: MatchFormModalProps) {
-  const { lookups } = useAppData();
-  const AGE_GROUPS = lookups.ageGroups.filter((a) => a.isActive).map((a) => a.value);
+  const { lookups, userRole } = useAppData();
+  let AGE_GROUPS = lookups.ageGroups.filter((a) => a.isActive).map((a) => a.value);
+  // Antrenör ise sadece kendi yaş grubunu seçebilsin
+  if (userRole?.role === "antrenor" && userRole.age_group) {
+    AGE_GROUPS = [userRole.age_group];
+  }
   const SEASONS = lookups.seasons.filter((s) => s.isActive).map((s) => s.value);
   const PARTICIPATION_STATUSES = lookups.participationStatuses.filter((p) => p.isActive).map((p) => p.value);
   const isEdit = !!match;
@@ -212,7 +216,7 @@ export default function MatchFormModal({ match, players, saving, onClose, onSave
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-fade-in">
-      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
+      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose}></div>
 
       <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] flex flex-col border border-[#e2e5e9] animate-slide-in-up">
         {/* Header */}
@@ -282,6 +286,7 @@ export default function MatchFormModal({ match, players, saving, onClose, onSave
                       setPlayerStats([]);
                     }}
                     className="w-full px-3 py-2 bg-[#f8f9fb] border border-[#e2e5e9] rounded-lg text-sm text-[#1a1a2e] focus:outline-none focus:ring-2 focus:ring-[#c4111d]/20 focus:border-[#c4111d]/30 transition-all"
+                    disabled={userRole?.role === "antrenor"}
                   >
                     {AGE_GROUPS.map((ag) => (
                       <option key={ag} value={ag}>{ag}</option>

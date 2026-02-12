@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
 import { useAppData } from "@/lib/app-data";
 import {
   addLookupItem,
@@ -8,6 +8,8 @@ import {
   deleteLookupItem,
   LookupItem,
 } from "@/lib/supabase/lookups";
+import { fetchAllUsersWithRoles, inviteUserWithRole, updateUserRole, SupabaseUser } from "@/lib/supabase/users";
+import { createClient } from "@/lib/supabase/client";
 import {
   Plus,
   Trash2,
@@ -23,6 +25,7 @@ import {
 } from "lucide-react";
 
 /* ────────── Tablo adı eşlemeleri ────────── */
+
 type LookupTable =
   | "lookup_positions"
   | "lookup_feet"
@@ -30,9 +33,10 @@ type LookupTable =
   | "lookup_seasons"
   | "lookup_participation_statuses";
 
+type TabKey = keyof typeof TAB_META | "users";
 interface TabConfig {
-  key: keyof typeof TAB_META;
-  table: LookupTable;
+  key: string;
+  table?: LookupTable;
   label: string;
   icon: React.ElementType;
   placeholder: string;
@@ -46,28 +50,69 @@ const TAB_META = {
   participationStatuses: { table: "lookup_participation_statuses" as LookupTable, label: "Katılım Durumu", icon: CheckCircle2, placeholder: "Yeni katılım durumu" },
 } as const;
 
-const TABS: TabConfig[] = Object.entries(TAB_META).map(([key, val]) => ({
-  key: key as keyof typeof TAB_META,
-  ...val,
-}));
+const TABS: TabConfig[] = [
+  ...Object.entries(TAB_META).map(([key, val]) => ({
+    key,
+    ...val,
+  })),
+  { key: "users", label: "Kullanıcılar", icon: Users, placeholder: "" },
+];
 
 /* ════════════════════════════════════════ */
 /*              SAYFA                      */
 /* ════════════════════════════════════════ */
 export default function SettingsPage() {
-  const { lookups, refreshLookups, loading } = useAppData();
-  const [activeTab, setActiveTab] = useState<keyof typeof TAB_META>("positions");
+  const { lookups, refreshLookups, loading, userRole } = useAppData();
+
+  // Sadece yönetici erişebilir
+  if (userRole?.role !== "yonetici") {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh]">
+        <div className="text-2xl font-bold text-[#c4111d] mb-2">Erişim Engellendi</div>
+        <div className="text-[#5a6170] text-sm">Bu sayfaya sadece yöneticiler erişebilir.</div>
+      </div>
+    );
+  }
+  const [activeTab, setActiveTab] = useState<string>("positions");
   const [newValue, setNewValue] = useState("");
+  // Kullanıcı yönetimi için ek state
+  const [users, setUsers] = useState<SupabaseUser[]>([]);
+  const [userEmail, setUserEmail] = useState("");
+  const [userRoleToAdd, setUserRoleToAdd] = useState("oyuncu");
+  const [userSaveLoading, setUserSaveLoading] = useState<string | null>(null);
+  const [userError, setUserError] = useState<string | null>(null);
+  // Kullanıcıları yükle
+  const loadUsers = async () => {
+    // Yönetici ise tüm kullanıcıları, antrenör ise sadece kendi yaş grubunu görür
+    if (userRole?.role === "yonetici") {
+      const data = await fetchAllUsersWithRoles();
+      setUsers(data);
+    } else if (userRole?.role === "antrenor" && userRole.age_group) {
+      const data = await fetchAllUsersWithRoles(userRole.age_group);
+      setUsers(data);
+    } else {
+      setUsers([]);
+    }
+  };
+  // Kullanıcı sekmesine geçince yükle
+  React.useEffect(() => {
+    if (activeTab === "users" && (userRole?.role === "yonetici" || userRole?.role === "antrenor")) {
+      loadUsers();
+    }
+    // eslint-disable-next-line
+  }, [activeTab, userRole]);
   const [saving, setSaving] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editValue, setEditValue] = useState("");
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
 
-  const tab = TAB_META[activeTab];
-  const items: LookupItem[] = lookups[activeTab] ?? [];
+  const isLookupTab = activeTab !== "users";
+  const tab: TabConfig | undefined = isLookupTab ? TABS.find(t => t.key === activeTab) : undefined;
+  const items: LookupItem[] = isLookupTab && tab && tab.table ? lookups[activeTab as keyof typeof TAB_META] ?? [] : [];
 
   /* ── Yeni ekle ── */
   const handleAdd = async () => {
+    if (!isLookupTab || !tab || !tab.table) return;
     const trimmed = newValue.trim();
     if (!trimmed) return;
     // Zaten var mı kontrol et
@@ -88,6 +133,7 @@ export default function SettingsPage() {
 
   /* ── Güncelle ── */
   const handleUpdate = async (id: string) => {
+    if (!isLookupTab || !tab || !tab.table) return;
     const trimmed = editValue.trim();
     if (!trimmed) return;
     setSaving(true);
@@ -105,6 +151,7 @@ export default function SettingsPage() {
 
   /* ── Sil ── */
   const handleDelete = async (id: string) => {
+    if (!isLookupTab || !tab || !tab.table) return;
     setSaving(true);
     try {
       await deleteLookupItem(tab.table, id);
@@ -120,6 +167,7 @@ export default function SettingsPage() {
 
   /* ── Sıra değiştir ── */
   const handleMoveUp = async (index: number) => {
+    if (!isLookupTab || !tab || !tab.table) return;
     if (index === 0) return;
     const current = items[index];
     const above = items[index - 1];
@@ -139,6 +187,7 @@ export default function SettingsPage() {
   };
 
   const handleMoveDown = async (index: number) => {
+    if (!isLookupTab || !tab || !tab.table) return;
     if (index >= items.length - 1) return;
     const current = items[index];
     const below = items[index + 1];
@@ -204,7 +253,7 @@ export default function SettingsPage() {
                     : "bg-[#f1f3f5] text-[#8c919a]"
                 }`}
               >
-                {(lookups[t.key] ?? []).length}
+                {t.key !== "users" ? (lookups[t.key as keyof typeof lookups] ?? []).length : ""}
               </span>
             </button>
           );
@@ -213,35 +262,116 @@ export default function SettingsPage() {
 
       {/* İçerik Kartı */}
       <div className="bg-white rounded-2xl border border-[#e2e5e9] shadow-sm overflow-hidden">
-        {/* Yeni Ekleme Alanı */}
-        <div className="p-4 border-b border-[#e2e5e9] bg-[#f8f9fb]">
-          <div className="flex gap-2">
-            <input
-              type="text"
-              value={newValue}
-              onChange={(e) => setNewValue(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handleAdd()}
-              placeholder={tab.placeholder}
-              className="flex-1 px-4 py-2.5 rounded-xl border border-[#e2e5e9] bg-white text-sm text-[#1a1a2e] placeholder:text-[#8c919a] focus:outline-none focus:ring-2 focus:ring-[#c4111d]/20 focus:border-[#c4111d]/40 transition-all"
-            />
-            <button
-              onClick={handleAdd}
-              disabled={saving || !newValue.trim()}
-              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#c4111d] text-white text-sm font-medium hover:bg-[#a30f18] disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm shadow-[#c4111d]/25"
-            >
-              {saving ? <Loader2 size={16} className="animate-spin" /> : <Plus size={16} />}
-              Ekle
-            </button>
+        {activeTab !== "users" ? (
+          <>
+            {/* Yeni Ekleme Alanı */}
+            {(userRole?.role === "yonetici" || userRole?.role === "antrenor") && (
+              <div className="p-4 border-b border-[#e2e5e9] bg-[#f8f9fb]">
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={newValue}
+                    onChange={(e) => setNewValue(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && handleAdd()}
+                    placeholder={tab?.placeholder}
+                    className="flex-1 px-4 py-2.5 rounded-xl border border-[#e2e5e9] bg-white text-sm text-[#1a1a2e] placeholder:text-[#8c919a] focus:outline-none focus:ring-2 focus:ring-[#c4111d]/20 focus:border-[#c4111d]/40 transition-all"
+                  />
+                  <button
+                    onClick={handleAdd}
+                    disabled={saving || !newValue.trim()}
+                    className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#c4111d] text-white text-sm font-medium hover:bg-[#a30f18] disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm shadow-[#c4111d]/25"
+                  >
+                    {saving ? <Loader2 size={16} className="animate-spin" /> : <Plus size={16} />}
+                    Ekle
+                  </button>
+                </div>
+              </div>
+            )}
+            {/* Liste */}
+            {/* ...mevcut kod... */}
+          </>
+        ) : userRole?.role === "yonetici" || userRole?.role === "antrenor" ? (
+          <div className="p-4">
+            <h2 className="text-lg font-bold mb-4">Kullanıcılar</h2>
+            {userRole?.role?.toString() === "antrenor" && userRole.age_group && (
+              <div className="mb-2 text-xs text-blue-700 bg-blue-50 rounded px-2 py-1 inline-block">
+                Sadece kendi yaş grubunuzdaki kullanıcıları görebilirsiniz: <b>{(userRole as any).age_group}</b>
+              </div>
+            )}
+            <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+              {users.map((u) => (
+                <div key={u.id} className="flex items-center gap-4 p-4 bg-[#f8f9fb] rounded-xl border border-[#e2e5e9] shadow-sm">
+                  <div className="flex items-center justify-center w-12 h-12 rounded-full bg-[#e2e5e9] text-[#c4111d] font-bold text-lg">
+                    {u.email?.[0]?.toUpperCase() || "?"}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="font-medium text-[#1a1a2e] truncate">{u.email}</div>
+                    <div className="flex items-center gap-2 mt-1">
+                      <span className={`text-xs px-2 py-0.5 rounded-full font-semibold ${u.role === "yonetici" ? "bg-[#c4111d]/10 text-[#c4111d]" : u.role === "antrenor" ? "bg-blue-100 text-blue-700" : u.role === "oyuncu" ? "bg-green-100 text-green-700" : "bg-gray-200 text-gray-500"}`}>
+                        {u.role === "rolsüz" ? "Rol Yok" : (u.role ? u.role.charAt(0).toUpperCase() + u.role.slice(1) : "")}
+                      </span>
+                      {u.role === "rolsüz" && (
+                        <span className="text-[10px] text-red-500 ml-1">Atanmamış</span>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <select
+                      value={u.role}
+                      onChange={async (e) => {
+                        setUserSaveLoading(u.id);
+                        await updateUserRole(u.id, e.target.value as any);
+                        await loadUsers();
+                        setUserSaveLoading(null);
+                      }}
+                      className="px-3 py-1.5 rounded-lg border border-[#e2e5e9] bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#c4111d]/20"
+                      disabled={userSaveLoading === u.id || (userRole?.role === "antrenor" && u.age_group !== (userRole as any).age_group)}
+                    >
+                      <option value="yonetici">Yönetici</option>
+                      <option value="antrenor">Antrenör</option>
+                      <option value="oyuncu">Oyuncu</option>
+                      <option value="rolsüz">Rol Yok</option>
+                    </select>
+                    {/* Yaş grubu atama dropdown'u */}
+                    <select
+                      value={u.age_group || ""}
+                      onChange={async (e) => {
+                        setUserSaveLoading(u.id + "-age");
+                        const supabase = createClient();
+                        await supabase
+                          .from("user_roles")
+                          .update({ age_group: e.target.value })
+                          .eq("user_id", u.id);
+                        await loadUsers();
+                        setUserSaveLoading(null);
+                      }}
+                      className="mt-1 px-3 py-1.5 rounded-lg border border-[#e2e5e9] bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#c4111d]/20"
+                      disabled={userSaveLoading === u.id + "-age" || (userRole?.role === "antrenor" && u.age_group !== (userRole as any).age_group)}
+                    >
+                      <option value="">Yaş Grubu Yok</option>
+                      {lookups.ageGroups.map((ag) => (
+                        <option key={ag.value} value={ag.value}>{ag.value}</option>
+                      ))}
+                    </select>
+                  </div>
+                  {userSaveLoading === u.id && (
+                    <Loader2 size={18} className="ml-2 animate-spin text-[#c4111d]" />
+                  )}
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
-
-        {/* Liste */}
+        ) : (
+          <div className="p-4 text-sm text-[#8c919a]">Yalnızca yönetici veya antrenör kullanıcılar görebilir.</div>
+        )}
         <div className="divide-y divide-[#e2e5e9]">
           {items.length === 0 ? (
             <div className="p-12 text-center">
-              <div className="w-12 h-12 rounded-full bg-[#f1f3f5] flex items-center justify-center mx-auto mb-3">
-                <tab.icon size={24} className="text-[#8c919a]" />
-              </div>
+              {tab?.icon && activeTab !== "users" && (
+                <div className="w-12 h-12 rounded-full bg-[#f1f3f5] flex items-center justify-center mx-auto mb-3">
+                  <tab.icon size={24} className="text-[#8c919a]" />
+                </div>
+              )}
               <p className="text-sm text-[#8c919a]">
                 Henüz kayıt bulunmuyor. Yukarıdan yeni bir değer ekleyin.
               </p>
@@ -323,7 +453,7 @@ export default function SettingsPage() {
                 )}
 
                 {/* Silme */}
-                {editingId !== item.id && (
+                {editingId !== item.id && userRole?.role !== "oyuncu" && (
                   <>
                     {deleteConfirm === item.id ? (
                       <div className="flex items-center gap-1 shrink-0">
