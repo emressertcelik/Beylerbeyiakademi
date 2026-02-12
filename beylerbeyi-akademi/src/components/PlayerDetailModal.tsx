@@ -366,7 +366,7 @@ export default function PlayerDetailModal({ player, onClose, onEdit, onDelete }:
                         <div className="flex items-center gap-2 sm:gap-3">
                           <span className="text-xs font-semibold text-[#1a1a2e]">{match.date}</span>
                           <span className="text-xs text-[#8c919a]">{match.opponent}</span>
-                          {status && StatusIcon ? (
+                          {status && StatusIcon && statusObj ? (
                             <div className={`flex items-center gap-1 px-2 py-1 rounded-lg shrink-0 ${statusObj.bg}`}>
                               <StatusIcon size={12} className={statusObj.text} />
                               <span className={`text-[9px] font-semibold ${statusObj.text}`}>{playerStat?.participationStatus}</span>
