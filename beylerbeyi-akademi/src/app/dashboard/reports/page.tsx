@@ -25,6 +25,10 @@ interface PlayerReport {
   matches: number;
   starts: number;
   sub: number;
+  sakat: number;
+  cezali: number;
+  kadroYok: number;
+  sureAlmadi: number;
   minutesPlayed: number;
   goals: number;
   assists: number;
@@ -41,6 +45,7 @@ interface PlayerReport {
 }
 
 export default function ReportsPage() {
+  // ...existing code...
   const { players, matches, lookups, loading } = useAppData();
   const AGE_GROUPS = lookups.ageGroups.filter((a) => a.isActive).map((a) => a.value);
   const SEASONS = lookups.seasons.filter((s) => s.isActive).map((s) => s.value);
@@ -51,9 +56,14 @@ export default function ReportsPage() {
   const [sortAsc, setSortAsc] = useState(false);
   const [positionFilter, setPositionFilter] = useState<string>("all");
 
-  // Build player reports from match data
+  // En güncel maçlar önce olacak şekilde sıralama
+  const sortedMatches = useMemo(() => {
+    return [...matches].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  }, [matches]);
+
+  // Build player reports from match data (güncel maçlar önce)
   const playerReports = useMemo(() => {
-    const playedMatches = matches.filter((m) => {
+    const playedMatches = sortedMatches.filter((m) => {
       if (m.status !== "played") return false;
       if (selectedSeason !== "all" && m.season !== selectedSeason) return false;
       if (selectedAgeGroup !== "all" && m.ageGroup !== selectedAgeGroup) return false;
@@ -64,21 +74,31 @@ export default function ReportsPage() {
 
     for (const match of playedMatches) {
       // Aynı maçta bir oyuncu birden fazla satırda olabilir, hepsini toplamalıyız
-      const playerStatsById: Record<string, { starts: number; sub: number; matches: number; psList: any[] }> = {};
+      const playerStatsById: Record<string, { starts: number; sub: number; sakat: number; cezali: number; kadroYok: number; sureAlmadi: number; matches: number; psList: any[] }> = {};
       for (const ps of match.playerStats) {
-        const statusLower = (ps.participationStatus || "").toLowerCase();
-        const isStart = statusLower.includes("ilk");
-        const isSub = statusLower.includes("yedek") || statusLower.includes("sonradan");
+        const statusRaw = ps.participationStatus;
+        const status = (statusRaw || "").trim().toLowerCase();
+        // Esnek eşleşme: 'ilk' geçen her durum İlk 11 sayılır
+        const isStart = status.includes("ilk");
+        const isSub = status.includes("yedek") || status.includes("sonradan");
+        const isSakat = status.includes("sakat");
+        const isCezali = status.includes("cezalı") || status.includes("ceza");
+        const isKadroYok = status.includes("kadroda yok") || status.includes("kadro yok");
+        const isSureAlmadi = status.includes("süre almadı") || status.includes("süre yok");
         if (!playerStatsById[ps.playerId]) {
-          playerStatsById[ps.playerId] = { starts: 0, sub: 0, matches: 0, psList: [] };
+          playerStatsById[ps.playerId] = { starts: 0, sub: 0, sakat: 0, cezali: 0, kadroYok: 0, sureAlmadi: 0, matches: 0, psList: [] };
         }
         if (isStart) playerStatsById[ps.playerId].starts++;
         if (isSub) playerStatsById[ps.playerId].sub++;
+        if (isSakat) playerStatsById[ps.playerId].sakat++;
+        if (isCezali) playerStatsById[ps.playerId].cezali++;
+        if (isKadroYok) playerStatsById[ps.playerId].kadroYok++;
+        if (isSureAlmadi) playerStatsById[ps.playerId].sureAlmadi++;
         playerStatsById[ps.playerId].matches++;
         playerStatsById[ps.playerId].psList.push(ps);
       }
       for (const playerId in playerStatsById) {
-        const { starts, sub, matches: matchCount, psList } = playerStatsById[playerId];
+        const { starts, sub, sakat, cezali, kadroYok, sureAlmadi, matches: matchCount, psList } = playerStatsById[playerId];
         const existing = map.get(playerId);
         // Tüm istatistikleri topla
         let minutesPlayed = 0, goals = 0, assists = 0, yellowCards = 0, redCards = 0, goalsConceded = 0, cleanSheets = 0, avgRating = 0, ratingCount = 0;
@@ -121,6 +141,10 @@ export default function ReportsPage() {
             matches: 1,
             starts: starts,
             sub: sub,
+            sakat: sakat,
+            cezali: cezali,
+            kadroYok: kadroYok,
+            sureAlmadi: sureAlmadi,
             minutesPlayed,
             goals,
             assists,
@@ -333,7 +357,7 @@ export default function ReportsPage() {
               name={topScorer.name}
               jersey={topScorer.jerseyNumber}
               value={`${topScorer.goals} gol`}
-              sub={`${topScorer.matches} maçta`}
+              sub={`İ11: ${topScorer.starts} · Y: ${topScorer.sub} · ${topScorer.matches} maç`}
             />
           )}
           {topAssist && (
@@ -345,7 +369,7 @@ export default function ReportsPage() {
               name={topAssist.name}
               jersey={topAssist.jerseyNumber}
               value={`${topAssist.assists} asist`}
-              sub={`${topAssist.matches} maçta`}
+              sub={`İ11: ${topAssist.starts} · Y: ${topAssist.sub} · ${topAssist.matches} maç`}
             />
           )}
           {topContributor && (
@@ -357,7 +381,7 @@ export default function ReportsPage() {
               name={topContributor.name}
               jersey={topContributor.jerseyNumber}
               value={`${topContributor.goals + topContributor.assists} katkı`}
-              sub={`${topContributor.goals}G + ${topContributor.assists}A`}
+              sub={`İ11: ${topContributor.starts} · Y: ${topContributor.sub} · ${topContributor.goals}G + ${topContributor.assists}A`}
             />
           )}
           {topMinutes && (
@@ -369,7 +393,7 @@ export default function ReportsPage() {
               name={topMinutes.name}
               jersey={topMinutes.jerseyNumber}
               value={`${topMinutes.minutesPlayed} dk`}
-              sub={`${topMinutes.matches} maç`}
+              sub={`İ11: ${topMinutes.starts} · Y: ${topMinutes.sub} · ${topMinutes.matches} maç`}
             />
           )}
           {topRated && (
@@ -393,7 +417,7 @@ export default function ReportsPage() {
               name={topCleanSheet.name}
               jersey={topCleanSheet.jerseyNumber}
               value={`${topCleanSheet.cleanSheets} maç`}
-              sub={`${topCleanSheet.matches} maçta gol yemedi`}
+              sub={`İ11: ${topCleanSheet.starts} · Y: ${topCleanSheet.sub} · ${topCleanSheet.matches} maç`}
             />
           )}
         </div>
@@ -426,7 +450,11 @@ export default function ReportsPage() {
                   <th className="px-3 py-2.5 text-[10px] font-semibold text-[#8c919a] uppercase tracking-wider w-8">#</th>
                   <th className="px-3 py-2.5 text-[10px] font-semibold text-[#8c919a] uppercase tracking-wider min-w-[140px]">Oyuncu</th>
                   <th className="px-2 py-2.5"><SortHeader field="matches" label="Maç" /></th>
-                  <th className="px-2 py-2.5 text-[10px] font-semibold text-[#8c919a] uppercase tracking-wider">İ11/Y</th>
+                  <th className="px-2 py-2.5 text-[10px] font-semibold text-[#8c919a] uppercase tracking-wider" title="İlk 11 / Yedek">İ11/Y</th>
+                  <th className="px-2 py-2.5 text-[10px] font-semibold text-[#8c919a] uppercase tracking-wider" title="Sakat">Skt</th>
+                  <th className="px-2 py-2.5 text-[10px] font-semibold text-[#8c919a] uppercase tracking-wider" title="Cezalı">Czl</th>
+                  <th className="px-2 py-2.5 text-[10px] font-semibold text-[#8c919a] uppercase tracking-wider" title="Kadroda Yok">KYok</th>
+                  <th className="px-2 py-2.5 text-[10px] font-semibold text-[#8c919a] uppercase tracking-wider" title="Süre Almadı">SüreYok</th>
                   <th className="px-2 py-2.5"><SortHeader field="minutesPlayed" label="DK" /></th>
                   <th className="px-2 py-2.5"><SortHeader field="goals" label="Gol" /></th>
                   <th className="px-2 py-2.5"><SortHeader field="assists" label="Ast" /></th>
@@ -465,7 +493,15 @@ export default function ReportsPage() {
                       </div>
                     </td>
                     <td className="px-2 py-2.5 text-xs font-bold text-[#1a1a2e] text-center">{r.matches}</td>
-                    <td className="px-2 py-2.5 text-[10px] text-[#5a6170] text-center">{r.starts}/{r.sub}</td>
+                    <td className="px-2 py-2.5 text-[10px] text-[#5a6170] text-center">
+                      <span className="font-bold text-emerald-700">İlk 11: {r.starts}</span>
+                      <span className="mx-1">/</span>
+                      <span className="font-bold text-blue-700">Yedek: {r.sub}</span>
+                    </td>
+                    <td className="px-2 py-2.5 text-[10px] text-[#5a6170] text-center">{r.sakat}</td>
+                    <td className="px-2 py-2.5 text-[10px] text-[#5a6170] text-center">{r.cezali}</td>
+                    <td className="px-2 py-2.5 text-[10px] text-[#5a6170] text-center">{r.kadroYok}</td>
+                    <td className="px-2 py-2.5 text-[10px] text-[#5a6170] text-center">{r.sureAlmadi}</td>
                     <td className="px-2 py-2.5 text-xs text-[#5a6170] text-center">{r.minutesPlayed}</td>
                     <td className="px-2 py-2.5 text-center">
                       <span className={`text-xs font-bold ${r.goals > 0 ? "text-emerald-600" : "text-[#8c919a]"}`}>{r.goals}</span>

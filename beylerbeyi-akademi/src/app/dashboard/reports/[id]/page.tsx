@@ -151,7 +151,11 @@ export default function PlayerReportPage() {
       if (!ps) continue;
       const sl = (ps.participationStatus || "").toLowerCase();
       if (sl.includes("ilk")) starts++;
-      if (sl.includes("yedek") || sl.includes("sonradan")) subs++;
+      if (
+        sl.includes("yedek") ||
+        sl.includes("sonradan girdi") ||
+        sl.includes("sonradan")
+      ) subs++;
       totalMin += ps.minutesPlayed;
       goals += ps.goals;
       assists += ps.assists;

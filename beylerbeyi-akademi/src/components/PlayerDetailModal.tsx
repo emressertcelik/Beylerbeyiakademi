@@ -334,73 +334,42 @@ export default function PlayerDetailModal({ player, onClose, onEdit, onDelete }:
               ) : (
                 <div className="space-y-2.5 max-h-[400px] overflow-y-auto pr-1">
                   {playerAllMatches.map(({ match, playerStat }) => {
-                    const isWin = match.result === "W";
-                    const isLoss = match.result === "L";
-                    const resultBorder = isWin ? "border-l-emerald-500" : isLoss ? "border-l-red-400" : "border-l-amber-400";
-                    const resultBg = isWin ? "bg-emerald-500" : isLoss ? "bg-red-400" : "bg-amber-400";
-                    const resultText = isWin ? "G" : isLoss ? "M" : "B";
-                    const isOwnAgeGroup = match.ageGroup === player.ageGroup;
-                    const ageGroupColor = isOwnAgeGroup ? "bg-[#c4111d]/10 text-[#c4111d]" : "bg-purple-100 text-purple-700";
-                    const played = playerStat?.participationStatus === "İlk 11" || playerStat?.participationStatus === "Sonradan Girdi";
-                    const statusLookup: Record<string, { icon: typeof UserCheck; bg: string; text: string }> = {
-                      "İlk 11":         { icon: UserCheck, bg: "bg-emerald-50", text: "text-emerald-600" },
-                      "ilk 11":         { icon: UserCheck, bg: "bg-emerald-50", text: "text-emerald-600" },
-                      "Sonradan Girdi": { icon: ArrowRightLeft, bg: "bg-blue-50", text: "text-blue-600" },
-                      "sonradan girdi": { icon: ArrowRightLeft, bg: "bg-blue-50", text: "text-blue-600" },
-                      "Süre almadı":    { icon: Clock, bg: "bg-amber-50", text: "text-amber-600" },
-                      "Süre Almadı":    { icon: Clock, bg: "bg-amber-50", text: "text-amber-600" },
-                      "süre almadı":    { icon: Clock, bg: "bg-amber-50", text: "text-amber-600" },
-                      "Sakat":          { icon: Cross, bg: "bg-orange-50", text: "text-orange-600" },
-                      "sakat":          { icon: Cross, bg: "bg-orange-50", text: "text-orange-600" },
-                      "Cezalı":         { icon: ShieldBan, bg: "bg-red-50", text: "text-red-500" },
-                      "cezalı":         { icon: ShieldBan, bg: "bg-red-50", text: "text-red-500" },
-                      "Kadroda Yok":    { icon: UserX, bg: "bg-gray-100", text: "text-gray-400" },
-                      "kadroda yok":    { icon: UserX, bg: "bg-gray-100", text: "text-gray-400" },
-                    };
-                    const status = statusLookup[playerStat?.participationStatus || ""];
-                    const StatusIcon = status?.icon;
+                      // TEST: Konsola veri yazdır
+                      console.log('MATCH:', match);
+                      console.log('PLAYERSTAT:', playerStat);
+                      console.log('PARTICIPATION STATUS:', playerStat?.participationStatus);
+                    const played = match.status === "played";
+                    const status = playerStat?.participationStatus || "";
+                    let StatusIcon = null;
+                    let statusObj = null;
+                    if (status === "İlk 11") {
+                      StatusIcon = Star;
+                      statusObj = { text: "text-emerald-600", bg: "bg-emerald-50" };
+                    } else if (status === "Sonradan Girdi") {
+                      StatusIcon = Clock;
+                      statusObj = { text: "text-blue-600", bg: "bg-blue-50" };
+                    } else if (status === "Sakat") {
+                      StatusIcon = AlertTriangle;
+                      statusObj = { text: "text-orange-600", bg: "bg-orange-50" };
+                    } else if (status === "Cezalı") {
+                      StatusIcon = Ban;
+                      statusObj = { text: "text-red-600", bg: "bg-red-50" };
+                    } else if (status === "Kadroda Yok") {
+                      StatusIcon = Users;
+                      statusObj = { text: "text-gray-600", bg: "bg-gray-50" };
+                    } else if (status === "Süre Almadı") {
+                      StatusIcon = Clock;
+                      statusObj = { text: "text-yellow-600", bg: "bg-yellow-50" };
+                    }
                     return (
-                      <div
-                        key={match.id}
-                        className={`rounded-xl border border-[#e2e5e9] border-l-[3px] ${resultBorder} overflow-hidden bg-white shadow-sm hover:shadow-md transition-shadow`}
-                      >
-                        {/* Üst satır: tarih, yaş grubu, skor, durum */}
-                        <div className="flex items-center gap-2 px-3 py-2.5">
-                          {/* Sonuç rozeti */}
-                          <span className={`w-6 h-6 rounded-md flex items-center justify-center text-[10px] font-black text-white shrink-0 ${resultBg}`}>
-                            {resultText}
-                          </span>
-                          {/* Yaş grubu */}
-                          <span className={`text-[9px] font-bold px-2 py-0.5 rounded-md shrink-0 ${ageGroupColor}`}>
-                            {match.ageGroup}
-                          </span>
-                          {/* Skor ve rakip */}
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-1.5">
-                              <span className="text-[12px] font-bold text-[#1a1a2e]">
-                                {match.homeAway === "home"
-                                  ? `${match.scoreHome} - ${match.scoreAway}`
-                                  : `${match.scoreAway} - ${match.scoreHome}`}
-                              </span>
-                              <span className="text-[11px] text-[#5a6170] truncate">
-                                vs {match.opponent}
-                              </span>
-                            </div>
-                            <div className="flex items-center gap-1.5 mt-0.5">
-                              <span className="text-[9px] text-[#8c919a]">
-                                {new Date(match.date).toLocaleDateString("tr-TR", { day: "numeric", month: "short", year: "numeric" })}
-                              </span>
-                              <span className="text-[8px] text-[#8c919a]">·</span>
-                              <span className="text-[9px] text-[#8c919a]">
-                                {match.homeAway === "home" ? "İç Saha" : "Deplasman"}
-                              </span>
-                            </div>
-                          </div>
-                          {/* Katılım durumu */}
+                      <div key={match.id} className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 bg-[#f8f9fb] rounded-lg px-3 sm:px-4 py-3 border border-[#e2e5e9] mb-2">
+                        <div className="flex items-center gap-2 sm:gap-3">
+                          <span className="text-xs font-semibold text-[#1a1a2e]">{match.date}</span>
+                          <span className="text-xs text-[#8c919a]">{match.opponent}</span>
                           {status && StatusIcon ? (
-                            <div className={`flex items-center gap-1 px-2 py-1 rounded-lg shrink-0 ${status.bg}`}>
-                              <StatusIcon size={12} className={status.text} />
-                              <span className={`text-[9px] font-semibold ${status.text}`}>{playerStat?.participationStatus}</span>
+                            <div className={`flex items-center gap-1 px-2 py-1 rounded-lg shrink-0 ${statusObj.bg}`}>
+                              <StatusIcon size={12} className={statusObj.text} />
+                              <span className={`text-[9px] font-semibold ${statusObj.text}`}>{playerStat?.participationStatus}</span>
                             </div>
                           ) : (
                             <div className="flex items-center gap-1 px-2 py-1 rounded-lg shrink-0 bg-gray-50">
@@ -408,16 +377,22 @@ export default function PlayerDetailModal({ player, onClose, onEdit, onDelete }:
                             </div>
                           )}
                         </div>
-                        {/* Alt satır: istatistikler (sadece oynayan oyuncular) */}
-                        {played && playerStat && (
+                        {/* Alt satır: istatistikler (tüm katılım durumları için) */}
+                        {playerStat && (
                           <div className="flex items-center gap-0 border-t border-[#f0f1f3] bg-[#fafbfc]">
-                            <MatchMiniStat label="DK" value={String(playerStat.minutesPlayed)} />
-                            <MatchMiniStat label="GOL" value={String(playerStat.goals)} highlight={playerStat.goals > 0} color="emerald" />
-                            <MatchMiniStat label="AST" value={String(playerStat.assists)} highlight={playerStat.assists > 0} color="blue" />
-                            <MatchMiniStat label="SK" value={String(playerStat.yellowCards)} highlight={playerStat.yellowCards > 0} color="yellow" />
-                            <MatchMiniStat label="KK" value={String(playerStat.redCards)} highlight={playerStat.redCards > 0} color="red" />
-                            <MatchMiniStat label="YG" value={String(playerStat.goalsConceded)} highlight={playerStat.goalsConceded > 0} color="orange" />
-                            <MatchMiniStat label="CS" value={playerStat.cleanSheet ? "✓" : "—"} highlight={playerStat.cleanSheet} color="emerald" />
+                            {status === "İlk 11" || status === "Sonradan Girdi" ? (
+                              <>
+                                <MatchMiniStat label="DK" value={String(playerStat.minutesPlayed)} />
+                                <MatchMiniStat label="GOL" value={String(playerStat.goals)} highlight={playerStat.goals > 0} color="emerald" />
+                                <MatchMiniStat label="AST" value={String(playerStat.assists)} highlight={playerStat.assists > 0} color="blue" />
+                                <MatchMiniStat label="SK" value={String(playerStat.yellowCards)} highlight={playerStat.yellowCards > 0} color="yellow" />
+                                <MatchMiniStat label="KK" value={String(playerStat.redCards)} highlight={playerStat.redCards > 0} color="red" />
+                                <MatchMiniStat label="YG" value={String(playerStat.goalsConceded)} highlight={playerStat.goalsConceded > 0} color="orange" />
+                                <MatchMiniStat label="CS" value={playerStat.cleanSheet ? "✓" : "—"} highlight={playerStat.cleanSheet} color="emerald" />
+                              </>
+                            ) : (
+                              <MatchMiniStat label="Katılım" value={status} />
+                            )}
                           </div>
                         )}
                       </div>
