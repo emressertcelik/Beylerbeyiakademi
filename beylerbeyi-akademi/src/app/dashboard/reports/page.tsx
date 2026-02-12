@@ -63,48 +63,73 @@ export default function ReportsPage() {
     const map = new Map<string, PlayerReport>();
 
     for (const match of playedMatches) {
+      // Aynı maçta bir oyuncu birden fazla satırda olabilir, hepsini toplamalıyız
+      const playerStatsById: Record<string, { starts: number; sub: number; matches: number; psList: any[] }> = {};
       for (const ps of match.playerStats) {
-        const existing = map.get(ps.playerId);
         const statusLower = (ps.participationStatus || "").toLowerCase();
         const isStart = statusLower.includes("ilk");
         const isSub = statusLower.includes("yedek") || statusLower.includes("sonradan");
-
-        if (existing) {
-          // Maçta istatistik satırı varsa, maç sayısı 1 artmalı
-          existing.matches++;
-          if (isStart) existing.starts++;
-          if (isSub) existing.sub++;
-          existing.minutesPlayed += ps.minutesPlayed;
-          existing.goals += ps.goals;
-          existing.assists += ps.assists;
-          existing.yellowCards += ps.yellowCards;
-          existing.redCards += ps.redCards;
-          existing.goalsConceded += ps.goalsConceded;
-          if (ps.cleanSheet) existing.cleanSheets++;
+        if (!playerStatsById[ps.playerId]) {
+          playerStatsById[ps.playerId] = { starts: 0, sub: 0, matches: 0, psList: [] };
+        }
+        if (isStart) playerStatsById[ps.playerId].starts++;
+        if (isSub) playerStatsById[ps.playerId].sub++;
+        playerStatsById[ps.playerId].matches++;
+        playerStatsById[ps.playerId].psList.push(ps);
+      }
+      for (const playerId in playerStatsById) {
+        const { starts, sub, matches: matchCount, psList } = playerStatsById[playerId];
+        const existing = map.get(playerId);
+        // Tüm istatistikleri topla
+        let minutesPlayed = 0, goals = 0, assists = 0, yellowCards = 0, redCards = 0, goalsConceded = 0, cleanSheets = 0, avgRating = 0, ratingCount = 0;
+        for (const ps of psList) {
+          minutesPlayed += ps.minutesPlayed;
+          goals += ps.goals;
+          assists += ps.assists;
+          yellowCards += ps.yellowCards;
+          redCards += ps.redCards;
+          goalsConceded += ps.goalsConceded;
+          if (ps.cleanSheet) cleanSheets++;
           if (ps.rating) {
-            existing.avgRating = ((existing.avgRating * existing.ratingCount) + ps.rating) / (existing.ratingCount + 1);
-            existing.ratingCount++;
+            avgRating += ps.rating;
+            ratingCount++;
+          }
+        }
+        const player = players.find((p) => p.id === playerId);
+        if (existing) {
+          existing.matches++;
+          existing.starts += starts;
+          existing.sub += sub;
+          existing.minutesPlayed += minutesPlayed;
+          existing.goals += goals;
+          existing.assists += assists;
+          existing.yellowCards += yellowCards;
+          existing.redCards += redCards;
+          existing.goalsConceded += goalsConceded;
+          existing.cleanSheets += cleanSheets;
+          if (ratingCount > 0) {
+            existing.avgRating = ((existing.avgRating * existing.ratingCount) + avgRating) / (existing.ratingCount + ratingCount);
+            existing.ratingCount += ratingCount;
           }
         } else {
-          const player = players.find((p) => p.id === ps.playerId);
-          map.set(ps.playerId, {
-            id: ps.playerId,
-            name: ps.playerName,
-            jerseyNumber: ps.jerseyNumber,
-            position: player?.position || ps.position,
+          map.set(playerId, {
+            id: playerId,
+            name: player?.firstName + " " + player?.lastName,
+            jerseyNumber: player?.jerseyNumber || 0,
+            position: player?.position || psList[0].position,
             ageGroup: player?.ageGroup || "",
             matches: 1,
-            starts: isStart ? 1 : 0,
-            sub: isSub ? 1 : 0,
-            minutesPlayed: ps.minutesPlayed,
-            goals: ps.goals,
-            assists: ps.assists,
-            yellowCards: ps.yellowCards,
-            redCards: ps.redCards,
-            goalsConceded: ps.goalsConceded,
-            cleanSheets: ps.cleanSheet ? 1 : 0,
-            avgRating: ps.rating || 0,
-            ratingCount: ps.rating ? 1 : 0,
+            starts: starts,
+            sub: sub,
+            minutesPlayed,
+            goals,
+            assists,
+            yellowCards,
+            redCards,
+            goalsConceded,
+            cleanSheets,
+            avgRating: ratingCount > 0 ? avgRating / ratingCount : 0,
+            ratingCount,
             goalsPerMatch: 0,
             assistsPerMatch: 0,
             tacticalAvg: player
@@ -126,7 +151,7 @@ export default function ReportsPage() {
       }
     }
 
-    // Calculate per-match stats
+    // Maç başı istatistikleri hesapla
     for (const report of map.values()) {
       report.goalsPerMatch = report.matches > 0 ? +(report.goals / report.matches).toFixed(2) : 0;
       report.assistsPerMatch = report.matches > 0 ? +(report.assists / report.matches).toFixed(2) : 0;

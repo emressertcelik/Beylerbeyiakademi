@@ -639,8 +639,17 @@ export default function PlayerReportPage() {
                         <span className="text-[10px] text-[#8c919a]">
                           {new Date(match.date).toLocaleDateString("tr-TR", { day: "2-digit", month: "long", year: "numeric" })}
                         </span>
-                        {isStart && <span className="text-[8px] bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded-md font-bold">İlk 11</span>}
-                        {isSub && <span className="text-[8px] bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded-md font-bold">Yedek</span>}
+                        {/* Participation Status Badge */}
+                        {(() => {
+                          const status = (ps.participationStatus || "").toLowerCase();
+                          if (status.includes("ilk")) return <span className="text-[8px] bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded-md font-bold">İlk 11</span>;
+                          if (status.includes("yedek") || status.includes("sonradan")) return <span className="text-[8px] bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded-md font-bold">Yedek</span>;
+                          if (status.includes("ceza")) return <span className="text-[8px] bg-red-100 text-red-600 px-1.5 py-0.5 rounded-md font-bold">Cezalı</span>;
+                          if (status.includes("sakat")) return <span className="text-[8px] bg-orange-100 text-orange-600 px-1.5 py-0.5 rounded-md font-bold">Sakat</span>;
+                          if (status.includes("kadroda yok")) return <span className="text-[8px] bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded-md font-bold">Kadroda Yok</span>;
+                          if (status.includes("süre")) return <span className="text-[8px] bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded-md font-bold">Süre Almadı</span>;
+                          return null;
+                        })()}
                       </div>
                     </div>
                     {ps.rating && (

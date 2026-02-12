@@ -117,7 +117,7 @@ export default function LoginPage() {
               <p className="text-[#6e7781] text-sm">Panele erişmek için giriş yapın</p>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-4">
               <div>
                 <label htmlFor="email" className="block text-[13px] font-semibold text-[#24292f] mb-1.5">
                   E-posta
@@ -174,7 +174,7 @@ export default function LoginPage() {
                   "Giriş Yap"
                 )}
               </button>
-            </form>
+            </div>
 
             <div className="mt-12 flex items-center justify-center gap-2">
               <div className="w-2 h-2 rounded-full bg-[#c4111d]/30" />
