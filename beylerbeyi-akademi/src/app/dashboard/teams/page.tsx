@@ -151,18 +151,13 @@ export default function TeamsPage() {
   const canEdit = userRole?.role === "yonetici" || (userRole?.role === "antrenor" && !!userRole.age_group);
 
   return (
-    <div className="space-y-6 animate-slide-up">
+    <div className="space-y-6">
       {/* Web Push Enable Button */}
       <EnablePushButton />
       {/* ...puan durumu linki kaldırıldı... */}
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 px-2 sm:px-0">
-        <div>
-          <h1 className="text-2xl font-bold text-[#1a1a2e] tracking-tight">Takımlar</h1>
-          <p className="text-sm text-[#5a6170] mt-1">
-            {filteredMatches.length} maç {selectedAge !== "ALL" ? `· ${selectedAge}` : ""}
-          </p>
-        </div>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+        <h1 className="text-xl font-bold text-[#1a1a2e]">Takımlar</h1>
         {canEdit && (
           <button
             onClick={() => setEditingMatch(null)}
@@ -237,7 +232,7 @@ export default function TeamsPage() {
 
       {/* Team Stats Cards */}
       {teamStats && (
-        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-3 px-1 sm:px-0">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 sm:gap-4">
           <StatCard icon={<Shield size={16} />} label="Toplam Maç" value={teamStats.totalMatches} />
           <StatCard icon={<Trophy size={16} />} label="Galibiyet" value={teamStats.wins} color="text-emerald-600" />
           <StatCard icon={<Shield size={16} />} label="Beraberlik" value={teamStats.draws} color="text-amber-600" />

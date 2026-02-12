@@ -216,168 +216,36 @@ export default function SettingsPage() {
 
   return (
     <div className="space-y-6">
-      {/* Başlık */}
-      <div>
-        <h1 className="text-2xl font-bold text-[#1a1a2e]">Ayarlar</h1>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+        <h1 className="text-xl font-bold text-[#1a1a2e]">Ayarlar</h1>
         <p className="text-sm text-[#8c919a] mt-1">
           Yaş grubu, pozisyon, ayak ve sezon bilgilerini buradan yönetebilirsiniz.
         </p>
       </div>
 
-      {/* Tab Bar */}
-      <div className="flex gap-2 overflow-x-auto pb-1">
-        {TABS.map((t) => {
-          const isActive = activeTab === t.key;
-          const Icon = t.icon;
-          return (
-            <button
-              key={t.key}
-              onClick={() => {
-                setActiveTab(t.key);
-                setNewValue("");
-                setEditingId(null);
-                setDeleteConfirm(null);
-              }}
-              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium whitespace-nowrap transition-all duration-200 ${
-                isActive
-                  ? "bg-[#c4111d] text-white shadow-sm shadow-[#c4111d]/25"
-                  : "bg-white text-[#5a6170] border border-[#e2e5e9] hover:border-[#c4111d]/30 hover:text-[#c4111d]"
-              }`}
-            >
-              <Icon size={16} />
-              {t.label}
-              <span
-                className={`ml-1 text-xs px-1.5 py-0.5 rounded-full ${
-                  isActive
-                    ? "bg-white/20 text-white"
-                    : "bg-[#f1f3f5] text-[#8c919a]"
-                }`}
-              >
-                {t.key !== "users" ? (lookups[t.key as keyof typeof lookups] ?? []).length : ""}
-              </span>
-            </button>
-          );
-        })}
-      </div>
-
-      {/* İçerik Kartı */}
-      <div className="bg-white rounded-2xl border border-[#e2e5e9] shadow-sm overflow-hidden">
-        {activeTab !== "users" ? (
-          <>
-            {/* Yeni Ekleme Alanı */}
-            {(userRole?.role === "yonetici" || userRole?.role === "antrenor") && (
-              <div className="p-4 border-b border-[#e2e5e9] bg-[#f8f9fb]">
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    value={newValue}
-                    onChange={(e) => setNewValue(e.target.value)}
-                    onKeyDown={(e) => e.key === "Enter" && handleAdd()}
-                    placeholder={tab?.placeholder}
-                    className="flex-1 px-4 py-2.5 rounded-xl border border-[#e2e5e9] bg-white text-sm text-[#1a1a2e] placeholder:text-[#8c919a] focus:outline-none focus:ring-2 focus:ring-[#c4111d]/20 focus:border-[#c4111d]/40 transition-all"
-                  />
-                  <button
-                    onClick={handleAdd}
-                    disabled={saving || !newValue.trim()}
-                    className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#c4111d] text-white text-sm font-medium hover:bg-[#a30f18] disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm shadow-[#c4111d]/25"
-                  >
-                    {saving ? <Loader2 size={16} className="animate-spin" /> : <Plus size={16} />}
-                    Ekle
-                  </button>
+      <div className="overflow-x-auto">
+        <table className="min-w-full text-sm">
+          <thead>
+            <tr>
+              <th className="px-4 py-2.5 text-left border-b border-[#e2e5e9]">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-medium text-[#1a1a2e]">Sıra</span>
                 </div>
-              </div>
-            )}
-            {/* Liste */}
-            {/* ...mevcut kod... */}
-          </>
-        ) : userRole?.role === "yonetici" || userRole?.role === "antrenor" ? (
-          <div className="p-4">
-            <h2 className="text-lg font-bold mb-4">Kullanıcılar</h2>
-            {userRole?.role?.toString() === "antrenor" && userRole.age_group && (
-              <div className="mb-2 text-xs text-blue-700 bg-blue-50 rounded px-2 py-1 inline-block">
-                Sadece kendi yaş grubunuzdaki kullanıcıları görebilirsiniz: <b>{(userRole as any).age_group}</b>
-              </div>
-            )}
-            <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
-              {users.map((u) => (
-                <div key={u.id} className="flex items-center gap-4 p-4 bg-[#f8f9fb] rounded-xl border border-[#e2e5e9] shadow-sm">
-                  <div className="flex items-center justify-center w-12 h-12 rounded-full bg-[#e2e5e9] text-[#c4111d] font-bold text-lg">
-                    {u.email?.[0]?.toUpperCase() || "?"}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="font-medium text-[#1a1a2e] truncate">{u.email}</div>
-                    <div className="flex items-center gap-2 mt-1">
-                      <span className={`text-xs px-2 py-0.5 rounded-full font-semibold ${u.role === "yonetici" ? "bg-[#c4111d]/10 text-[#c4111d]" : u.role === "antrenor" ? "bg-blue-100 text-blue-700" : u.role === "oyuncu" ? "bg-green-100 text-green-700" : "bg-gray-200 text-gray-500"}`}>
-                        {u.role === "rolsüz" ? "Rol Yok" : (u.role ? u.role.charAt(0).toUpperCase() + u.role.slice(1) : "")}
-                      </span>
-                      {u.role === "rolsüz" && (
-                        <span className="text-[10px] text-red-500 ml-1">Atanmamış</span>
-                      )}
-                    </div>
-                  </div>
-                  <div className="flex flex-col gap-1">
-                    <select
-                      value={u.role}
-                      onChange={async (e) => {
-                        setUserSaveLoading(u.id);
-                        await updateUserRole(u.id, e.target.value as any);
-                        await loadUsers();
-                        setUserSaveLoading(null);
-                      }}
-                      className="px-3 py-1.5 rounded-lg border border-[#e2e5e9] bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#c4111d]/20"
-                      disabled={userSaveLoading === u.id || (userRole?.role === "antrenor" && u.age_group !== (userRole as any).age_group)}
-                    >
-                      <option value="yonetici">Yönetici</option>
-                      <option value="antrenor">Antrenör</option>
-                      <option value="oyuncu">Oyuncu</option>
-                      <option value="rolsüz">Rol Yok</option>
-                    </select>
-                    {/* Yaş grubu atama dropdown'u */}
-                    <select
-                      value={u.age_group || ""}
-                      onChange={async (e) => {
-                        setUserSaveLoading(u.id + "-age");
-                        const supabase = createClient();
-                        await supabase
-                          .from("user_roles")
-                          .update({ age_group: e.target.value })
-                          .eq("user_id", u.id);
-                        await loadUsers();
-                        setUserSaveLoading(null);
-                      }}
-                      className="mt-1 px-3 py-1.5 rounded-lg border border-[#e2e5e9] bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#c4111d]/20"
-                      disabled={userSaveLoading === u.id + "-age" || (userRole?.role === "antrenor" && u.age_group !== (userRole as any).age_group)}
-                    >
-                      <option value="">Yaş Grubu Yok</option>
-                      {lookups.ageGroups.map((ag) => (
-                        <option key={ag.value} value={ag.value}>{ag.value}</option>
-                      ))}
-                    </select>
-                  </div>
-                  {userSaveLoading === u.id && (
-                    <Loader2 size={18} className="ml-2 animate-spin text-[#c4111d]" />
-                  )}
+              </th>
+              <th className="px-4 py-2.5 text-left border-b border-[#e2e5e9]">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-medium text-[#1a1a2e]">Değer</span>
                 </div>
-              ))}
-            </div>
-          </div>
-        ) : (
-          <div className="p-4 text-sm text-[#8c919a]">Yalnızca yönetici veya antrenör kullanıcılar görebilir.</div>
-        )}
-        <div className="divide-y divide-[#e2e5e9]">
-          {items.length === 0 ? (
-            <div className="p-12 text-center">
-              {tab?.icon && activeTab !== "users" && (
-                <div className="w-12 h-12 rounded-full bg-[#f1f3f5] flex items-center justify-center mx-auto mb-3">
-                  <tab.icon size={24} className="text-[#8c919a]" />
+              </th>
+              <th className="px-4 py-2.5 text-left border-b border-[#e2e5e9]">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-medium text-[#1a1a2e]">Eylem</span>
                 </div>
-              )}
-              <p className="text-sm text-[#8c919a]">
-                Henüz kayıt bulunmuyor. Yukarıdan yeni bir değer ekleyin.
-              </p>
-            </div>
-          ) : (
-            items.map((item, index) => (
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {items.map((item, index) => (
               <div
                 key={item.id}
                 className="flex items-center gap-3 px-4 py-3 hover:bg-[#f8f9fb] transition-colors group"
@@ -484,9 +352,9 @@ export default function SettingsPage() {
                   </>
                 )}
               </div>
-            ))
-          )}
-        </div>
+            ))}
+          </tbody>
+        </table>
       </div>
 
       {/* Bilgi notu */}

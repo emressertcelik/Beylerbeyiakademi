@@ -90,19 +90,14 @@ export default function LoginPage() {
         <div className="absolute top-1/2 left-0 right-0 -translate-y-1/2 h-1 bg-white z-20" />
       </div>
 
-      {/* Sağ panel — form */}
-      <div className="flex-1 flex flex-col bg-white">
-        {/* Mobil üst şerit */}
-        <div className="lg:hidden h-1.5 flex">
-          <div className="flex-1 bg-[#c4111d]" />
-          <div className="flex-1 bg-white border-b border-[#e5e7eb]" />
-          <div className="flex-1 bg-[#1b6e2a]" />
-        </div>
-
-        <div className="flex-1 flex items-center justify-center px-6 py-12">
-          <div className="w-full max-w-[360px]">
-            {/* Mobil logo */}
-            <div className="lg:hidden flex flex-col items-center mb-10">
+      {/* Sağ panel (form) */}
+      <div className="flex-1 flex flex-col items-center justify-center p-4 sm:p-8 w-full max-w-full">
+        <form
+          onSubmit={handleSubmit}
+          className="w-full max-w-sm bg-white rounded-2xl shadow-xl p-6 flex flex-col gap-4 border border-[#e2e5e9]"
+        >
+          <div className="flex flex-col items-center">
+            <div className="flex flex-col items-center mb-10">
               <div className="w-20 h-20 rounded-full flex items-center justify-center mb-4">
                 <Image
                   src="/Logo_S.png"
@@ -189,7 +184,7 @@ export default function LoginPage() {
               <div className="w-2 h-2 rounded-full bg-[#1b6e2a]/30" />
             </div>
           </div>
-        </div>
+        </form>
       </div>
     </div>
   );

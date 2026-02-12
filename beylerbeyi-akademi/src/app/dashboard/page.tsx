@@ -213,7 +213,7 @@ export default function DashboardPage() {
           </div>
 
           {/* Mini stats */}
-          <div className="grid grid-cols-5 gap-2 sm:flex sm:items-center sm:gap-4">
+          <div className="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-5 gap-2 sm:flex sm:items-center sm:gap-4 w-full max-w-full overflow-x-auto">
             <MiniStat label="Atılan Gol" value={loading ? "—" : String(weeklyStats.goalsScored)} color="text-emerald-600" />
             <div className="hidden sm:block w-px h-6 bg-[#e2e5e9]" />
             <MiniStat label="Yenilen Gol" value={loading ? "—" : String(weeklyStats.goalsConceded)} color="text-red-500" />
@@ -229,7 +229,7 @@ export default function DashboardPage() {
         {/* Content: Player of the week + Team of the week + Recent results */}
         <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-[#f5d0d0]/60">
           {/* Haftanın Oyuncusu */}
-          <div className="p-6 md:p-8">
+          <div className="p-4 sm:p-6 md:p-8">
             <p className="text-[10px] font-bold text-[#c4111d] uppercase tracking-[0.15em] mb-3">⭐ Haftanın Oyuncusu</p>
             {loading ? (
               <p className="text-sm text-[#8c919a]">Yükleniyor...</p>
@@ -279,7 +279,7 @@ export default function DashboardPage() {
           </div>
 
           {/* Haftanın Takımı */}
-          <div className="p-6 md:p-8">
+          <div className="p-4 sm:p-6 md:p-8">
             <p className="text-[10px] font-bold text-[#c4111d] uppercase tracking-[0.15em] mb-3">🛡️ Haftanın Takımı</p>
             {loading ? (
               <p className="text-sm text-[#8c919a]">Yükleniyor...</p>
@@ -318,7 +318,7 @@ export default function DashboardPage() {
           </div>
 
           {/* Son Maç Sonuçları */}
-          <div className="p-6 md:p-8">
+          <div className="p-4 sm:p-6 md:p-8">
             <p className="text-[10px] font-bold text-[#c4111d] uppercase tracking-[0.15em] mb-3">🏆 Son Sonuçlar</p>
             {loading ? (
               <p className="text-sm text-[#8c919a]">Yükleniyor...</p>
