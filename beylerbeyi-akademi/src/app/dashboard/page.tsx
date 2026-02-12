@@ -452,21 +452,10 @@ export default function DashboardPage() {
                             <span className="text-xs font-bold text-[#1a1a2e]">{m.matchTime}</span>
                           </div>
                         )}
-                        {m.gatheringTime && (
-                          <div className="flex items-center gap-1.5">
-                            <span className="text-[10px] text-[#8c919a]">Toplanma: <span className="font-semibold text-[#5a6170]">{m.gatheringTime}</span></span>
-                          </div>
-                        )}
                         {m.venue && (
                           <div className="flex items-center gap-1 text-[10px] text-[#8c919a]">
                             <MapPin size={10} className="shrink-0" />
                             <span className="truncate max-w-[140px]">{m.venue}</span>
-                          </div>
-                        )}
-                        {m.gatheringLocation && !m.venue && (
-                          <div className="flex items-center gap-1 text-[10px] text-[#8c919a]">
-                            <MapPin size={10} className="shrink-0" />
-                            <span className="truncate max-w-[140px]">{m.gatheringLocation}</span>
                           </div>
                         )}
                       </div>

@@ -256,31 +256,357 @@ export default function PlayerReportPage() {
   const age = Math.floor((Date.now() - new Date(player.birthDate).getTime()) / (365.25 * 24 * 60 * 60 * 1000));
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-        <h1 className="text-xl font-bold text-[#1a1a2e]">Oyuncu Raporu</h1>
-        <div className="flex items-center gap-2">
-          <span className="text-[10px] font-semibold text-[#8c919a]">Maç</span>
-          <span className="text-[10px] font-semibold text-[#8c919a]">Gol</span>
-          <span className="text-[10px] font-semibold text-[#8c919a]">Asist</span>
-          <span className="text-[10px] font-semibold text-[#8c919a]">Sarı Kart</span>
-          <span className="text-[10px] font-semibold text-[#8c919a]">Kırmızı</span>
-          <span className="text-[10px] font-semibold text-[#8c919a]">Gole Kapatan</span>
+    <div className="space-y-5 max-w-4xl mx-auto">
+      {/* ═══ Header Card ═══ */}
+      <div className="bg-gradient-to-br from-[#c4111d] to-[#e94a5a] rounded-2xl p-5 sm:p-6 text-white relative overflow-hidden border border-[#f8d7da] shadow-sm">
+        {/* Logo */}
+        <div className="absolute top-4 left-4 z-10">
+          <Image src="/Logo_S.png" alt="Logo" width={48} height={48} className="rounded-xl shadow-md bg-white/80 p-1" />
+        </div>
+        <div className="absolute top-0 right-0 w-40 h-40 bg-[#c4111d]/10 rounded-full -translate-y-12 translate-x-12" />
+        <div className="absolute bottom-0 left-0 w-28 h-28 bg-[#c4111d]/5 rounded-full translate-y-10 -translate-x-10" />
+        <div className="relative flex items-start gap-3 sm:gap-4">
+          <button onClick={() => router.push("/dashboard/reports")} className="mt-1 p-1.5 rounded-lg hover:bg-white/10 transition-colors shrink-0">
+            <ArrowLeft size={18} />
+          </button>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-3 flex-wrap">
+              <div className="w-14 h-14 rounded-2xl bg-[#c4111d] flex items-center justify-center text-xl font-black shadow-lg shadow-[#c4111d]/30 shrink-0 text-white">
+                {player.jerseyNumber}
+              </div>
+              <div>
+                <h1 className="text-xl sm:text-2xl font-black tracking-tight text-white">
+                  {player.firstName} {player.lastName}
+                </h1>
+                <div className="flex items-center gap-2 text-xs text-white/90 mt-1 flex-wrap">
+                  <span className="bg-white/20 px-2 py-0.5 rounded-md font-medium text-white">{player.position}</span>
+                  <span className="bg-white/20 px-2 py-0.5 rounded-md font-medium text-white">{player.ageGroup}</span>
+                  <span>{age} yaş</span>
+                  <span className="text-white/50">·</span>
+                  <span>{player.foot}</span>
+                  <span className="text-white/50">·</span>
+                  <span>{player.height}cm · {player.weight}kg</span>
+                </div>
+              </div>
+            </div>
+            {/* Skill Rings */}
+            <div className="flex items-center gap-6 mt-5">
+              <RadialRing value={tacticalAvg} label="Taktik" color="#fff" />
+              <RadialRing value={athleticAvg} label="Atletik" color="#fff" />
+              {matchStats.avgRating > 0 && (
+                <RadialRing value={matchStats.avgRating} max={5} label="Puan" color="#fff" size={64} />
+              )}
+            </div>
+          </div>
         </div>
       </div>
-      <div className="overflow-x-auto">
-        <table className="min-w-full text-sm">
-          <thead>
-            <tr>
-              <th className="border-b border-[#e2e5e9] p-2.5 text-left">Maç</th>
-              <th className="border-b border-[#e2e5e9] p-2.5 text-left">Gol</th>
-              <th className="border-b border-[#e2e5e9] p-2.5 text-left">Asist</th>
-              <th className="border-b border-[#e2e5e9] p-2.5 text-left">Sarı Kart</th>
-              <th className="border-b border-[#e2e5e9] p-2.5 text-left">Kırmızı</th>
-              <th className="border-b border-[#e2e5e9] p-2.5 text-left">Gole Kapatan</th>
-            </tr>
-          </thead>
-          <tbody>
+
+      {/* ═══ Big Stat Cards ═══ */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-2">
+        <div className="bg-white rounded-2xl border border-[#e2e5e9] p-5 shadow-md flex flex-col items-center">
+          <div className="flex items-center gap-2 mb-2">
+            <div className="w-8 h-8 rounded-lg bg-[#c4111d]/10 flex items-center justify-center"><Swords size={16} className="text-[#c4111d]" /></div>
+            <span className="text-[10px] font-semibold text-[#8c919a] uppercase">Maç</span>
+          </div>
+          <p className="text-4xl font-extrabold text-[#c4111d] drop-shadow-sm">{matchStats.total}</p>
+          <div className="flex gap-2 mt-2">
+            <span className="text-[10px] bg-emerald-50 text-emerald-700 px-1.5 py-0.5 rounded font-semibold">{matchStats.starts} İ11</span>
+            <span className="text-[10px] bg-blue-50 text-blue-700 px-1.5 py-0.5 rounded font-semibold">{matchStats.subs} Yedek</span>
+          </div>
+        </div>
+        {player.position === "Kaleci" ? (
+          <>
+            <div className="bg-white rounded-2xl border border-[#e2e5e9] p-5 shadow-md flex flex-col items-center">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="w-8 h-8 rounded-lg bg-orange-50 flex items-center justify-center"><Trophy size={16} className="text-orange-600" /></div>
+                <span className="text-[10px] font-semibold text-[#8c919a] uppercase">Yediği Gol</span>
+              </div>
+              <p className="text-4xl font-extrabold text-orange-600 drop-shadow-sm">{matchStats.goalsConceded}</p>
+              <p className="text-xs text-[#8c919a] mt-1">{matchStats.total > 0 ? (matchStats.goalsConceded / matchStats.total).toFixed(2) : "0"} / maç</p>
+            </div>
+            <div className="bg-white rounded-2xl border border-[#e2e5e9] p-5 shadow-md flex flex-col items-center">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="w-8 h-8 rounded-lg bg-cyan-50 flex items-center justify-center"><Shield size={16} className="text-cyan-600" /></div>
+                <span className="text-[10px] font-semibold text-[#8c919a] uppercase">Gole Kapatan</span>
+              </div>
+              <p className="text-4xl font-extrabold text-cyan-600 drop-shadow-sm">{matchStats.cleanSheets}</p>
+              <p className="text-xs text-[#8c919a] mt-1">{matchStats.total > 0 ? (matchStats.cleanSheets / matchStats.total * 100).toFixed(0) : "0"}%</p>
+            </div>
+            <div className="bg-white rounded-2xl border border-[#e2e5e9] p-5 shadow-none flex items-center justify-center">
+              <span className="text-xs text-[#8c919a]">Kaleci için gol/asist istatistiği gösterilmez.</span>
+            </div>
+          </>
+        ) : (
+          <>
+            <div className="bg-white rounded-2xl border border-[#e2e5e9] p-5 shadow-md flex flex-col items-center">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center"><Trophy size={16} className="text-emerald-600" /></div>
+                <span className="text-[10px] font-semibold text-[#8c919a] uppercase">Gol</span>
+              </div>
+              <p className="text-4xl font-extrabold text-emerald-600 drop-shadow-sm">{matchStats.goals}</p>
+              <p className="text-xs text-[#8c919a] mt-1">{matchStats.goalsPerMatch.toFixed(2)} / maç</p>
+            </div>
+            <div className="bg-white rounded-2xl border border-[#e2e5e9] p-5 shadow-md flex flex-col items-center">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center"><Target size={16} className="text-blue-600" /></div>
+                <span className="text-[10px] font-semibold text-[#8c919a] uppercase">Asist</span>
+              </div>
+              <p className="text-4xl font-extrabold text-blue-600 drop-shadow-sm">{matchStats.assists}</p>
+              <p className="text-xs text-[#8c919a] mt-1">{matchStats.assistsPerMatch.toFixed(2)} / maç</p>
+            </div>
+            <div className="bg-white rounded-2xl border border-[#e2e5e9] p-5 shadow-md flex flex-col items-center">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="w-8 h-8 rounded-lg bg-teal-50 flex items-center justify-center"><Flame size={16} className="text-teal-600" /></div>
+                <span className="text-[10px] font-semibold text-[#8c919a] uppercase">Gol Katkısı</span>
+              </div>
+              <p className="text-4xl font-extrabold text-teal-600 drop-shadow-sm">{matchStats.goals + matchStats.assists}</p>
+              <p className="text-xs text-[#8c919a] mt-1">{matchStats.total > 0 ? ((matchStats.goals + matchStats.assists) / matchStats.total).toFixed(2) : "0"} / maç</p>
+            </div>
+          </>
+        )}
+      </div>
+
+      {/* ═══ Extended Stats Row ═══ */}
+      <div className="grid grid-cols-3 sm:grid-cols-7 gap-2">
+        {[
+          { l: "Dakika", v: matchStats.totalMin, c: "text-[#1a1a2e]", s: matchStats.total > 0 ? `${Math.round(matchStats.totalMin / matchStats.total)}dk/m` : "" },
+          { l: "Galibiyet", v: resultBreakdown.w, c: "text-emerald-600", s: matchStats.total > 0 ? `%${Math.round((resultBreakdown.w / matchStats.total) * 100)}` : "" },
+          { l: "Beraberlik", v: resultBreakdown.d, c: "text-amber-600", s: "" },
+          { l: "Mağlubiyet", v: resultBreakdown.l, c: "text-red-500", s: "" },
+          { l: "Sarı Kart", v: matchStats.yellowCards, c: "text-yellow-600", s: "" },
+          { l: "Kırmızı", v: matchStats.redCards, c: "text-red-600", s: "" },
+          { l: "Gole Kapatan", v: matchStats.cleanSheets, c: "text-cyan-600", s: "" },
+        ].map((st) => (
+          <div key={st.l} className="bg-white rounded-xl border border-[#e2e5e9] p-2.5 text-center shadow-sm">
+            <p className="text-[9px] font-semibold text-[#8c919a] uppercase tracking-wider">{st.l}</p>
+            <p className={`text-lg font-black mt-0.5 ${st.c}`}>{st.v}</p>
+            {st.s && <p className="text-[9px] text-[#8c919a]">{st.s}</p>}
+          </div>
+        ))}
+      </div>
+
+      {/* ═══ Development Summary Banner ═══ */}
+      {(skillDevSummary.tacticalUp > 0 || skillDevSummary.athleticUp > 0 || bodyChanges.height || bodyChanges.weight) && (
+        <div className="bg-gradient-to-r from-emerald-50 to-blue-50 rounded-2xl border border-emerald-100 p-5">
+          <h4 className="text-xs font-bold text-emerald-800 uppercase tracking-wider flex items-center gap-2 mb-3">
+            <TrendingUp size={14} /> Gelişim Özeti
+          </h4>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            {skillDevSummary.tacticalUp > 0 && (
+              <div className="bg-white/80 backdrop-blur-sm rounded-xl p-3 text-center border border-white">
+                <Shield size={20} className="text-blue-500 mx-auto mb-1" />
+                <p className="text-xl font-black text-blue-600">+{skillDevSummary.tacticalUp}</p>
+                <p className="text-[9px] text-[#8c919a] font-semibold uppercase mt-0.5">Taktik Artış</p>
+                {skillDevSummary.tacticalDown > 0 && <p className="text-[9px] text-red-400 mt-0.5">-{skillDevSummary.tacticalDown} düşüş</p>}
+              </div>
+            )}
+            {skillDevSummary.athleticUp > 0 && (
+              <div className="bg-white/80 backdrop-blur-sm rounded-xl p-3 text-center border border-white">
+                <Zap size={20} className="text-emerald-500 mx-auto mb-1" />
+                <p className="text-xl font-black text-emerald-600">+{skillDevSummary.athleticUp}</p>
+                <p className="text-[9px] text-[#8c919a] font-semibold uppercase mt-0.5">Atletik Artış</p>
+                {skillDevSummary.athleticDown > 0 && <p className="text-[9px] text-red-400 mt-0.5">-{skillDevSummary.athleticDown} düşüş</p>}
+              </div>
+            )}
+            {bodyChanges.height && (
+              <div className="bg-white/80 backdrop-blur-sm rounded-xl p-3 text-center border border-white">
+                <Ruler size={20} className="text-indigo-500 mx-auto mb-1" />
+                <p className="text-xl font-black text-indigo-600">
+                  {bodyChanges.height.current - bodyChanges.height.first > 0 ? "+" : ""}{bodyChanges.height.current - bodyChanges.height.first} cm
+                </p>
+                <p className="text-[9px] text-[#8c919a] font-semibold uppercase mt-0.5">Boy Değişimi</p>
+                <p className="text-[9px] text-[#5a6170] mt-0.5">{bodyChanges.height.first} → {bodyChanges.height.current}</p>
+              </div>
+            )}
+            {bodyChanges.weight && (
+              <div className="bg-white/80 backdrop-blur-sm rounded-xl p-3 text-center border border-white">
+                <Weight size={20} className="text-orange-500 mx-auto mb-1" />
+                <p className="text-xl font-black text-orange-600">
+                  {bodyChanges.weight.current - bodyChanges.weight.first > 0 ? "+" : ""}{bodyChanges.weight.current - bodyChanges.weight.first} kg
+                </p>
+                <p className="text-[9px] text-[#8c919a] font-semibold uppercase mt-0.5">Kilo Değişimi</p>
+                <p className="text-[9px] text-[#5a6170] mt-0.5">{bodyChanges.weight.first} → {bodyChanges.weight.current}</p>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* ═══ Skills Side-by-Side ═══ */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <Section title="Taktik Beceriler" icon={Shield} iconColor="text-blue-500"
+          badge={skillDevSummary.tacticalUp > 0 ? (
+            <span className="text-[9px] bg-emerald-50 text-emerald-600 font-bold px-1.5 py-0.5 rounded-md flex items-center gap-0.5">
+              <TrendingUp size={9} /> +{skillDevSummary.tacticalUp}
+            </span>
+          ) : undefined}
+        >
+          <div className="space-y-1 mt-2">
+            {Object.entries(TACTICAL_LABELS).map(([key, label]) => {
+              const val = player.tactical[key as keyof typeof player.tactical];
+              const change = skillChanges[`tactical:${key === "gameReading" ? "game_reading" : key}`];
+              return <SkillBar key={key} label={label} value={val} prevValue={change?.first} />;
+            })}
+          </div>
+          <div className="mt-3 pt-3 border-t border-[#f0f1f3] flex items-center justify-between">
+            <span className="text-[10px] font-semibold text-[#8c919a] uppercase">Ortalama</span>
+            <span className="text-sm font-black text-blue-600">{tacticalAvg}</span>
+          </div>
+        </Section>
+        <Section title="Atletik Beceriler" icon={Zap} iconColor="text-emerald-500"
+          badge={skillDevSummary.athleticUp > 0 ? (
+            <span className="text-[9px] bg-emerald-50 text-emerald-600 font-bold px-1.5 py-0.5 rounded-md flex items-center gap-0.5">
+              <TrendingUp size={9} /> +{skillDevSummary.athleticUp}
+            </span>
+          ) : undefined}
+        >
+          <div className="space-y-1 mt-2">
+            {Object.entries(ATHLETIC_LABELS).map(([key, label]) => {
+              const val = player.athletic[key as keyof typeof player.athletic];
+              const change = skillChanges[`athletic:${key}`];
+              return <SkillBar key={key} label={label} value={val} prevValue={change?.first} />;
+            })}
+          </div>
+          <div className="mt-3 pt-3 border-t border-[#f0f1f3] flex items-center justify-between">
+            <span className="text-[10px] font-semibold text-[#8c919a] uppercase">Ortalama</span>
+            <span className="text-sm font-black text-emerald-600">{athleticAvg}</span>
+          </div>
+        </Section>
+      </div>
+
+      {/* ═══ Physical Development ═══ */}
+      <Section title="Fiziksel Gelişim" icon={Ruler} iconColor="text-indigo-500">
+        <div className="grid grid-cols-2 gap-4 mt-2">
+          <div className="relative bg-gradient-to-br from-indigo-50 to-white rounded-xl p-4 border border-indigo-100 overflow-hidden">
+            <Ruler size={40} className="absolute -top-1 -right-1 text-indigo-100 rotate-12" />
+            <span className="text-[10px] font-semibold text-indigo-400 uppercase tracking-wider">Boy</span>
+            <p className="text-3xl font-black text-[#1a1a2e] mt-1">{player.height}<span className="text-sm font-normal text-[#8c919a] ml-0.5">cm</span></p>
+            {bodyChanges.height ? (
+              <div className="mt-2 space-y-1">
+                <div className="flex items-center gap-1.5">
+                  <TrendingUp size={12} className="text-emerald-500" />
+                  <span className="text-xs font-bold text-emerald-600">
+                    {bodyChanges.height.current - bodyChanges.height.first > 0 ? "+" : ""}{bodyChanges.height.current - bodyChanges.height.first} cm
+                  </span>
+                </div>
+                <div className="w-full h-1.5 bg-indigo-100 rounded-full overflow-hidden">
+                  <div className="h-full bg-indigo-500 rounded-full transition-all" style={{ width: `${Math.min(((bodyChanges.height.current - bodyChanges.height.first) / 20) * 100, 100)}%` }} />
+                </div>
+                <p className="text-[9px] text-[#8c919a]">{bodyChanges.height.first}cm → {bodyChanges.height.current}cm</p>
+              </div>
+            ) : <p className="text-[9px] text-[#8c919a] mt-2">Değişim kaydı yok</p>}
+          </div>
+          <div className="relative bg-gradient-to-br from-orange-50 to-white rounded-xl p-4 border border-orange-100 overflow-hidden">
+            <Weight size={40} className="absolute -top-1 -right-1 text-orange-100 rotate-12" />
+            <span className="text-[10px] font-semibold text-orange-400 uppercase tracking-wider">Kilo</span>
+            <p className="text-3xl font-black text-[#1a1a2e] mt-1">{player.weight}<span className="text-sm font-normal text-[#8c919a] ml-0.5">kg</span></p>
+            {bodyChanges.weight ? (
+              <div className="mt-2 space-y-1">
+                <div className="flex items-center gap-1.5">
+                  {bodyChanges.weight.current - bodyChanges.weight.first >= 0
+                    ? <TrendingUp size={12} className="text-emerald-500" />
+                    : <TrendingDown size={12} className="text-red-500" />}
+                  <span className={`text-xs font-bold ${bodyChanges.weight.current - bodyChanges.weight.first >= 0 ? "text-emerald-600" : "text-red-500"}`}>
+                    {bodyChanges.weight.current - bodyChanges.weight.first > 0 ? "+" : ""}{bodyChanges.weight.current - bodyChanges.weight.first} kg
+                  </span>
+                </div>
+                <div className="w-full h-1.5 bg-orange-100 rounded-full overflow-hidden">
+                  <div className="h-full bg-orange-500 rounded-full transition-all" style={{ width: `${Math.min((Math.abs(bodyChanges.weight.current - bodyChanges.weight.first) / 15) * 100, 100)}%` }} />
+                </div>
+                <p className="text-[9px] text-[#8c919a]">{bodyChanges.weight.first}kg → {bodyChanges.weight.current}kg</p>
+              </div>
+            ) : <p className="text-[9px] text-[#8c919a] mt-2">Değişim kaydı yok</p>}
+          </div>
+        </div>
+      </Section>
+
+      {/* ═══ Monthly Performance ═══ */}
+      {monthlyStats.length > 0 && (
+        <Section title="Aylık Performans" icon={Activity} iconColor="text-indigo-500">
+          <div className="mt-2 space-y-3">
+            {monthlyStats.map((ms) => {
+              const maxVal = Math.max(...monthlyStats.map((m) => m.goals + m.assists), 1);
+              const monthName = new Date(ms.month + "-01").toLocaleDateString("tr-TR", { month: "short", year: "numeric" });
+              return (
+                <div key={ms.month}>
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-[10px] font-semibold text-[#5a6170]">{monthName}</span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[9px] text-[#8c919a]">{ms.matches} maç</span>
+                      <span className="text-[10px] font-bold text-[#1a1a2e]">{ms.goals + ms.assists} katkı</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1 h-6">
+                    {ms.goals > 0 && (
+                      <div className="h-full bg-gradient-to-r from-emerald-500 to-emerald-400 rounded-lg flex items-center justify-center transition-all"
+                        style={{ width: `${Math.max((ms.goals / maxVal) * 100, 8)}%` }}>
+                        <span className="text-[9px] font-bold text-white px-1">{ms.goals}G</span>
+                      </div>
+                    )}
+                    {ms.assists > 0 && (
+                      <div className="h-full bg-gradient-to-r from-blue-500 to-blue-400 rounded-lg flex items-center justify-center transition-all"
+                        style={{ width: `${Math.max((ms.assists / maxVal) * 100, 8)}%` }}>
+                        <span className="text-[9px] font-bold text-white px-1">{ms.assists}A</span>
+                      </div>
+                    )}
+                    {ms.goals === 0 && ms.assists === 0 && (
+                      <div className="h-full bg-[#e2e5e9] rounded-lg flex items-center px-2" style={{ width: "15%" }}>
+                        <span className="text-[9px] text-[#8c919a]">—</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+            <div className="flex items-center gap-4 pt-1">
+              <div className="flex items-center gap-1.5"><span className="w-3 h-3 rounded bg-emerald-500" /><span className="text-[10px] text-[#8c919a]">Gol</span></div>
+              <div className="flex items-center gap-1.5"><span className="w-3 h-3 rounded bg-blue-500" /><span className="text-[10px] text-[#8c919a]">Asist</span></div>
+            </div>
+          </div>
+        </Section>
+      )}
+
+      {/* ═══ Skill History Log ═══ */}
+      {!logsLoading && skillLogs.length > 0 && (
+        <Section title="Beceri Gelişim Geçmişi" icon={TrendingUp} iconColor="text-purple-500" defaultOpen={false}
+          badge={<span className="text-[9px] bg-purple-50 text-purple-600 font-bold px-1.5 py-0.5 rounded-md">{skillLogs.length}</span>}
+        >
+          <div className="space-y-1 max-h-72 overflow-y-auto mt-2 pr-1">
+            {skillLogs.slice(0, 50).map((log) => {
+              const labels = log.category === "tactical" ? TACTICAL_LABELS : ATHLETIC_LABELS;
+              const readableKey = log.skillName === "game_reading" ? "gameReading" : log.skillName;
+              const skillLabel = labels[readableKey] || log.skillName;
+              const diff = log.newValue - log.oldValue;
+              return (
+                <div key={log.id} className="flex items-center justify-between bg-[#f8f9fb] hover:bg-[#f0f1f3] rounded-lg px-3 py-2 transition-colors">
+                  <div className="flex items-center gap-2">
+                    <span className={`w-1.5 h-1.5 rounded-full ${log.category === "tactical" ? "bg-blue-500" : "bg-emerald-500"}`} />
+                    <span className="text-xs text-[#1a1a2e] font-medium">{skillLabel}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] text-[#8c919a]">{log.oldValue}</span>
+                    <span className="text-[10px] text-[#8c919a]">→</span>
+                    <span className="text-[10px] font-bold text-[#1a1a2e]">{log.newValue}</span>
+                    <span className={`text-[9px] font-bold flex items-center min-w-[28px] ${diff > 0 ? "text-emerald-500" : diff < 0 ? "text-red-500" : "text-[#8c919a]"}`}>
+                      {diff > 0 ? "+" : ""}{diff}
+                    </span>
+                    <span className="text-[9px] text-[#b0b5bd] w-14 text-right">
+                      {new Date(log.changedAt).toLocaleDateString("tr-TR", { day: "2-digit", month: "short" })}
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </Section>
+      )}
+
+      {/* ═══ Match History (Redesigned) ═══ */}
+      <Section title={`Maç Geçmişi (${playerMatches.length})`} icon={Calendar} iconColor="text-[#c4111d]" defaultOpen={false}>
+        {playerMatches.length === 0 ? (
+          <p className="text-xs text-[#8c919a] text-center py-8">Henüz oynanmış maç yok.</p>
+        ) : (
+          <div className="space-y-3 max-h-[500px] overflow-y-auto mt-2 pr-1">
             {playerMatches.map((match) => {
               const ps = match.playerStats.find((p) => p.playerId === playerId);
               if (!ps) return null;
@@ -369,9 +695,9 @@ export default function PlayerReportPage() {
                 </div>
               );
             })}
-          </tbody>
-        </table>
-      </div>
+          </div>
+        )}
+      </Section>
     </div>
   );
 }

@@ -120,8 +120,11 @@ export default function PlayersPage() {
 
   return (
     <div className="space-y-4 sm:space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-        <h1 className="text-xl font-bold text-[#1a1a2e]">Oyuncular</h1>
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="text-xl font-bold text-[#1a1a2e]">Oyuncular</h1>
+          <div className="text-sm text-[#8c919a] font-medium mt-1">{players.length} oyuncu</div>
+        </div>
         {canAddPlayer && (
           <button
             onClick={() => setEditingPlayer(null)}
@@ -133,14 +136,90 @@ export default function PlayersPage() {
         )}
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 sm:gap-4">
+      {/* Filtreler ve arama (Takımlar sayfası gibi) */}
+      <div className="flex flex-col sm:flex-row gap-3 bg-white border border-[#e2e5e9] rounded-xl p-3 overflow-x-auto">
+        {/* Yaş grubu sekmeleri */}
+        <div className="flex gap-1 bg-[#f1f3f5] rounded-lg p-1 min-w-[260px]">
+          {AGE_FILTERS.map((f) => (
+            <button
+              key={f.value}
+              onClick={() => setSelectedAge(f.value)}
+              className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-all duration-200 ${
+                selectedAge === f.value
+                  ? "bg-white text-[#c4111d] shadow-sm"
+                  : "text-[#5a6170] hover:text-[#1a1a2e]"
+              }`}
+            >
+              {f.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Sezon açılır menü */}
+        <div className="relative" ref={seasonRef}>
+          <button
+            onClick={() => setSeasonOpen(!seasonOpen)}
+            className={`flex items-center gap-2 px-3 py-1.5 h-[34px] bg-[#f1f3f5] rounded-lg text-xs font-semibold transition-all duration-200 border ${
+              seasonOpen
+                ? "border-[#c4111d]/30 ring-2 ring-[#c4111d]/20 text-[#c4111d]"
+                : "border-transparent hover:border-[#e2e5e9] text-[#1a1a2e]"
+            }`}
+          >
+            <Calendar size={14} className="text-[#8c919a] shrink-0" />
+            <span className="whitespace-nowrap">{selectedSeasonLabel}</span>
+            <svg className={`w-3 h-3 text-[#8c919a] transition-transform duration-200 ${seasonOpen ? "rotate-180" : ""}`} fill="none" viewBox="0 0 10 6"><path d="M1 1L5 5L9 1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+          </button>
+          {seasonOpen && (
+            <div className="absolute top-full left-0 mt-1.5 bg-white border border-[#e2e5e9] rounded-xl shadow-lg shadow-black/8 py-1 min-w-[160px] z-50 animate-fade-in">
+              {SEASON_FILTERS.map((f) => (
+                <button
+                  key={f.value}
+                  onClick={() => {
+                    setSelectedSeason(f.value);
+                    setSeasonOpen(false);
+                  }}
+                  className={`w-full text-left px-4 py-2 text-xs font-medium transition-colors duration-150 ${
+                    selectedSeason === f.value
+                      ? "text-[#c4111d] bg-[#c4111d]/5"
+                      : "text-[#1a1a2e] hover:bg-[#f1f3f5]"
+                  }`}
+                >
+                  <span className="flex items-center gap-2">
+                    {selectedSeason === f.value && (
+                      <svg className="w-3.5 h-3.5 text-[#c4111d] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+                    )}
+                    <span className={selectedSeason !== f.value ? "ml-[22px]" : ""}>{f.label}</span>
+                  </span>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Arama inputu */}
+        <div className="flex-1 flex items-center gap-2 min-w-[200px]">
+          <div className="relative w-full">
+            <input
+              type="text"
+              className="w-full px-3 py-2 rounded-lg border border-[#e2e5e9] bg-white text-sm text-[#1a1a2e] focus:outline-none focus:ring-2 focus:ring-[#c4111d] pl-9"
+              placeholder="Oyuncu ara..."
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+            />
+            <Search size={18} className="absolute left-2 top-1/2 -translate-y-1/2 text-[#c4111d] pointer-events-none" />
+          </div>
+        </div>
+      </div>
+
+      {/* Oyuncu kartları grid */}
+      <div className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
         {loading ? (
-          <div className="flex flex-col items-center justify-center py-20 animate-fade-in">
+          <div className="col-span-full flex flex-col items-center justify-center py-20 animate-fade-in">
             <div className="w-10 h-10 border-3 border-[#e2e5e9] border-t-[#c4111d] rounded-full animate-spin mb-4" />
             <p className="text-sm font-medium text-[#5a6170]">Oyuncular yükleniyor...</p>
           </div>
         ) : filteredPlayers.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20 animate-fade-in">
+          <div className="col-span-full flex flex-col items-center justify-center py-20 animate-fade-in">
             <div className="w-16 h-16 rounded-2xl bg-[#f1f3f5] flex items-center justify-center mb-4">
               <Users size={28} className="text-[#8c919a]" />
             </div>
@@ -148,15 +227,13 @@ export default function PlayersPage() {
             <p className="text-xs text-[#8c919a] mt-1">Farklı bir filtre veya arama terimi deneyin</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filteredPlayers.map((player) => (
-              <PlayerCard
-                key={player.id}
-                player={player}
-                onClick={() => setSelectedPlayer(player)}
-              />
-            ))}
-          </div>
+          filteredPlayers.map((player) => (
+            <PlayerCard
+              key={player.id}
+              player={player}
+              onClick={() => setSelectedPlayer(player)}
+            />
+          ))
         )}
       </div>
 
