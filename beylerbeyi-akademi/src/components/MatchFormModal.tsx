@@ -215,12 +215,12 @@ export default function MatchFormModal({ match, players, saving, onClose, onSave
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-fade-in">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 animate-fade-in">
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose}></div>
 
-      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] flex flex-col border border-[#e2e5e9] animate-slide-in-up">
+      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg sm:max-w-3xl max-h-[90vh] flex flex-col border border-[#e2e5e9] animate-slide-in-up">
         {/* Header */}
-        <div className="border-b border-[#e2e5e9] px-4 sm:px-6 py-4 sm:py-5 flex items-center justify-between rounded-t-2xl shrink-0">
+        <div className="border-b border-[#e2e5e9] px-2 sm:px-6 py-3 sm:py-5 flex items-center justify-between rounded-t-2xl shrink-0">
           <h2 className="text-lg font-bold text-[#1a1a2e]">
             {isEdit ? "Maç Düzenle" : "Yeni Maç Ekle"}
           </h2>
@@ -230,7 +230,7 @@ export default function MatchFormModal({ match, players, saving, onClose, onSave
         </div>
 
         {/* Tabs */}
-        <div className="border-b border-[#e2e5e9] px-4 sm:px-6 flex gap-1 shrink-0 overflow-x-auto">
+        <div className="border-b border-[#e2e5e9] px-2 sm:px-6 flex gap-1 shrink-0 overflow-x-auto">
           {[
             { key: "match" as const, label: "Maç Bilgisi" },
             { key: "squad" as const, label: `Kadro (${squad.length})` },
@@ -251,10 +251,10 @@ export default function MatchFormModal({ match, players, saving, onClose, onSave
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto p-4 sm:p-6">
+        <div className="flex-1 overflow-y-auto p-2 sm:p-6">
           {activeTab === "match" && (
             <div className="space-y-5">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4">
                 <div>
                   <label className="block text-xs font-medium text-[#5a6170] mb-1.5">Tarih</label>
                   <input

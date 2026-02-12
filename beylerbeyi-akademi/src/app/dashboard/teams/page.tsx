@@ -320,8 +320,8 @@ export default function TeamsPage() {
         <MatchDetailModal
           match={selectedMatch}
           onClose={() => setSelectedMatch(null)}
-          onEdit={canEdit && (userRole?.role === "yonetici" || (userRole?.role === "antrenor" && selectedMatch.ageGroup === userRole.age_group)) ? handleEditFromDetail : undefined}
-          onDelete={userRole?.role === "yonetici" ? handleDeleteMatch : undefined}
+          {...(canEdit && (userRole?.role === "yonetici" || (userRole?.role === "antrenor" && selectedMatch.ageGroup === userRole.age_group)) ? { onEdit: handleEditFromDetail } : {})}
+          {...(userRole?.role === "yonetici" ? { onDelete: handleDeleteMatch } : {})}
         />
       )}
 
