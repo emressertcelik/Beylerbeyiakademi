@@ -7,6 +7,7 @@ import { useAppData } from "@/lib/app-data";
 import MatchFormModal from "@/components/MatchFormModal";
 import MatchDetailModal from "@/components/MatchDetailModal";
 import { useToast } from "@/components/Toast";
+import EnablePushButton from "@/components/EnablePushButton";
 import {
   Plus,
   Calendar,
@@ -151,9 +152,11 @@ export default function TeamsPage() {
 
   return (
     <div className="space-y-6 animate-slide-up">
+      {/* Web Push Enable Button */}
+      <EnablePushButton />
       {/* ...puan durumu linki kaldırıldı... */}
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 px-2 sm:px-0">
         <div>
           <h1 className="text-2xl font-bold text-[#1a1a2e] tracking-tight">Takımlar</h1>
           <p className="text-sm text-[#5a6170] mt-1">
@@ -172,9 +175,9 @@ export default function TeamsPage() {
       </div>
 
       {/* Filters Bar */}
-      <div className="flex flex-col sm:flex-row gap-3 bg-white border border-[#e2e5e9] rounded-xl p-3">
+      <div className="flex flex-col sm:flex-row gap-3 bg-white border border-[#e2e5e9] rounded-xl p-3 overflow-x-auto">
         {/* Age group tabs */}
-        <div className="flex gap-1 bg-[#f1f3f5] rounded-lg p-1">
+        <div className="flex gap-1 bg-[#f1f3f5] rounded-lg p-1 min-w-[260px]">
           {AGE_FILTERS.map((f) => (
             <button
               key={f.value}
@@ -234,7 +237,7 @@ export default function TeamsPage() {
 
       {/* Team Stats Cards */}
       {teamStats && (
-        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-3 px-1 sm:px-0">
           <StatCard icon={<Shield size={16} />} label="Toplam Maç" value={teamStats.totalMatches} />
           <StatCard icon={<Trophy size={16} />} label="Galibiyet" value={teamStats.wins} color="text-emerald-600" />
           <StatCard icon={<Shield size={16} />} label="Beraberlik" value={teamStats.draws} color="text-amber-600" />
@@ -254,7 +257,7 @@ export default function TeamsPage() {
           <p className="text-xs text-[#8c919a] mt-1">Bu filtre için henüz maç eklenmemiş</p>
         </div>
       ) : (
-        <div className="space-y-2">
+        <div className="space-y-2 overflow-x-auto">
           <h2 className="text-sm font-bold text-[#1a1a2e]">Maçlar</h2>
           {filteredMatches.map((match) => {
             const isPlayed = match.status === "played";
@@ -263,16 +266,16 @@ export default function TeamsPage() {
               <button
                 key={match.id}
                 onClick={() => setSelectedMatch(match)}
-                className="w-full bg-white border border-[#e2e5e9] rounded-xl p-4 text-left hover:border-[#c4111d]/30 hover:shadow-md hover:shadow-[#c4111d]/5 transition-all duration-200 group"
+                className="w-full bg-white border border-[#e2e5e9] rounded-xl p-3 sm:p-4 text-left hover:border-[#c4111d]/30 hover:shadow-md hover:shadow-[#c4111d]/5 transition-all duration-200 group min-w-[320px]"
               >
-                <div className="flex items-center gap-4">
+                <div className="flex flex-col xs:flex-row items-start xs:items-center gap-2 xs:gap-4">
                   {/* Result / Status Badge */}
                   <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-sm font-black ${rc.bg} ${rc.text} border ${rc.border} shrink-0`}>
                     {isPlayed ? resultLabels[match.result] : "📅"}
                   </div>
 
                   {/* Match Info */}
-                  <div className="flex-1 min-w-0">
+                  <div className="flex-1 min-w-0 max-w-full">
                     <div className="flex items-center gap-2">
                       {isPlayed ? (
                         <p className="text-sm font-semibold text-[#1a1a2e] group-hover:text-[#c4111d] transition-colors truncate">
@@ -285,7 +288,7 @@ export default function TeamsPage() {
                         </p>
                       )}
                     </div>
-                    <div className="flex items-center gap-2 mt-0.5 text-[11px] text-[#8c919a]">
+                    <div className="flex flex-wrap items-center gap-2 mt-0.5 text-[11px] text-[#8c919a] max-w-full overflow-x-auto">
                       <span>{new Date(match.date).toLocaleDateString("tr-TR", { day: "numeric", month: "short", year: "numeric" })}</span>
                       <span>·</span>
                       <span>{match.ageGroup}</span>
@@ -302,7 +305,7 @@ export default function TeamsPage() {
 
                   {/* Player count */}
                   {isPlayed && (
-                    <div className="text-[11px] text-[#8c919a] font-medium shrink-0 hidden sm:block">
+                    <div className="text-[11px] text-[#8c919a] font-medium shrink-0 hidden xs:block">
                       {match.playerStats.length} oyuncu
                     </div>
                   )}
