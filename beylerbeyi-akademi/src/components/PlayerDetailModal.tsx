@@ -6,6 +6,7 @@ import { Match } from "@/types/match";
 import { fetchSkillLogs, fetchBodyLogs } from "@/lib/supabase/players";
 import { fetchMatchesByPlayer } from "@/lib/supabase/matches";
 import { X, Edit3, Trash2, TrendingUp, TrendingDown, ArrowUp, ArrowDown, Ruler, Weight, ChevronDown, UserCheck, ArrowRightLeft, Cross, ShieldBan, UserX, Clock } from "lucide-react";
+import { Star } from "lucide-react";
 
 interface PlayerDetailModalProps {
   player: Player;
