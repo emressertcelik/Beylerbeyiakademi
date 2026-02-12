@@ -218,7 +218,7 @@ export default function MatchFormModal({ match, players, saving, onClose, onSave
     <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 animate-fade-in">
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose}></div>
 
-      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg sm:max-w-3xl max-h-[90vh] flex flex-col border border-[#e2e5e9] animate-slide-in-up">
+      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-full sm:max-w-3xl max-h-[90vh] flex flex-col border border-[#e2e5e9] animate-slide-in-up">
         {/* Header */}
         <div className="border-b border-[#e2e5e9] px-2 sm:px-6 py-3 sm:py-5 flex items-center justify-between rounded-t-2xl shrink-0">
           <h2 className="text-lg font-bold text-[#1a1a2e]">
@@ -276,7 +276,7 @@ export default function MatchFormModal({ match, players, saving, onClose, onSave
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4">
                 <div>
                   <label className="block text-xs font-medium text-[#5a6170] mb-1.5">Yaş Grubu</label>
                   <select
@@ -370,7 +370,7 @@ export default function MatchFormModal({ match, players, saving, onClose, onSave
               {form.status === "played" && (
               <div>
                 <label className="block text-xs font-medium text-[#5a6170] mb-2">Skor</label>
-                <div className="flex items-center gap-3 bg-[#f8f9fb] rounded-xl p-4 border border-[#e2e5e9]">
+                <div className="flex flex-col sm:flex-row items-center gap-3 bg-[#f8f9fb] rounded-xl p-4 border border-[#e2e5e9]">
                   <div className="flex-1 text-center">
                     <p className="text-[10px] text-[#8c919a] font-semibold uppercase tracking-wider mb-1">Beylerbeyi</p>
                     <input
@@ -728,7 +728,7 @@ export default function MatchFormModal({ match, players, saving, onClose, onSave
                     </div>
 
                     {/* Stats Grid */}
-                    <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
                       <MiniInput label="Dakika" value={ps.minutesPlayed} onChange={(v) => updatePlayerStat(ps.playerId, "minutesPlayed", v)} max={120} />
                       <MiniInput label="Gol" value={ps.goals} onChange={(v) => updatePlayerStat(ps.playerId, "goals", v)} />
                       <MiniInput label="Asist" value={ps.assists} onChange={(v) => updatePlayerStat(ps.playerId, "assists", v)} />
