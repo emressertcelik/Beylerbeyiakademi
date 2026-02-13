@@ -187,7 +187,16 @@ export default function MatchDetailModal({ match, onClose, onEdit, onDelete }: M
               </div>
               <div className="bg-[#f8f9fb] divide-y divide-[#e2e5e9]">
                 {(match.squad ?? [])
-                  .sort((a, b) => a.jerseyNumber - b.jerseyNumber)
+                  .slice()
+                  .sort((a, b) => {
+                    const order = ["Kaleci", "Defans", "Orta Saha", "Forvet"];
+                    const aIdx = order.indexOf(a.position);
+                    const bIdx = order.indexOf(b.position);
+                    if (aIdx !== -1 && bIdx !== -1) return aIdx - bIdx;
+                    if (aIdx !== -1) return -1;
+                    if (bIdx !== -1) return 1;
+                    return a.position.localeCompare(b.position);
+                  })
                   .map((s, i) => (
                     <div
                       key={s.playerId}

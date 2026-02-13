@@ -3,8 +3,7 @@
 import { useState } from "react";
 import { registerServiceWorker, askNotificationPermission, subscribeUserToPush } from "@/lib/webpush";
 
-// TODO: Replace with your own VAPID public key (from your push server setup)
-const VAPID_PUBLIC_KEY = "YOUR_PUBLIC_VAPID_KEY_HERE";
+const VAPID_PUBLIC_KEY = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || "";
 
 export default function EnablePushButton() {
   const [enabled, setEnabled] = useState(false);
