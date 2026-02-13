@@ -72,6 +72,16 @@ export default function PlayersPage() {
         String(p.jerseyNumber).includes(search);
       return matchAge && matchSeason && matchSearch;
     });
+    // Sıralama: Kaleci, Defans, Orta Saha, Forvet
+    const positionOrder = ["Kaleci", "Defans", "Orta Saha", "Forvet"];
+    filtered = filtered.slice().sort((a, b) => {
+      const aIdx = positionOrder.indexOf(a.position);
+      const bIdx = positionOrder.indexOf(b.position);
+      if (aIdx !== -1 && bIdx !== -1) return aIdx - bIdx;
+      if (aIdx !== -1) return -1;
+      if (bIdx !== -1) return 1;
+      return a.position.localeCompare(b.position);
+    });
     return filtered.map((p) => {
       const matchStats = getPlayerStatsFromMatches(p.id);
       if (matchStats.matches > 0) {

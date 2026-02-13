@@ -55,9 +55,9 @@ export default function PlayerFormModal({ player, saving, onClose, onSave }: Pla
         ageGroup: player.ageGroup,
         position: player.position,
         foot: player.foot,
-        jerseyNumber: player.jerseyNumber,
-        height: player.height,
-        weight: player.weight,
+        jerseyNumber: player.jerseyNumber ?? 0,
+        height: player.height ?? 0,
+        weight: player.weight ?? 0,
         phone: player.phone || "",
         parentPhone: player.parentPhone || "",
         notes: player.notes || "",
@@ -385,7 +385,7 @@ function NumberField({
       <label className="block text-xs font-medium text-[#5a6170] mb-1.5">{label}</label>
       <input
         type="number"
-        value={value}
+        value={value ?? ""}
         onChange={(e) => onChange(Number(e.target.value))}
         min={min}
         max={max}

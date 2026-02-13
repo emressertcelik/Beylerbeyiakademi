@@ -59,7 +59,8 @@ function computeTeamStats(matches: Match[], ageGroup: AgeGroup | "ALL", season: 
 }
 
 export default function TeamsPage() {
-    const [search, setSearch] = useState("");
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState<'all' | 'played' | 'scheduled'>('all');
   const { players, matches, lookups, saveMatch, removeMatch, userRole } = useAppData();
 
   const AGE_FILTERS = useMemo(() => [
@@ -102,10 +103,11 @@ export default function TeamsPage() {
       const ageOk = selectedAge === "ALL" || m.ageGroup === selectedAge;
       const seasonOk = selectedSeason === "ALL" || m.season === selectedSeason;
       const searchOk = search === "" || m.opponent.toLowerCase().includes(search.toLowerCase());
-      return ageOk && seasonOk && searchOk;
+      const statusOk = statusFilter === 'all' || m.status === statusFilter;
+      return ageOk && seasonOk && searchOk && statusOk;
     });
     return filtered.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-  }, [matches, userRole, selectedAge, selectedSeason, search]);
+  }, [matches, userRole, selectedAge, selectedSeason, search, statusFilter]);
 
   const teamStats = useMemo(
     () => computeTeamStats(matches, selectedAge, selectedSeason),
@@ -174,6 +176,21 @@ export default function TeamsPage() {
 
       {/* Filters Bar */}
       <div className="flex flex-col sm:flex-row gap-3 bg-white border border-[#e2e5e9] rounded-xl p-3 overflow-visible relative">
+        {/* Maç Durumu Filtresi */}
+        <div className="flex gap-1">
+          <button
+            onClick={() => setStatusFilter('all')}
+            className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-all duration-200 ${statusFilter === 'all' ? 'bg-[#c4111d] text-white shadow-sm' : 'text-[#5a6170] hover:text-[#1a1a2e] bg-[#f1f3f5]'}`}
+          >Tüm Maçlar</button>
+          <button
+            onClick={() => setStatusFilter('played')}
+            className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-all duration-200 ${statusFilter === 'played' ? 'bg-[#c4111d] text-white shadow-sm' : 'text-[#5a6170] hover:text-[#1a1a2e] bg-[#f1f3f5]'}`}
+          >Oynanmış</button>
+          <button
+            onClick={() => setStatusFilter('scheduled')}
+            className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-all duration-200 ${statusFilter === 'scheduled' ? 'bg-[#c4111d] text-white shadow-sm' : 'text-[#5a6170] hover:text-[#1a1a2e] bg-[#f1f3f5]'}`}
+          >Planlanmış</button>
+        </div>
         {/* Age group tabs */}
         <div className="flex gap-1 bg-[#f1f3f5] rounded-lg p-1 min-w-[260px]">
           {AGE_FILTERS.map((f) => (
@@ -296,14 +313,14 @@ export default function TeamsPage() {
                     <span className="text-base font-bold text-[#1a1a2e] truncate">{match.opponent}</span>
                   </div>
                 </div>
-                <div className="flex flex-wrap items-center gap-2 text-[12px] text-[#8c919a] px-4 pb-3 pt-1">
+                <div className="flex flex-wrap items-center gap-1 text-[11px] sm:text-[12px] text-[#8c919a] px-2 sm:px-4 pb-2 sm:pb-3 pt-1">
                   {match.week && (
                     <>
                       <span className="font-bold text-[#c4111d]">Hafta {match.week}</span>
                       <span>·</span>
                     </>
                   )}
-                  <span>{new Date(match.date).toLocaleDateString("tr-TR", { day: "numeric", month: "short", year: "numeric" })}</span>
+                  <span className="text-[11px] sm:text-[12px] font-medium">{new Date(match.date).toLocaleDateString("tr-TR", { day: "numeric", month: "short", year: "numeric" })}</span>
                   <span>·</span>
                   <span>{match.ageGroup}</span>
                   <span>·</span>

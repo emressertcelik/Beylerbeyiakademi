@@ -686,6 +686,7 @@ export default function MatchFormModal({ match, players, saving, onClose, onSave
                           >
                             <span className={`font-black ${isOtherGroup ? "text-purple-600" : "text-[#c4111d]"}`}>#{s.jerseyNumber}</span>
                             <span className="font-medium text-[#1a1a2e]">{s.playerName}</span>
+                            <span className="text-[9px] text-[#8c919a] font-normal">({s.position} - {s.jerseyNumber})</span>
                             {isOtherGroup && (
                               <span className="text-[7px] font-bold px-1 py-0.5 rounded bg-purple-100 text-purple-700">
                                 {players.find(p => p.id === s.playerId)?.ageGroup}
