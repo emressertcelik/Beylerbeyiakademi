@@ -12,7 +12,7 @@ export default function GroupOpponentsManager() {
   const [opponent, setOpponent] = useState("");
   const [opponents, setOpponents] = useState<GroupOpponent[]>([]);
   const [loading, setLoading] = useState(false);
-  const [deleteConfirm, setDeleteConfirm] = useState<null | number>(null);
+  const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
 
   useEffect(() => {
     if (season && ageGroup) {
