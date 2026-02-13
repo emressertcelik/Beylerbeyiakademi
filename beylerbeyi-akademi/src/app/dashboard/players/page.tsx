@@ -253,7 +253,7 @@ export default function PlayersPage() {
             }
           }}
           onDelete={userRole?.role === "yonetici" ? handleDeletePlayer : undefined}
-          userRole={userRole}
+          userRole={userRole ? { role: userRole.role } : undefined}
         />
       )}
 
