@@ -59,39 +59,12 @@ export default function PlayerCard({ player, onClick, userRole }: PlayerCardProp
         </div>
       )}
 
-      {/* Stats */}
-      <div className="grid grid-cols-4 gap-2">
+      {/* Minimal Stats: Maç, Gol, Asist, Yediği Gol */}
+      <div className="grid grid-cols-4 gap-2 mt-4">
         <StatMini label="Maç" value={player.stats.matches} />
-        {/* Oyuncu rolü ile girişte taktik değerler gizlenir */}
-        {userRole?.role === "oyuncu" ? null : (
-          isGoalkeeper ? (
-            <>
-              <StatMini label="Y. Gol" value={player.stats.goalsConceded} color="text-orange-500" />
-              <StatMini label="C. Kale" value={player.stats.cleanSheets} color="text-emerald-500" />
-            </>
-          ) : (
-            <>
-              <StatMini label="Gol" value={player.stats.goals} color="text-emerald-500" />
-              <StatMini label="Asist" value={player.stats.assists} color="text-blue-500" />
-            </>
-          )
-        )}
-        <StatMini
-          label="Kart"
-          value={
-            <span className="flex items-center justify-center gap-1">
-              <span className="inline-block w-2.5 h-3.5 rounded-[2px] bg-yellow-400" />
-              <span className="text-xs text-[#1a1a2e]">{player.stats.yellowCards}</span>
-              <span className="inline-block w-2.5 h-3.5 rounded-[2px] bg-red-500 ml-0.5" />
-              <span className="text-xs text-[#1a1a2e]">{player.stats.redCards}</span>
-            </span>
-          }
-        />
-      </div>
-      {/* Ana Kadro/Yedek Özet */}
-      <div className="flex gap-2 mt-2">
-        <span className="text-[11px] px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 font-semibold">{player.stats.anaKadro ?? 0} i11</span>
-        <span className="text-[11px] px-2 py-0.5 rounded bg-blue-50 text-blue-700 font-semibold">{player.stats.yedek ?? 0} Yedek</span>
+        <StatMini label="Gol" value={player.stats.goals} color="text-emerald-500" />
+        <StatMini label="Asist" value={player.stats.assists} color="text-blue-500" />
+        <StatMini label="Yediği Gol" value={player.stats.goalsConceded} color="text-orange-500" />
       </div>
     </button>
   );
