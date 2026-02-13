@@ -12,6 +12,7 @@ interface PlayerDetailModalProps {
   onClose: () => void;
   onEdit: (player: Player) => void;
   onDelete?: (playerId: string) => void;
+  userRole?: { role: string };
 }
 
 // Beceri alan adlarının Türkçe karşılıkları
@@ -52,7 +53,7 @@ function SkillBar({ label, value, max = 10 }: { label: string; value: number; ma
   );
 }
 
-export default function PlayerDetailModal({ player, onClose, onEdit, onDelete }: PlayerDetailModalProps) {
+export default function PlayerDetailModal({ player, onClose, onEdit, onDelete, userRole }: PlayerDetailModalProps) {
   const isGoalkeeper = player.position === "Kaleci";
   const [skillLogs, setSkillLogs] = useState<SkillLog[]>([]);
   const [bodyLogs, setBodyLogs] = useState<BodyLog[]>([]);
@@ -404,32 +405,36 @@ export default function PlayerDetailModal({ player, onClose, onEdit, onDelete }:
           </Section>
 
           {/* Taktik Değerler */}
-          <CollapsibleSection title="Taktik Değerler" isOpen={tacticalOpen} onToggle={() => setTacticalOpen(!tacticalOpen)}>
-            <div className="bg-[#f8f9fb] rounded-xl p-5 space-y-3 border border-[#e2e5e9]">
-              <SkillBar label="Pozisyon Alma" value={player.tactical.positioning} />
-              <SkillBar label="Pas" value={player.tactical.passing} />
-              <SkillBar label="Orta" value={player.tactical.crossing} />
-              <SkillBar label="Şut" value={player.tactical.shooting} />
-              <SkillBar label="Dribling" value={player.tactical.dribbling} />
-              <SkillBar label="Kafa Vuruşu" value={player.tactical.heading} />
-              <SkillBar label="Top Kesme" value={player.tactical.tackling} />
-              <SkillBar label="Markaj" value={player.tactical.marking} />
-              <SkillBar label="Oyun Okuma" value={player.tactical.gameReading} />
-            </div>
-          </CollapsibleSection>
+          {userRole?.role !== "oyuncu" && (
+            <CollapsibleSection title="Taktik Değerler" isOpen={tacticalOpen} onToggle={() => setTacticalOpen(!tacticalOpen)}>
+              <div className="bg-[#f8f9fb] rounded-xl p-5 space-y-3 border border-[#e2e5e9]">
+                <SkillBar label="Pozisyon Alma" value={player.tactical.positioning} />
+                <SkillBar label="Pas" value={player.tactical.passing} />
+                <SkillBar label="Orta" value={player.tactical.crossing} />
+                <SkillBar label="Şut" value={player.tactical.shooting} />
+                <SkillBar label="Dribling" value={player.tactical.dribbling} />
+                <SkillBar label="Kafa Vuruşu" value={player.tactical.heading} />
+                <SkillBar label="Top Kesme" value={player.tactical.tackling} />
+                <SkillBar label="Markaj" value={player.tactical.marking} />
+                <SkillBar label="Oyun Okuma" value={player.tactical.gameReading} />
+              </div>
+            </CollapsibleSection>
+          )}
 
           {/* Atletik Değerler */}
-          <CollapsibleSection title="Atletik Değerler" isOpen={athleticOpen} onToggle={() => setAthleticOpen(!athleticOpen)}>
-            <div className="bg-[#f8f9fb] rounded-xl p-5 space-y-3 border border-[#e2e5e9]">
-              <SkillBar label="Hız" value={player.athletic.speed} />
-              <SkillBar label="Güç" value={player.athletic.strength} />
-              <SkillBar label="Dayanıklılık" value={player.athletic.stamina} />
-              <SkillBar label="Çeviklik" value={player.athletic.agility} />
-              <SkillBar label="Sıçrama" value={player.athletic.jumping} />
-              <SkillBar label="Denge" value={player.athletic.balance} />
-              <SkillBar label="Esneklik" value={player.athletic.flexibility} />
-            </div>
-          </CollapsibleSection>
+          {userRole?.role !== "oyuncu" && (
+            <CollapsibleSection title="Atletik Değerler" isOpen={athleticOpen} onToggle={() => setAthleticOpen(!athleticOpen)}>
+              <div className="bg-[#f8f9fb] rounded-xl p-5 space-y-3 border border-[#e2e5e9]">
+                <SkillBar label="Hız" value={player.athletic.speed} />
+                <SkillBar label="Güç" value={player.athletic.strength} />
+                <SkillBar label="Dayanıklılık" value={player.athletic.stamina} />
+                <SkillBar label="Çeviklik" value={player.athletic.agility} />
+                <SkillBar label="Sıçrama" value={player.athletic.jumping} />
+                <SkillBar label="Denge" value={player.athletic.balance} />
+                <SkillBar label="Esneklik" value={player.athletic.flexibility} />
+              </div>
+            </CollapsibleSection>
+          )}
 
           {/* Gelişim Logu */}
           <CollapsibleSection title="Gelişim Geçmişi" isOpen={historyOpen} onToggle={() => setHistoryOpen(!historyOpen)}>

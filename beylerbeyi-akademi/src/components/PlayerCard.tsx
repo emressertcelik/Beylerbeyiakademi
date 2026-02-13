@@ -7,6 +7,7 @@ import Link from "next/link";
 interface PlayerCardProps {
   player: Player;
   onClick?: (player: Player) => void;
+  userRole?: { role: string };
 }
 
 const positionStyle: Record<string, { bg: string; text: string; dot: string }> = {
@@ -16,7 +17,7 @@ const positionStyle: Record<string, { bg: string; text: string; dot: string }> =
   Forvet: { bg: "bg-red-50", text: "text-red-700", dot: "bg-red-400" },
 };
 
-export default function PlayerCard({ player, onClick }: PlayerCardProps) {
+export default function PlayerCard({ player, onClick, userRole }: PlayerCardProps) {
   const isGoalkeeper = player.position === "Kaleci";
   const style = positionStyle[player.position] || { bg: "bg-slate-50", text: "text-slate-600", dot: "bg-slate-400" };
 
@@ -61,16 +62,19 @@ export default function PlayerCard({ player, onClick }: PlayerCardProps) {
       {/* Stats */}
       <div className="grid grid-cols-4 gap-2">
         <StatMini label="Maç" value={player.stats.matches} />
-        {isGoalkeeper ? (
-          <>
-            <StatMini label="Y. Gol" value={player.stats.goalsConceded} color="text-orange-500" />
-            <StatMini label="C. Kale" value={player.stats.cleanSheets} color="text-emerald-500" />
-          </>
-        ) : (
-          <>
-            <StatMini label="Gol" value={player.stats.goals} color="text-emerald-500" />
-            <StatMini label="Asist" value={player.stats.assists} color="text-blue-500" />
-          </>
+        {/* Oyuncu rolü ile girişte taktik değerler gizlenir */}
+        {userRole?.role === "oyuncu" ? null : (
+          isGoalkeeper ? (
+            <>
+              <StatMini label="Y. Gol" value={player.stats.goalsConceded} color="text-orange-500" />
+              <StatMini label="C. Kale" value={player.stats.cleanSheets} color="text-emerald-500" />
+            </>
+          ) : (
+            <>
+              <StatMini label="Gol" value={player.stats.goals} color="text-emerald-500" />
+              <StatMini label="Asist" value={player.stats.assists} color="text-blue-500" />
+            </>
+          )
         )}
         <StatMini
           label="Kart"

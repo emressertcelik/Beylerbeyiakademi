@@ -232,6 +232,7 @@ export default function PlayersPage() {
               key={player.id}
               player={player}
               onClick={() => setSelectedPlayer(player)}
+              userRole={userRole}
             />
           ))
         )}
@@ -252,6 +253,7 @@ export default function PlayersPage() {
             }
           }}
           onDelete={userRole?.role === "yonetici" ? handleDeletePlayer : undefined}
+          userRole={userRole}
         />
       )}
 
