@@ -222,7 +222,7 @@ export default function PlayersPage() {
       </div>
 
       {/* Oyuncu kartları grid */}
-      <div className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-2 sm:gap-4">
         {loading ? (
           <div className="col-span-full flex flex-col items-center justify-center py-20 animate-fade-in">
             <div className="w-10 h-10 border-3 border-[#e2e5e9] border-t-[#c4111d] rounded-full animate-spin mb-4" />

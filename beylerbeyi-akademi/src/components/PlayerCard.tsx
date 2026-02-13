@@ -24,7 +24,7 @@ export default function PlayerCard({ player, onClick, userRole }: PlayerCardProp
   return (
     <button
       onClick={onClick ? () => onClick(player) : undefined}
-      className="bg-white border border-[#e2e5e9] rounded-xl p-5 text-left hover:border-[#c4111d]/30 hover:shadow-lg hover:shadow-[#c4111d]/5 transition-all duration-200 w-full group"
+      className="bg-white border border-[#e2e5e9] rounded-xl p-3 sm:p-5 text-left hover:border-[#c4111d]/30 hover:shadow-lg hover:shadow-[#c4111d]/5 transition-all duration-200 w-full group"
     >
       {/* Header */}
       <div className="flex items-start justify-between mb-4">
