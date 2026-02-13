@@ -32,33 +32,67 @@ function statusColor(status: string): string {
 }
 
 export default function MatchFormModal({ match, players, saving, onClose, onSave }: MatchFormModalProps) {
-    const [playerSearch, setPlayerSearch] = useState("");
   const { lookups, userRole } = useAppData();
   let AGE_GROUPS = lookups.ageGroups.filter((a) => a.isActive).map((a) => a.value);
-  // Antrenör ise sadece kendi yaş grubunu seçebilsin
   if (userRole?.role === "antrenor" && userRole.age_group) {
     AGE_GROUPS = [userRole.age_group];
   }
   const SEASONS = lookups.seasons.filter((s) => s.isActive).map((s) => s.value);
   const PARTICIPATION_STATUSES = lookups.participationStatuses.filter((p) => p.isActive).map((p) => p.value);
   const isEdit = !!match;
-
   const [form, setForm] = useState({
-    date: new Date().toISOString().split("T")[0],
-    season: SEASONS[0] || "2025-2026",
-    ageGroup: (AGE_GROUPS[0] ?? "U15") as AgeGroup,
-    opponent: "",
-    homeAway: "home" as "home" | "away",
-    status: "scheduled" as MatchStatus,
-    scoreHome: 0,
-    scoreAway: 0,
-    venue: "",
-    notes: "",
-    matchTime: "",
-    gatheringTime: "",
-    gatheringLocation: "",
-    week: "",
+    date: match?.date || new Date().toISOString().split("T")[0],
+    season: match?.season || SEASONS[0] || "2025-2026",
+    ageGroup: match?.ageGroup || (AGE_GROUPS[0] ?? "U15") as AgeGroup,
+    opponent: "", // Rakipler yüklenene kadar boş bırak
+    homeAway: match?.homeAway || ("home" as "home" | "away"),
+    status: match?.status || ("scheduled" as MatchStatus),
+    scoreHome: match?.scoreHome || 0,
+    scoreAway: match?.scoreAway || 0,
+    venue: match?.venue || "",
+    notes: match?.notes || "",
+    matchTime: match?.matchTime || "",
+    gatheringTime: match?.gatheringTime || "",
+    gatheringLocation: match?.gatheringLocation || "",
+    week: match?.week || "",
   });
+
+      // Grup rakipleri için state ve useEffect
+  const [groupOpponents, setGroupOpponents] = useState<string[]>([]);
+  useEffect(() => {
+    if (form.season && form.ageGroup) {
+      import("@/lib/supabase/groupOpponents").then(({ fetchGroupOpponents }) => {
+        fetchGroupOpponents(form.season, form.ageGroup).then((data) => {
+          const rakipler = data.map((g) => g.opponent);
+          setGroupOpponents(rakipler);
+          // Edit modunda eski kayıttan gelen opponent değeri rakipler arasında yoksa, ilk rakibi seç
+          if (rakipler.length > 0) {
+            setForm((prev) => {
+              if (!rakipler.includes(prev.opponent)) {
+                return { ...prev, opponent: rakipler[0] };
+              }
+              return prev;
+            });
+          } else {
+            setForm((prev) => ({ ...prev, opponent: "" }));
+          }
+        });
+      });
+    } else {
+      setGroupOpponents([]);
+      setForm((prev) => ({ ...prev, opponent: "" }));
+    }
+  }, [form.season, form.ageGroup]);
+
+  // Rakipler veya form.opponent değiştiğinde, rakip select güncelliğini korusun
+  // Bu useEffect artık gereksiz, yukarıda handle edildi.
+    const [playerSearch, setPlayerSearch] = useState("");
+  // ...existing code...
+  // ...existing code...
+  // ...existing code...
+  // ...existing code...
+
+  // ...existing code...
 
   const [squad, setSquad] = useState<SquadPlayer[]>([]);
   const [playerStats, setPlayerStats] = useState<MatchPlayerStat[]>([]);
@@ -287,13 +321,22 @@ export default function MatchFormModal({ match, players, saving, onClose, onSave
                 </div>
                 <div>
                   <label className="block text-xs font-medium text-[#5a6170] mb-1.5">Rakip</label>
-                  <input
-                    type="text"
-                    value={form.opponent}
-                    onChange={(e) => setForm({ ...form, opponent: e.target.value })}
-                    placeholder="Rakip takım adı"
-                    className="w-full px-3 py-2 bg-[#f8f9fb] border border-[#e2e5e9] rounded-lg text-sm text-[#1a1a2e] placeholder-[#8c919a] focus:outline-none focus:ring-2 focus:ring-[#c4111d]/20 focus:border-[#c4111d]/30 transition-all"
-                  />
+                  {groupOpponents.length > 0 ? (
+                    <select
+                      value={form.opponent}
+                      onChange={(e) => setForm({ ...form, opponent: e.target.value })}
+                      className="w-full px-3 py-2 bg-[#f8f9fb] border border-[#e2e5e9] rounded-lg text-sm text-[#1a1a2e] focus:outline-none focus:ring-2 focus:ring-[#c4111d]/20 focus:border-[#c4111d]/30 transition-all"
+                    >
+                      <option value="">Rakip Seç</option>
+                      {groupOpponents.map((op) => (
+                        <option key={op} value={op}>{op}</option>
+                      ))}
+                    </select>
+                  ) : (
+                    <select disabled className="w-full px-3 py-2 bg-[#f8f9fb] border border-[#e2e5e9] rounded-lg text-sm text-[#8c919a]">
+                      <option>Tanımlı rakip yok</option>
+                    </select>
+                  )}
                 </div>
                 <div>
                   <label className="block text-xs font-medium text-[#5a6170] mb-1.5">Hafta</label>

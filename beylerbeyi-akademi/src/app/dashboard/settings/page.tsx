@@ -1,4 +1,5 @@
 "use client";
+const GROUP_OPPONENTS_TAB = { key: "groupOpponents", label: "Grup Rakipleri", icon: Users, placeholder: "" };
 
 import React, { useState } from "react";
 import { useAppData } from "@/lib/app-data";
@@ -24,6 +25,7 @@ import {
   Loader2,
   CheckCircle2,
 } from "lucide-react";
+import GroupOpponentsManager from "./GroupOpponentsManager";
 
 /* ────────── Tablo adı eşlemeleri ────────── */
 
@@ -56,6 +58,7 @@ const TABS: TabConfig[] = [
     key,
     ...val,
   })),
+  GROUP_OPPONENTS_TAB,
   { key: "users", label: "Kullanıcılar", icon: Users, placeholder: "" },
 ];
 
@@ -99,7 +102,7 @@ export default function SettingsPage() {
     // eslint-disable-next-line
   }, [activeTab, userRole]);
 
-  const isLookupTab = activeTab !== "users";
+  const isLookupTab = activeTab !== "users" && activeTab !== "groupOpponents";
   const tab: TabConfig | undefined = isLookupTab ? TABS.find(t => t.key === activeTab) : undefined;
   const items: LookupItem[] = isLookupTab && tab && tab.table ? lookups[activeTab as keyof typeof TAB_META] ?? [] : [];
 
@@ -241,6 +244,14 @@ export default function SettingsPage() {
       </div>
 
       {/* Lookup Tabları */}
+      {activeTab === "groupOpponents" && (
+        <div>
+          <h2 className="text-lg font-bold mb-4">Grup Rakipleri</h2>
+          <div className="mt-4">
+            <GroupOpponentsManager />
+          </div>
+        </div>
+      )}
       {isLookupTab && (
         <>
           <div className="flex gap-2 mb-3">
@@ -392,7 +403,7 @@ export default function SettingsPage() {
       )}
 
       {/* Kullanıcı Yönetimi Sekmesi */}
-      {!isLookupTab && (
+      {activeTab === "users" && (
         <div className="space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
             <h2 className="text-lg font-bold text-[#1a1a2e]">Kullanıcı Yönetimi</h2>

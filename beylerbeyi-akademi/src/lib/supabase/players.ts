@@ -92,12 +92,7 @@ export async function fetchPlayers(): Promise<Player[]> {
   const supabase = getClient();
   const { data, error } = await supabase
     .from("players")
-    .select(`
-      *,
-      player_previous_teams ( id, team_name, years, sort_order ),
-      player_tactical_skills ( positioning, passing, crossing, shooting, dribbling, heading, tackling, marking, game_reading ),
-      player_athletic_skills ( speed, strength, stamina, agility, jumping, balance, flexibility )
-    `)
+    .select("*")
     .order("created_at", { ascending: false });
 
   if (error) {
