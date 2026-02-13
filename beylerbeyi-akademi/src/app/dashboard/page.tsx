@@ -9,6 +9,15 @@ import { Match } from "@/types/match";
 import MatchDetailModal from "@/components/MatchDetailModal";
 
 export default function DashboardPage() {
+    // Yaş grubu renkleri
+    const ageGroupColors: Record<string, string> = {
+      U14: 'bg-blue-500',
+      U15: 'bg-green-500',
+      U16: 'bg-yellow-500',
+      U17: 'bg-purple-500',
+      U19: 'bg-red-500',
+      default: 'bg-gray-400',
+    };
   const { players, matches, loading } = useAppData();
 
   const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
@@ -290,7 +299,7 @@ export default function DashboardPage() {
             ) : teamOfTheWeek ? (
               <div>
                 <div className="flex items-center gap-3 mb-3">
-                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#1a1a2e] to-[#5a6170] flex items-center justify-center shadow-md shadow-[#1a1a2e]/15">
+                  <div className={`w-12 h-12 rounded-full flex items-center justify-center shadow-md shadow-[#1a1a2e]/15 ${ageGroupColors[teamOfTheWeek.ageGroup] || ageGroupColors.default}`}>
                     <span className="text-white font-bold text-sm">{teamOfTheWeek.ageGroup}</span>
                   </div>
                   <div>
@@ -327,7 +336,7 @@ export default function DashboardPage() {
             {loading ? (
               <div className="flex items-center justify-center py-10 text-[#8c919a] text-lg">Yükleniyor...</div>
             ) : recentResults.length === 0 ? (
-              <div className="flex items-center justify-center py-10 text-[#8c919a] text-lg">Son 7 günde oynanmış maç yok.</div>
+              <p className="text-sm text-[#8c919a]">Bu hafta henüz maç oynanmadı.</p>
             ) : (
               <div className="flex flex-col gap-2">
                 {recentResults.slice(0, 5).map((m) => (
@@ -337,7 +346,7 @@ export default function DashboardPage() {
                     className="flex items-center bg-white border border-[#e2e5e9] rounded-xl px-4 py-2 hover:border-[#c4111d]/40 transition-all duration-200 w-full min-h-[48px]"
                   >
                     <span className={`text-[12px] font-bold w-7 h-7 rounded flex items-center justify-center border ${resultColor[m.result]} mr-2`}>{resultMap[m.result]}</span>
-                    <span className="text-[11px] font-semibold text-white bg-[#c4111d]/90 px-2 py-0.5 rounded mr-2">{m.ageGroup}</span>
+                    <span className={`text-[11px] font-semibold text-white px-2 py-0.5 rounded mr-2 ${ageGroupColors[m.ageGroup] || ageGroupColors.default}`}>{m.ageGroup}</span>
                     <span className="text-base font-bold text-[#1a1a2e] mr-2">{m.scoreHome}-{m.scoreAway}</span>
                     <span className="text-xs text-[#5a6170] truncate flex-1 text-left mr-2">vs {m.opponent}</span>
                     <span className="text-[10px] text-[#8c919a] ml-2">{formatDate(m.date)}</span>

@@ -59,6 +59,15 @@ function computeTeamStats(matches: Match[], ageGroup: AgeGroup | "ALL", season: 
 }
 
 export default function TeamsPage() {
+    // Yaş grubu renkleri
+    const ageGroupColors: Record<string, string> = {
+      U14: 'bg-blue-500 text-white',
+      U15: 'bg-green-500 text-white',
+      U16: 'bg-yellow-500 text-black',
+      U17: 'bg-purple-500 text-white',
+      U19: 'bg-red-500 text-white',
+      default: 'bg-gray-400 text-white',
+    };
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<'all' | 'played' | 'scheduled'>('all');
   const { players, matches, lookups, saveMatch, removeMatch, userRole } = useAppData();
@@ -322,7 +331,7 @@ export default function TeamsPage() {
                   )}
                   <span className="text-[11px] sm:text-[12px] font-medium">{new Date(match.date).toLocaleDateString("tr-TR", { day: "numeric", month: "short", year: "numeric" })}</span>
                   <span>·</span>
-                  <span>{match.ageGroup}</span>
+                  <span className={`px-2 py-0.5 rounded font-bold ${ageGroupColors[match.ageGroup] || ageGroupColors.default}`}>{match.ageGroup}</span>
                   <span>·</span>
                   <span>{match.homeAway === "home" ? "Ev" : "Deplasman"}</span>
                   {match.venue && (
