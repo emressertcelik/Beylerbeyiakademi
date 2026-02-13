@@ -437,70 +437,72 @@ export default function PlayerDetailModal({ player, onClose, onEdit, onDelete, u
           )}
 
           {/* Gelişim Logu */}
-          <CollapsibleSection title="Gelişim Geçmişi" isOpen={historyOpen} onToggle={() => setHistoryOpen(!historyOpen)}>
-            {logsLoading ? (
-              <div className="flex items-center justify-center py-8">
-                <div className="w-6 h-6 border-2 border-[#e2e5e9] border-t-[#c4111d] rounded-full animate-spin" />
-              </div>
-            ) : skillLogs.length === 0 ? (
-              <div className="bg-[#f8f9fb] rounded-xl p-6 text-center border border-[#e2e5e9]">
-                <p className="text-sm text-[#8c919a]">Henüz beceri değişikliği kaydı bulunmuyor.</p>
-                <p className="text-xs text-[#8c919a] mt-1">Taktik veya atletik değerler güncellendiğinde gelişim burada görünür.</p>
-              </div>
-            ) : (
-              <div className="space-y-2 max-h-[300px] overflow-y-auto pr-1">
-                {skillLogs.map((log) => {
-                  const diff = log.newValue - log.oldValue;
-                  const isUp = diff > 0;
-                  return (
-                    <div
-                      key={log.id}
-                      className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 bg-[#f8f9fb] rounded-lg px-3 sm:px-4 py-3 border border-[#e2e5e9]"
-                    >
-                      <div className="flex items-center gap-2 sm:gap-3">
-                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
-                          isUp ? "bg-emerald-50 text-emerald-600" : "bg-red-50 text-red-500"
-                        }`}>
-                          {isUp ? <TrendingUp size={16} /> : <TrendingDown size={16} />}
-                        </div>
-                        <div className="min-w-0">
-                          <div className="flex items-center gap-2">
-                            <span className="text-xs font-semibold text-[#1a1a2e]">
-                              {SKILL_LABELS[log.skillName] || log.skillName}
-                            </span>
-                            <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded ${
-                              log.category === "tactical"
-                                ? "bg-blue-50 text-blue-600"
-                                : "bg-purple-50 text-purple-600"
-                            }`}>
-                              {log.category === "tactical" ? "Taktik" : "Atletik"}
-                            </span>
+          {userRole?.role !== "oyuncu" && (
+            <CollapsibleSection title="Gelişim Geçmişi" isOpen={historyOpen} onToggle={() => setHistoryOpen(!historyOpen)}>
+              {logsLoading ? (
+                <div className="flex items-center justify-center py-8">
+                  <div className="w-6 h-6 border-2 border-[#e2e5e9] border-t-[#c4111d] rounded-full animate-spin" />
+                </div>
+              ) : skillLogs.length === 0 ? (
+                <div className="bg-[#f8f9fb] rounded-xl p-6 text-center border border-[#e2e5e9]">
+                  <p className="text-sm text-[#8c919a]">Henüz beceri değişikliği kaydı bulunmuyor.</p>
+                  <p className="text-xs text-[#8c919a] mt-1">Taktik veya atletik değerler güncellendiğinde gelişim burada görünür.</p>
+                </div>
+              ) : (
+                <div className="space-y-2 max-h-[300px] overflow-y-auto pr-1">
+                  {skillLogs.map((log) => {
+                    const diff = log.newValue - log.oldValue;
+                    const isUp = diff > 0;
+                    return (
+                      <div
+                        key={log.id}
+                        className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 bg-[#f8f9fb] rounded-lg px-3 sm:px-4 py-3 border border-[#e2e5e9]"
+                      >
+                        <div className="flex items-center gap-2 sm:gap-3">
+                          <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
+                            isUp ? "bg-emerald-50 text-emerald-600" : "bg-red-50 text-red-500"
+                          }`}>
+                            {isUp ? <TrendingUp size={16} /> : <TrendingDown size={16} />}
                           </div>
-                          <p className="text-[11px] text-[#8c919a] mt-0.5">
-                            {new Date(log.changedAt).toLocaleDateString("tr-TR", { day: "numeric", month: "long", year: "numeric" })}
-                            {" · "}
-                            {new Date(log.changedAt).toLocaleTimeString("tr-TR", { hour: "2-digit", minute: "2-digit" })}
-                          </p>
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs font-semibold text-[#1a1a2e]">
+                                {SKILL_LABELS[log.skillName] || log.skillName}
+                              </span>
+                              <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded ${
+                                log.category === "tactical"
+                                  ? "bg-blue-50 text-blue-600"
+                                  : "bg-purple-50 text-purple-600"
+                              }`}>
+                                {log.category === "tactical" ? "Taktik" : "Atletik"}
+                              </span>
+                            </div>
+                            <p className="text-[11px] text-[#8c919a] mt-0.5">
+                              {new Date(log.changedAt).toLocaleDateString("tr-TR", { day: "numeric", month: "long", year: "numeric" })}
+                              {" · "}
+                              {new Date(log.changedAt).toLocaleTimeString("tr-TR", { hour: "2-digit", minute: "2-digit" })}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2 shrink-0 ml-10 sm:ml-auto">
+                          <span className="text-sm font-medium text-[#8c919a]">{log.oldValue}</span>
+                          <div className={`flex items-center gap-0.5 px-2 py-1 rounded-md text-xs font-bold ${
+                            isUp
+                              ? "bg-emerald-50 text-emerald-600"
+                              : "bg-red-50 text-red-500"
+                          }`}>
+                            {isUp ? <ArrowUp size={12} /> : <ArrowDown size={12} />}
+                            {Math.abs(diff)}
+                          </div>
+                          <span className="text-sm font-bold text-[#1a1a2e]">{log.newValue}</span>
                         </div>
                       </div>
-                      <div className="flex items-center gap-2 shrink-0 ml-10 sm:ml-auto">
-                        <span className="text-sm font-medium text-[#8c919a]">{log.oldValue}</span>
-                        <div className={`flex items-center gap-0.5 px-2 py-1 rounded-md text-xs font-bold ${
-                          isUp
-                            ? "bg-emerald-50 text-emerald-600"
-                            : "bg-red-50 text-red-500"
-                        }`}>
-                          {isUp ? <ArrowUp size={12} /> : <ArrowDown size={12} />}
-                          {Math.abs(diff)}
-                        </div>
-                        <span className="text-sm font-bold text-[#1a1a2e]">{log.newValue}</span>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </CollapsibleSection>
+                    );
+                  })}
+                </div>
+              )}
+            </CollapsibleSection>
+          )}
         </div>
       </div>
     </div>
