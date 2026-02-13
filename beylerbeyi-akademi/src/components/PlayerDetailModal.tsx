@@ -335,42 +335,42 @@ export default function PlayerDetailModal({ player, onClose, onEdit, onDelete, u
               ) : (
                 <div className="space-y-2.5 max-h-[400px] overflow-y-auto pr-1">
                   {playerAllMatches.map(({ match, playerStat }) => {
-                      // TEST: Konsola veri yazdır
-                      console.log('MATCH:', match);
-                      console.log('PLAYERSTAT:', playerStat);
-                      console.log('PARTICIPATION STATUS:', playerStat?.participationStatus);
                     const played = match.status === "played";
                     const status = playerStat?.participationStatus || "";
                     let StatusIcon = null;
                     let statusObj = null;
-                    if (status === "İlk 11") {
+                    // Modern badge/tag for 'İlk 11'
+                    if (status.toLowerCase() === "ana kadro" || status === "İlk 11") {
                       StatusIcon = Star;
-                      statusObj = { text: "text-emerald-600", bg: "bg-emerald-50" };
+                      statusObj = { text: "text-emerald-600", bg: "bg-emerald-50", tag: "İlk 11" };
                     } else if (status === "Sonradan Girdi") {
                       StatusIcon = Clock;
-                      statusObj = { text: "text-blue-600", bg: "bg-blue-50" };
+                      statusObj = { text: "text-blue-600", bg: "bg-blue-50", tag: "Yedek" };
                     } else if (status === "Sakat") {
                       StatusIcon = AlertTriangle;
-                      statusObj = { text: "text-orange-600", bg: "bg-orange-50" };
+                      statusObj = { text: "text-orange-600", bg: "bg-orange-50", tag: "Sakat" };
                     } else if (status === "Cezalı") {
                       StatusIcon = Ban;
-                      statusObj = { text: "text-red-600", bg: "bg-red-50" };
+                      statusObj = { text: "text-red-600", bg: "bg-red-50", tag: "Cezalı" };
                     } else if (status === "Kadroda Yok") {
                       StatusIcon = Users;
-                      statusObj = { text: "text-gray-600", bg: "bg-gray-50" };
+                      statusObj = { text: "text-gray-600", bg: "bg-gray-50", tag: "Kadroda Yok" };
                     } else if (status === "Süre Almadı") {
                       StatusIcon = Clock;
-                      statusObj = { text: "text-yellow-600", bg: "bg-yellow-50" };
+                      statusObj = { text: "text-yellow-600", bg: "bg-yellow-50", tag: "Süre Almadı" };
                     }
+                    // Modern card layout
                     return (
-                      <div key={match.id} className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 bg-[#f8f9fb] rounded-lg px-3 sm:px-4 py-3 border border-[#e2e5e9] mb-2">
-                        <div className="flex items-center gap-2 sm:gap-3">
-                          <span className="text-xs font-semibold text-[#1a1a2e]">{match.date}</span>
+                      <div key={match.id} className="bg-gradient-to-br from-[#f8f9fb] to-white rounded-2xl border border-[#e2e5e9] shadow-md px-4 py-4 mb-3 flex flex-col gap-2">
+                        <div className="flex items-center gap-3">
+                          <span className="text-xs font-semibold text-[#1a1a2e]">
+                            {match.week ? `${match.week}.Hafta` : "Hafta Bilgisi Yok"}
+                          </span>
                           <span className="text-xs text-[#8c919a]">{match.opponent}</span>
                           {status && StatusIcon && statusObj ? (
-                            <div className={`flex items-center gap-1 px-2 py-1 rounded-lg shrink-0 ${statusObj.bg}`}>
-                              <StatusIcon size={12} className={statusObj.text} />
-                              <span className={`text-[9px] font-semibold ${statusObj.text}`}>{playerStat?.participationStatus}</span>
+                            <div className={`flex items-center gap-1 px-2 py-1 rounded-lg shrink-0 ${statusObj.bg}`}> 
+                              <StatusIcon size={14} className={statusObj.text} />
+                              <span className={`text-[11px] font-bold ${statusObj.text}`}>{statusObj.tag}</span>
                             </div>
                           ) : (
                             <div className="flex items-center gap-1 px-2 py-1 rounded-lg shrink-0 bg-gray-50">
@@ -378,10 +378,9 @@ export default function PlayerDetailModal({ player, onClose, onEdit, onDelete, u
                             </div>
                           )}
                         </div>
-                        {/* Alt satır: istatistikler (tüm katılım durumları için) */}
                         {playerStat && (
-                          <div className="flex items-center gap-0 border-t border-[#f0f1f3] bg-[#fafbfc]">
-                            {status === "İlk 11" || status === "Sonradan Girdi" ? (
+                          <div className="flex flex-wrap items-center gap-3 border-t border-[#f0f1f3] bg-[#fafbfc] mt-2 pt-2">
+                            {(statusObj && (statusObj.tag === "İlk 11" || statusObj.tag === "Yedek")) ? (
                               <>
                                 <MatchMiniStat label="DK" value={String(playerStat.minutesPlayed)} />
                                 <MatchMiniStat label="GOL" value={String(playerStat.goals)} highlight={playerStat.goals > 0} color="emerald" />
@@ -392,7 +391,7 @@ export default function PlayerDetailModal({ player, onClose, onEdit, onDelete, u
                                 <MatchMiniStat label="CS" value={playerStat.cleanSheet ? "✓" : "—"} highlight={playerStat.cleanSheet} color="emerald" />
                               </>
                             ) : (
-                              <MatchMiniStat label="Katılım" value={status} />
+                              <MatchMiniStat label="Katılım" value={statusObj?.tag || status} />
                             )}
                           </div>
                         )}
