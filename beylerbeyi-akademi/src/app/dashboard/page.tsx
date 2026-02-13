@@ -339,19 +339,26 @@ export default function DashboardPage() {
               <p className="text-sm text-[#8c919a]">Bu hafta henüz maç oynanmadı.</p>
             ) : (
               <div className="flex flex-col gap-2">
-                {recentResults.slice(0, 5).map((m) => (
-                  <button
-                    key={m.id}
-                    onClick={() => setSelectedMatch(m)}
-                    className="flex items-center bg-white border border-[#e2e5e9] rounded-xl px-4 py-2 hover:border-[#c4111d]/40 transition-all duration-200 w-full min-h-[48px]"
-                  >
-                    <span className={`text-[12px] font-bold w-7 h-7 rounded flex items-center justify-center border ${resultColor[m.result]} mr-2`}>{resultMap[m.result]}</span>
-                    <span className={`text-[11px] font-semibold text-white px-2 py-0.5 rounded mr-2 ${ageGroupColors[m.ageGroup] || ageGroupColors.default}`}>{m.ageGroup}</span>
-                    <span className="text-base font-bold text-[#1a1a2e] mr-2">{m.scoreHome}-{m.scoreAway}</span>
-                    <span className="text-xs text-[#5a6170] truncate flex-1 text-left mr-2">vs {m.opponent}</span>
-                    <span className="text-[10px] text-[#8c919a] ml-2">{formatDate(m.date)}</span>
-                  </button>
-                ))}
+                {recentResults.slice(0, 5).map((m) => {
+                  const rc = resultColor[m.result] || 'bg-blue-50 text-blue-600 border-blue-200';
+                  return (
+                    <button
+                      key={m.id}
+                      onClick={() => setSelectedMatch(m)}
+                      className="bg-white border border-[#e2e5e9] rounded-xl p-0 flex flex-row items-center shadow-sm hover:border-[#c4111d]/30 hover:shadow-md transition-all duration-200 min-w-[180px] max-w-[320px] w-full overflow-hidden"
+                    >
+                      <div className={`w-8 h-8 rounded-br-xl flex items-center justify-center text-base font-black ${rc} border-b shrink-0 mr-2`}>
+                        {resultMap[m.result]}
+                      </div>
+                      <div className="flex-1 min-w-0 flex items-center gap-2 px-2 py-1">
+                        <span className="text-[12px] font-bold text-[#1a1a2e] truncate">{m.opponent}</span>
+                        <span className="text-[10px] font-semibold px-1 rounded ${ageGroupColors[m.ageGroup] || ageGroupColors.default}">{m.ageGroup}</span>
+                        <span className="text-[11px] font-medium">{formatDate(m.date)}</span>
+                        <span className="text-base font-bold text-[#c4111d]">{m.scoreHome}-{m.scoreAway}</span>
+                      </div>
+                    </button>
+                  );
+                })}
               </div>
             )}
           </div>

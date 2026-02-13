@@ -331,7 +331,7 @@ export default function TeamsPage() {
                   )}
                   <span className="text-[11px] sm:text-[12px] font-medium">{new Date(match.date).toLocaleDateString("tr-TR", { day: "numeric", month: "short", year: "numeric" })}</span>
                   <span>·</span>
-                  <span className={`px-2 py-0.5 rounded font-bold ${ageGroupColors[match.ageGroup] || ageGroupColors.default}`}>{match.ageGroup}</span>
+                  <span className={`px-1.5 py-0 rounded font-bold text-[10px] sm:text-[11px] ${ageGroupColors[match.ageGroup] || ageGroupColors.default}`}>{match.ageGroup}</span>
                   <span>·</span>
                   <span>{match.homeAway === "home" ? "Ev" : "Deplasman"}</span>
                   {match.venue && (
