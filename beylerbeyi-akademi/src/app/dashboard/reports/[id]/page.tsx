@@ -298,9 +298,11 @@ export default function PlayerReportPage() {
             {/* Skill Rings */}
             <div className="flex items-center gap-6 mt-5">
               {userRole?.role !== "oyuncu" && (
-                <RadialRing value={tacticalAvg} label="Taktik" color="#fff" />
+                <>
+                  <RadialRing value={tacticalAvg} label="Taktik" color="#fff" />
+                  <RadialRing value={athleticAvg} label="Atletik" color="#fff" />
+                </>
               )}
-              <RadialRing value={athleticAvg} label="Atletik" color="#fff" />
               {matchStats.avgRating > 0 && (
                 <RadialRing value={matchStats.avgRating} max={5} label="Puan" color="#fff" size={64} />
               )}

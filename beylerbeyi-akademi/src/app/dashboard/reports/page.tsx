@@ -44,7 +44,19 @@ interface PlayerReport {
 
 export default function ReportsPage() {
   // ...existing code...
-  const { players, matches, lookups, loading } = useAppData();
+  const { players, matches, lookups, loading, userRole } = useAppData();
+
+  // Oyuncu rolünde raporlar sekmesi gizlensin
+  if (userRole?.role === "oyuncu") {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <div className="bg-white rounded-xl border border-[#e2e5e9] p-8 shadow-md text-center">
+          <h2 className="text-xl font-bold text-[#c4111d] mb-2">Bu sayfa oyuncu rolü için gizlenmiştir.</h2>
+          <p className="text-sm text-[#8c919a]">Yalnızca yönetici ve antrenörler raporları görüntüleyebilir.</p>
+        </div>
+      </div>
+    );
+  }
 
   // DEBUG: matches içeriğini konsola yaz
   if (typeof window !== "undefined") {
@@ -410,6 +422,20 @@ export default function ReportsPage() {
               jersey={topCleanSheet.jerseyNumber}
               value={`${topCleanSheet.cleanSheets} maç`}
               sub={`İ11: ${topCleanSheet.starts} · Y: ${topCleanSheet.sub} · ${topCleanSheet.matches} maç`}
+            />
+          )}
+          {/* Taktik Lider (tacticalAvg) card hidden for oyuncu role */}
+          {/* Taktik Lider kartı oyuncu rolünde kesinlikle render edilmiyor */}
+          {userRole && userRole.role !== "oyuncu" && topRated && (
+            <TopCard
+              icon={Award}
+              iconColor="text-blue-500"
+              iconBg="bg-gradient-to-br from-blue-100/80 to-blue-200/60"
+              title="Taktik Lider"
+              name={topRated.name}
+              jersey={topRated.jerseyNumber}
+              value={`${topRated.tacticalAvg} TAK`}
+              sub={`İ11: ${topRated.starts} · Y: ${topRated.sub} · ${topRated.matches} maç`}
             />
           )}
         </div>
