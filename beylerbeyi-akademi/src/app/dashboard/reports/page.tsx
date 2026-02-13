@@ -426,7 +426,7 @@ export default function ReportsPage() {
           )}
           {/* Taktik Lider (tacticalAvg) card hidden for oyuncu role */}
           {/* Taktik Lider kartı oyuncu rolünde kesinlikle render edilmiyor */}
-          {userRole && userRole.role && userRole.role !== "oyuncu" && topRated && (
+          {topRated && (
             <TopCard
               icon={Award}
               iconColor="text-blue-500"
