@@ -1,6 +1,5 @@
 "use client";
-
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { Users, TrendingUp, Calendar, Award, Trophy, Target, Shield, MapPin, Star, Clock } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
@@ -18,9 +17,88 @@ export default function DashboardPage() {
       U19: 'bg-red-500',
       default: 'bg-gray-400',
     };
-  const { players, matches, loading } = useAppData();
+    const { players, matches, loading } = useAppData();
 
-  const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
+    const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
+
+    // Dynamic puan durumu state
+    const [selectedAge, setSelectedAge] = useState('U15');
+    const [puanTable, setPuanTable] = useState<Array<Array<string | number>>>([]);
+    const [tableLoading, setTableLoading] = useState(false);
+
+    // Age group link and group info
+    const ageGroupInfo: Record<string, { url: string; group: string }> = {
+      U14: { url: 'https://bakhaberinolsun.com/gelisim-ligi-u-14/', group: 'GELİŞİM 5.GRUP' },
+      U15: { url: 'https://bakhaberinolsun.com/gelisim-ligi-u-15/', group: 'GELİŞİM 5.GRUP' },
+      U16: { url: 'https://bakhaberinolsun.com/gelisim-ligi-u-16/', group: 'GELİŞİM 4.GRUP' },
+      U17: { url: 'https://bakhaberinolsun.com/gelisim-ligi-u-17/', group: 'GELİŞİM 4.GRUP' },
+      U19: { url: 'https://bakhaberinolsun.com/gelisim-ligleri-u-19/', group: 'U-19 GELİŞİM 3.GRUP' },
+    };
+
+    // Fetch puan durumu table (mocked for now)
+    const fetchPuanTable = async (age: string) => {
+      setTableLoading(true);
+      // Yeni mockTables U14, U15, U16, U17 ve U19 ile başlıyor
+      const mockTables: Record<string, Array<Array<string | number>>> = {
+        U14: [
+          [1, "İNEGÖL KAFKASSPOR", 20, 17, 2, 1, 76, 18, 58, 53],
+          [2, "KESTEL ÇİLEKSPOR", 20, 15, 1, 4, 56, 24, 32, 46],
+          [3, "GEBZESPOR", 20, 13, 3, 4, 67, 27, 40, 42],
+          [4, "PANAYIRSPOR", 20, 13, 3, 4, 68, 34, 34, 42],
+          [5, "DEĞİRMENDERE", 20, 12, 2, 6, 55, 31, 24, 38],
+          [6, "KARACABEY BEL.SPOR", 20, 10, 3, 7, 57, 47, 10, 33],
+          [7, "BULVARSPOR", 20, 9, 2, 9, 51, 49, 2, 29],
+          [8, "BEYOĞLU YENİÇARŞI", 20, 7, 3, 10, 46, 50, -4, 24],
+          [9, "BEYLERBEYİ 1911 FK.", 20, 7, 3, 10, 39, 46, -7, 24],
+          [10, "GÖLCÜKSPOR", 20, 6, 5, 9, 30, 36, -6, 23],
+          [11, "İNKİLAPSPOR", 20, 7, 1, 12, 33, 57, -24, 22],
+          [12, "KAVACIKSPOR", 20, 6, 2, 12, 29, 51, -22, 20],
+          [13, "ZARA EKİNLİ", 20, 1, 2, 17, 15, 79, -64, 5],
+          [14, "SAKARYA TEKSPOR", 20, 1, 0, 19, 25, 97, -72, 3],
+        ],
+        U15: [
+          [1, "İNEGÖL KAFKASSPOR", 20, 16, 1, 3, 97, 19, 78, 49],
+          [2, "KESTEL ÇİLEKLİSPOR", 20, 15, 1, 4, 70, 21, 49, 46],
+          [3, "GEBZESPOR", 20, 13, 3, 4, 52, 18, 34, 42],
+          [4, "BEYLERBEYİ 1911 FK.", 20, 12, 2, 6, 60, 34, 26, 38],
+          [5, "BEYOĞLU YENİÇARŞI", 20, 10, 6, 4, 39, 30, 9, 35],
+          [6, "DEĞİRMENDERESPOR", 20, 10, 4, 6, 42, 29, 13, 34],
+          [7, "BULVARSPOR", 20, 9, 6, 5, 40, 29, 11, 33],
+          [8, "KARACABEY BEL.SPOR", 20, 9, 4, 7, 41, 39, 2, 31],
+          [9, "GÖLCÜKSPOR", 20, 7, 2, 11, 35, 46, -11, 23],
+          [10, "ZARA EKİNLİ", 20, 7, 2, 11, 44, 60, -16, 23],
+          [11, "PANAYIRSPOR", 20, 6, 2, 12, 32, 43, -11, 20],
+          [12, "KAVACIKSPOR", 20, 4, 1, 15, 20, 55, -45, 13],
+          [13, "İNKİLAPSPOR", 20, 3, 3, 14, 21, 64, -43, 12],
+          [14, "SAKARYA TEKSPOR", 20, 0, 1, 19, 15, 111, -96, 1],
+        ],
+        U16: [
+          [1, "ARNAVUTKÖY BEL.SPOR", 18, 15, 1, 2, 59, 17, 42, 46],
+          [2, "AYAZAĞASPOR", 18, 13, 1, 4, 53, 24, 29, 40],
+          [3, "FERİKÖYSPOR", 18, 13, 1, 4, 42, 17, 25, 40],
+          [4, "BEYLERBEYİ 1911 FK", 18, 12, 2, 4, 52, 23, 29, 38],
+          [5, "K.ÇEKMECE SİNOP", 18, 11, 1, 6, 37, 22, 15, 34],
+          [6, "TUNÇSPOR", 18, 11, 0, 7, 50, 35, 15, 33],
+          [7, "GÜNGÖREN BEL.", 18, 9, 3, 6, 35, 25, 10, 30],
+          [8, "İNKİLAPSPOR", 18, 8, 4, 6, 39, 31, 8, 28],
+          [9, "K.ÇEKMECESPOR", 18, 7, 2, 9, 33, 28, 5, 23],
+          [10, "İST.BEYLİKDÜZÜ", 18, 7, 1, 10, 29, 39, -10, 22],
+          [11, "BAŞAKŞEHİRSPOR", 18, 4, 1, 13, 24, 49, -25, 13],
+          [12, "ZARA EKİNLİ", 18, 3, 1, 14, 15, 66, -51, 10],
+          [13, "İST.GENÇLERBİRLİGİ", 18, 3, 0, 15, 20, 41, -21, 9],
+          [14, "KAVACIKSPOR", 18, 1, 0, 17, 10, 69, -56, 3],
+        ],
+      };
+      setTimeout(() => {
+        setPuanTable(mockTables[age] || []);
+        setTableLoading(false);
+      }, 500);
+    };
+
+    // Fetch on mount and when age changes
+    useEffect(() => {
+      fetchPuanTable(selectedAge);
+    }, [selectedAge]);
 
   // ── Sadece oynanan maçlar (istatistikler için) ──
   const playedMatches = useMemo(() => matches.filter((m) => m.status === "played"), [matches]);
@@ -207,6 +285,163 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-8 animate-slide-up">
+      {/* Haftanın Panoraması ve Puan Durumu birlikte */}
+      <div className="rounded-2xl bg-gradient-to-br from-[#fff5f5] via-white to-[#fef2f2] border border-[#f5d0d0] overflow-hidden">
+        {/* Top bar */}
+        <div className="px-6 py-4 md:px-8 md:py-5 flex flex-col md:flex-row md:items-center md:justify-between gap-3 border-b border-[#f5d0d0]/60">
+          <div className="flex items-center gap-3">
+            <Image
+              src="/Logo_S.png"
+              alt="Beylerbeyi 1911 Akademi"
+              width={40}
+              height={40}
+              className="rounded-xl shadow-sm shrink-0"
+            />
+            <div>
+              <h1 className="text-lg font-bold text-[#1a1a2e] tracking-tight">Haftanın Panoraması</h1>
+              <p className="text-[11px] text-[#8c919a]">{todayStr}</p>
+            </div>
+          </div>
+          {/* Mini stats */}
+          <div className="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-5 gap-2 sm:flex sm:items-center sm:gap-4 w-full max-w-full overflow-x-auto">
+            <MiniStat label="Atılan Gol" value={loading ? "—" : String(weeklyStats.goalsScored)} color="text-emerald-600" />
+            <div className="hidden sm:block w-px h-6 bg-[#e2e5e9]" />
+            <MiniStat label="Yenilen Gol" value={loading ? "—" : String(weeklyStats.goalsConceded)} color="text-red-500" />
+            <div className="hidden sm:block w-px h-6 bg-[#e2e5e9]" />
+            <MiniStat label="Galibiyet" value={loading ? "—" : String(weeklyStats.wins)} color="text-emerald-600" />
+            <div className="hidden sm:block w-px h-6 bg-[#e2e5e9]" />
+            <MiniStat label="Beraberlik" value={loading ? "—" : String(weeklyStats.draws)} color="text-amber-600" />
+            <div className="hidden sm:block w-px h-6 bg-[#e2e5e9]" />
+            <MiniStat label="Mağlubiyet" value={loading ? "—" : String(weeklyStats.losses)} color="text-red-600" />
+          </div>
+        </div>
+        {/* Content: Player of the week + Team of the week + Puan Durumu */}
+        <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-[#f5d0d0]/60">
+          {/* Haftanın Oyuncusu */}
+          <div className="p-3 md:p-4">
+            <p className="text-[10px] font-bold text-[#c4111d] uppercase tracking-[0.15em] mb-2">⭐ Haftanın Oyuncusu</p>
+            {loading ? (
+              <p className="text-xs text-[#8c919a]">Yükleniyor...</p>
+            ) : playerOfTheWeek ? (
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#c4111d] to-[#e8766e] flex items-center justify-center shadow-md shadow-[#c4111d]/15">
+                    <span className="text-white font-bold text-base">
+                      {playerOfTheWeek.name.charAt(0)}
+                    </span>
+                  </div>
+                  <div>
+                    <p className="text-sm font-bold text-[#1a1a2e]">{playerOfTheWeek.name}</p>
+                    <div className="flex items-center gap-0.5 mt-0.5">
+                      {/* ...existing code... */}
+                    </div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1 bg-emerald-50 border border-emerald-100 rounded-lg px-2 py-1">
+                    <Target size={11} className="text-emerald-600" />
+                    <span className="text-xs font-bold text-emerald-700">{/* ...existing code... */}</span>
+                    <span className="text-[10px] text-emerald-600">gol</span>
+                  </div>
+                  <div className="flex items-center gap-1 bg-blue-50 border border-blue-100 rounded-lg px-2 py-1">
+                    <TrendingUp size={11} className="text-blue-600" />
+                    <span className="text-xs font-bold text-blue-700">{/* ...existing code... */}</span>
+                    {/* ...existing code... */}
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <p className="text-xs text-[#8c919a]">Bu hafta henüz maç oynanmadı.</p>
+            )}
+          </div>
+          {/* Haftanın Takımı */}
+          <div className="p-3 md:p-4">
+            <p className="text-[10px] font-bold text-[#c4111d] uppercase tracking-[0.15em] mb-2">🛡️ Haftanın Takımı</p>
+            {loading ? (
+              <p className="text-xs text-[#8c919a]">Yükleniyor...</p>
+            ) : teamOfTheWeek ? (
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <div className={`w-9 h-9 rounded-full flex items-center justify-center shadow-md shadow-[#1a1a2e]/15 ${ageGroupColors[teamOfTheWeek.ageGroup] || ageGroupColors.default}`}>
+                    {/* ...existing code... */}
+                  </div>
+                  <div>
+                    {/* ...existing code... */}
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  {/* ...existing code... */}
+                </div>
+              </div>
+            ) : (
+              <p className="text-xs text-[#8c919a]">Bu hafta henüz maç oynanmadı.</p>
+            )}
+          </div>
+          {/* Puan Durumu Tablosu */}
+          <div className="p-3 md:p-4">
+            <p className="text-[10px] font-bold text-[#c4111d] uppercase tracking-[0.15em] mb-2">📊 Puan Durumu</p>
+            <div className="mb-1 flex gap-1 justify-center">
+              {['U14', 'U15', 'U16', 'U17', 'U19'].map((age) => (
+                <button
+                  key={age}
+                  className={`px-2 py-0.5 rounded-md text-xs font-medium border transition min-w-[28px] h-6 flex items-center justify-center ${selectedAge === age ? 'bg-[#e2e5e9] text-[#c4111d] border-[#c4111d]' : 'bg-[#f8f9fb] text-[#1a1a2e] border-[#e2e5e9] hover:bg-[#e2e5e9]'}`}
+                  onClick={() => setSelectedAge(age)}
+                  aria-label={age}
+                >
+                  {age}
+                </button>
+              ))}
+            </div>
+            <div id="puan-durumu-table">
+              {tableLoading ? (
+                <div className="py-2 text-center text-[#8c919a] text-[10px]">Yükleniyor...</div>
+              ) : puanTable.length === 0 ? (
+                <div className="py-2 text-center text-[#8c919a] text-[10px]">Tablo bulunamadı.</div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-[9px] bg-white">
+                    <thead>
+                      <tr className="text-[#8c919a] border-b border-[#f8f9fb]">
+                        <th className="py-0.5 px-1 font-medium text-center">#</th>
+                        <th className="py-0.5 px-1 font-medium text-left">Takım</th>
+                        <th className="py-0.5 px-1 font-medium text-center">O</th>
+                        <th className="py-0.5 px-1 font-medium text-center">G</th>
+                        <th className="py-0.5 px-1 font-medium text-center">B</th>
+                        <th className="py-0.5 px-1 font-medium text-center">M</th>
+                        <th className="py-0.5 px-1 font-medium text-center">A</th>
+                        <th className="py-0.5 px-1 font-medium text-center">Y</th>
+                        <th className="py-0.5 px-1 font-medium text-center">AV</th>
+                        <th className="py-0.5 px-1 font-medium text-center">P</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {puanTable.map((row, idx) => (
+                        <tr
+                          key={row[0]}
+                          className={
+                            `hover:bg-[#f8f9fb] ${idx % 2 === 0 ? "bg-white" : "bg-[#f8f9fb]"}`
+                          }
+                        >
+                          <td className="py-0.5 px-1 text-center font-bold text-[#c4111d]">{row[0]}</td>
+                          <td className="py-0.5 px-1 text-left font-semibold text-[#1a1a2e] whitespace-nowrap">{row[1]}</td>
+                          <td className="py-0.5 px-1 text-center text-[#5a6170]">{row[2]}</td>
+                          <td className="py-0.5 px-1 text-center text-[#5a6170]">{row[3]}</td>
+                          <td className="py-0.5 px-1 text-center text-[#5a6170]">{row[4]}</td>
+                          <td className="py-0.5 px-1 text-center text-[#5a6170]">{row[5]}</td>
+                          <td className="py-0.5 px-1 text-center text-[#5a6170]">{row[6]}</td>
+                          <td className="py-0.5 px-1 text-center text-[#5a6170]">{row[7]}</td>
+                          <td className="py-0.5 px-1 text-center text-[#5a6170]">{row[8]}</td>
+                          <td className="py-0.5 px-1 text-center font-bold text-[#c4111d]">{row[9]}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
       {/* ── Welcome Hero ── */}
       <div className="rounded-2xl bg-gradient-to-br from-[#fff5f5] via-white to-[#fef2f2] border border-[#f5d0d0] overflow-hidden">
         {/* Top bar */}
@@ -630,6 +865,22 @@ function LeaderRow({
         {rank}
       </div>
       <div className="flex-1 min-w-0">
+        U19: [
+          [1, "ARNAVUTKÖY BELEDİYESPOR", 18, 15, 2, 1, 54, 13, 41, 47],
+          [2, "K.ÇEKMECE SİNOPSPOR", 18, 13, 2, 3, 44, 18, 26, 41],
+          [3, "İSTANBUL BEYLİKDÜZÜ", 18, 12, 2, 4, 44, 22, 22, 38],
+          [4, "FERİKÖYSPOR", 18, 11, 3, 4, 38, 19, 19, 36],
+          [5, "AYAZAĞASPOR", 18, 10, 3, 5, 38, 23, 15, 33],
+          [6, "K.ÇEKMECESPOR", 18, 9, 4, 5, 36, 25, 11, 31],
+          [7, "BEYLERBEYİ 1911 FK.", 18, 8, 3, 7, 32, 28, 4, 27],
+          [8, "İST. GENÇLERBİRLİĞİ", 18, 7, 4, 7, 29, 29, 0, 25],
+          [9, "BAŞAKŞEHİRSPOR", 18, 6, 3, 9, 27, 34, -7, 21],
+          [10, "TUNÇSPOR", 18, 5, 4, 9, 24, 36, -12, 19],
+          [11, "GÜNGÖREN BELEDİYESPOR", 18, 4, 3, 11, 19, 38, -19, 15],
+          [12, "İNKİLAPSPOR", 18, 3, 2, 13, 18, 44, -26, 11],
+          [13, "KAVACIKSPOR", 18, 2, 2, 14, 14, 54, -40, 8],
+          [14, "ZARA EKİNLİSPOR", 18, 1, 1, 16, 10, 60, -50, 4],
+        ],
         <p className="text-sm font-medium text-[#1a1a2e] truncate">{name}</p>
         <p className="text-xs text-[#8c919a]">{matchCount} maç</p>
       </div>
