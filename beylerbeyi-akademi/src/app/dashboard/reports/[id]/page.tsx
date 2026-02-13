@@ -114,7 +114,7 @@ export default function PlayerReportPage() {
   const params = useParams();
   const router = useRouter();
   const playerId = params.id as string;
-  const { players, matches, loading } = useAppData();
+  const { players, matches, loading, userRole } = useAppData();
 
   const [skillLogs, setSkillLogs] = useState<SkillLog[]>([]);
   const [bodyLogs, setBodyLogs] = useState<BodyLog[]>([]);
@@ -297,7 +297,9 @@ export default function PlayerReportPage() {
             </div>
             {/* Skill Rings */}
             <div className="flex items-center gap-6 mt-5">
-              <RadialRing value={tacticalAvg} label="Taktik" color="#fff" />
+              {userRole?.role !== "oyuncu" && (
+                <RadialRing value={tacticalAvg} label="Taktik" color="#fff" />
+              )}
               <RadialRing value={athleticAvg} label="Atletik" color="#fff" />
               {matchStats.avgRating > 0 && (
                 <RadialRing value={matchStats.avgRating} max={5} label="Puan" color="#fff" size={64} />
@@ -440,44 +442,50 @@ export default function PlayerReportPage() {
 
       {/* ═══ Skills Side-by-Side ═══ */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <Section title="Taktik Beceriler" icon={Shield} iconColor="text-blue-500"
-          badge={skillDevSummary.tacticalUp > 0 ? (
-            <span className="text-[9px] bg-emerald-50 text-emerald-600 font-bold px-1.5 py-0.5 rounded-md flex items-center gap-0.5">
-              <TrendingUp size={9} /> +{skillDevSummary.tacticalUp}
-            </span>
-          ) : undefined}
-        >
-          <div className="space-y-1 mt-2">
-            {Object.entries(TACTICAL_LABELS).map(([key, label]) => {
-              const val = player.tactical[key as keyof typeof player.tactical];
-              const change = skillChanges[`tactical:${key === "gameReading" ? "game_reading" : key}`];
-              return <SkillBar key={key} label={label} value={val} prevValue={change?.first} />;
-            })}
-          </div>
-          <div className="mt-3 pt-3 border-t border-[#f0f1f3] flex items-center justify-between">
-            <span className="text-[10px] font-semibold text-[#8c919a] uppercase">Ortalama</span>
-            <span className="text-sm font-black text-blue-600">{tacticalAvg}</span>
-          </div>
-        </Section>
-        <Section title="Atletik Beceriler" icon={Zap} iconColor="text-emerald-500"
-          badge={skillDevSummary.athleticUp > 0 ? (
-            <span className="text-[9px] bg-emerald-50 text-emerald-600 font-bold px-1.5 py-0.5 rounded-md flex items-center gap-0.5">
-              <TrendingUp size={9} /> +{skillDevSummary.athleticUp}
-            </span>
-          ) : undefined}
-        >
-          <div className="space-y-1 mt-2">
-            {Object.entries(ATHLETIC_LABELS).map(([key, label]) => {
-              const val = player.athletic[key as keyof typeof player.athletic];
-              const change = skillChanges[`athletic:${key}`];
-              return <SkillBar key={key} label={label} value={val} prevValue={change?.first} />;
-            })}
-          </div>
-          <div className="mt-3 pt-3 border-t border-[#f0f1f3] flex items-center justify-between">
-            <span className="text-[10px] font-semibold text-[#8c919a] uppercase">Ortalama</span>
-            <span className="text-sm font-black text-emerald-600">{athleticAvg}</span>
-          </div>
-        </Section>
+        {userRole?.role !== "oyuncu" && (
+          <>
+            {/* Taktik Lider (Tactical Leader) Section - Hidden for oyuncu */}
+            {/* ...existing code for tactical leader section, if present... */}
+            <Section title="Taktik Beceriler" icon={Shield} iconColor="text-blue-500"
+              badge={skillDevSummary.tacticalUp > 0 ? (
+                <span className="text-[9px] bg-emerald-50 text-emerald-600 font-bold px-1.5 py-0.5 rounded-md flex items-center gap-0.5">
+                  <TrendingUp size={9} /> +{skillDevSummary.tacticalUp}
+                </span>
+              ) : undefined}
+            >
+              <div className="space-y-1 mt-2">
+                {Object.entries(TACTICAL_LABELS).map(([key, label]) => {
+                  const val = player.tactical[key as keyof typeof player.tactical];
+                  const change = skillChanges[`tactical:${key === "gameReading" ? "game_reading" : key}`];
+                  return <SkillBar key={key} label={label} value={val} prevValue={change?.first} />;
+                })}
+              </div>
+              <div className="mt-3 pt-3 border-t border-[#f0f1f3] flex items-center justify-between">
+                <span className="text-[10px] font-semibold text-[#8c919a] uppercase">Ortalama</span>
+                <span className="text-sm font-black text-blue-600">{tacticalAvg}</span>
+              </div>
+            </Section>
+            <Section title="Atletik Beceriler" icon={Zap} iconColor="text-emerald-500"
+              badge={skillDevSummary.athleticUp > 0 ? (
+                <span className="text-[9px] bg-emerald-50 text-emerald-600 font-bold px-1.5 py-0.5 rounded-md flex items-center gap-0.5">
+                  <TrendingUp size={9} /> +{skillDevSummary.athleticUp}
+                </span>
+              ) : undefined}
+            >
+              <div className="space-y-1 mt-2">
+                {Object.entries(ATHLETIC_LABELS).map(([key, label]) => {
+                  const val = player.athletic[key as keyof typeof player.athletic];
+                  const change = skillChanges[`athletic:${key}`];
+                  return <SkillBar key={key} label={label} value={val} prevValue={change?.first} />;
+                })}
+              </div>
+              <div className="mt-3 pt-3 border-t border-[#f0f1f3] flex items-center justify-between">
+                <span className="text-[10px] font-semibold text-[#8c919a] uppercase">Ortalama</span>
+                <span className="text-sm font-black text-emerald-600">{athleticAvg}</span>
+              </div>
+            </Section>
+          </>
+        )}
       </div>
 
       {/* ═══ Physical Development ═══ */}
