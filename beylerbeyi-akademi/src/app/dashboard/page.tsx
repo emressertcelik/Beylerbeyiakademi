@@ -163,14 +163,18 @@ export default function DashboardPage() {
     return sorted[0] ?? null;
   }, [playedMatches]);
 
-  // ── Son oynanan maçlar (en son 5 maç, yaş grubuna göre) ──
+  // ── Son 7 gün oynanan maçlar ──
   const recentResults = useMemo(() => {
     const today = new Date();
     today.setHours(23, 59, 59, 999);
+    const weekAgo = new Date(today);
+    weekAgo.setDate(weekAgo.getDate() - 7);
     return playedMatches
-      .filter((m) => new Date(m.date) <= today)
-      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-      .slice(0, 5);
+      .filter((m) => {
+        const d = new Date(m.date);
+        return d >= weekAgo && d <= today;
+      })
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   }, [playedMatches]);
 
   const formatDate = (dateStr: string) => {
@@ -321,28 +325,22 @@ export default function DashboardPage() {
           <div className="p-4 sm:p-6 md:p-8">
             <p className="text-[10px] font-bold text-[#c4111d] uppercase tracking-[0.15em] mb-3">🏆 Son Sonuçlar</p>
             {loading ? (
-              <p className="text-sm text-[#8c919a]">Yükleniyor...</p>
+              <div className="flex items-center justify-center py-10 text-[#8c919a] text-lg">Yükleniyor...</div>
             ) : recentResults.length === 0 ? (
-              <p className="text-sm text-[#8c919a]">Henüz maç sonucu yok.</p>
+              <div className="flex items-center justify-center py-10 text-[#8c919a] text-lg">Son 7 günde oynanmış maç yok.</div>
             ) : (
-              <div className="space-y-2">
-                {recentResults.map((m) => (
+              <div className="flex flex-col gap-2">
+                {recentResults.slice(0, 5).map((m) => (
                   <button
                     key={m.id}
                     onClick={() => setSelectedMatch(m)}
-                    className="w-full flex items-center gap-2.5 group hover:bg-[#fef2f2] rounded-lg px-1.5 py-1 -mx-1.5 transition-colors cursor-pointer"
+                    className="flex items-center bg-white border border-[#e2e5e9] rounded-xl px-4 py-2 hover:border-[#c4111d]/40 transition-all duration-200 w-full min-h-[48px]"
                   >
-                    <span className={`text-[10px] font-bold w-5 h-5 rounded flex items-center justify-center border ${resultColor[m.result]}`}>
-                      {resultMap[m.result]}
-                    </span>
-                    <span className="text-[10px] font-semibold text-white bg-[#c4111d]/80 px-1.5 py-0.5 rounded">
-                      {m.ageGroup}
-                    </span>
-                    <span className="text-xs font-semibold text-[#1a1a2e]">
-                      {m.scoreHome}-{m.scoreAway}
-                    </span>
-                    <span className="text-xs text-[#5a6170] truncate flex-1 text-left">vs {m.opponent}</span>
-                    <span className="text-[10px] text-[#8c919a] shrink-0">{formatDate(m.date)}</span>
+                    <span className={`text-[12px] font-bold w-7 h-7 rounded flex items-center justify-center border ${resultColor[m.result]} mr-2`}>{resultMap[m.result]}</span>
+                    <span className="text-[11px] font-semibold text-white bg-[#c4111d]/90 px-2 py-0.5 rounded mr-2">{m.ageGroup}</span>
+                    <span className="text-base font-bold text-[#1a1a2e] mr-2">{m.scoreHome}-{m.scoreAway}</span>
+                    <span className="text-xs text-[#5a6170] truncate flex-1 text-left mr-2">vs {m.opponent}</span>
+                    <span className="text-[10px] text-[#8c919a] ml-2">{formatDate(m.date)}</span>
                   </button>
                 ))}
               </div>
