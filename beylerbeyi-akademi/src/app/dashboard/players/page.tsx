@@ -137,7 +137,7 @@ export default function PlayersPage() {
       </div>
 
       {/* Filtreler ve arama (Takımlar sayfası gibi) */}
-      <div className="flex flex-col sm:flex-row gap-3 bg-white border border-[#e2e5e9] rounded-xl p-3 overflow-x-auto">
+      <div className="flex flex-col sm:flex-row gap-3 bg-white border border-[#e2e5e9] rounded-xl p-3 overflow-visible relative">
         {/* Yaş grubu sekmeleri */}
         <div className="flex gap-1 bg-[#f1f3f5] rounded-lg p-1 min-w-[260px]">
           {AGE_FILTERS.map((f) => (
@@ -170,7 +170,7 @@ export default function PlayersPage() {
             <svg className={`w-3 h-3 text-[#8c919a] transition-transform duration-200 ${seasonOpen ? "rotate-180" : ""}`} fill="none" viewBox="0 0 10 6"><path d="M1 1L5 5L9 1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
           </button>
           {seasonOpen && (
-            <div className="absolute top-full left-0 mt-1.5 bg-white border border-[#e2e5e9] rounded-xl shadow-lg shadow-black/8 py-1 min-w-[160px] z-50 animate-fade-in">
+            <div className="absolute top-full left-0 mt-1.5 bg-white border border-[#e2e5e9] rounded-xl shadow-lg shadow-black/8 py-1 min-w-[160px] z-[999] animate-fade-in">
               {SEASON_FILTERS.map((f) => (
                 <button
                   key={f.value}

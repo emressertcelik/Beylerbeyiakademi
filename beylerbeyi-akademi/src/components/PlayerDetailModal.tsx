@@ -133,9 +133,22 @@ export default function PlayerDetailModal({ player, onClose, onEdit, onDelete, u
                 <h2 className="text-base sm:text-lg font-bold text-[#1a1a2e] truncate">
                   {player.firstName} {player.lastName}
                 </h2>
-                <p className="text-xs sm:text-sm text-[#5a6170] truncate">
-                  {player.position} · {player.ageGroup} · {player.foot} Ayak
-                </p>
+                <div className="flex items-center gap-2 mt-1">
+                  {/* Yaş grubu badge'i */}
+                  {player.ageGroup && (
+                    <span
+                      className={
+                        `px-2 py-0.5 rounded text-xs font-semibold ` +
+                        (player.ageGroup === "U15" ? "bg-blue-50 text-blue-700" :
+                         player.ageGroup === "U16" ? "bg-emerald-50 text-emerald-700" :
+                         player.ageGroup === "U17" ? "bg-amber-50 text-amber-700" :
+                         player.ageGroup === "U18" ? "bg-red-50 text-red-700" :
+                         "bg-slate-50 text-slate-600")
+                      }
+                    >{player.ageGroup}</span>
+                  )}
+                  <span className="text-xs text-[#5a6170]">{player.position} · {player.foot} Ayak</span>
+                </div>
               </div>
             </div>
             <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
@@ -367,6 +380,19 @@ export default function PlayerDetailModal({ player, onClose, onEdit, onDelete, u
                             {match.week ? `${match.week}.Hafta` : "Hafta Bilgisi Yok"}
                           </span>
                           <span className="text-xs text-[#8c919a]">{match.opponent}</span>
+                          {/* Yaş grubu badge'i */}
+                          {match.ageGroup && (
+                            <span
+                              className={
+                                `px-2 py-0.5 rounded text-xs font-semibold ` +
+                                (match.ageGroup === "U15" ? "bg-blue-50 text-blue-700" :
+                                 match.ageGroup === "U16" ? "bg-emerald-50 text-emerald-700" :
+                                 match.ageGroup === "U17" ? "bg-amber-50 text-amber-700" :
+                                 match.ageGroup === "U18" ? "bg-red-50 text-red-700" :
+                                 "bg-slate-50 text-slate-600")
+                              }
+                            >{match.ageGroup}</span>
+                          )}
                           {status && StatusIcon && statusObj ? (
                             <div className={`flex items-center gap-1 px-2 py-1 rounded-lg shrink-0 ${statusObj.bg}`}> 
                               <StatusIcon size={14} className={statusObj.text} />

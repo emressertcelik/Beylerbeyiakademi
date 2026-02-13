@@ -5,6 +5,7 @@ import { AgeGroup } from "@/types/player";
 import { Match, TeamStats } from "@/types/match";
 import { useAppData } from "@/lib/app-data";
 import MatchFormModal from "@/components/MatchFormModal";
+import { Search } from "lucide-react";
 import MatchDetailModal from "@/components/MatchDetailModal";
 import { useToast } from "@/components/Toast";
 import EnablePushButton from "@/components/EnablePushButton";
@@ -58,6 +59,7 @@ function computeTeamStats(matches: Match[], ageGroup: AgeGroup | "ALL", season: 
 }
 
 export default function TeamsPage() {
+    const [search, setSearch] = useState("");
   const { players, matches, lookups, saveMatch, removeMatch, userRole } = useAppData();
 
   const AGE_FILTERS = useMemo(() => [
@@ -99,10 +101,11 @@ export default function TeamsPage() {
     filtered = filtered.filter((m) => {
       const ageOk = selectedAge === "ALL" || m.ageGroup === selectedAge;
       const seasonOk = selectedSeason === "ALL" || m.season === selectedSeason;
-      return ageOk && seasonOk;
+      const searchOk = search === "" || m.opponent.toLowerCase().includes(search.toLowerCase());
+      return ageOk && seasonOk && searchOk;
     });
     return filtered.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-  }, [matches, userRole, selectedAge, selectedSeason]);
+  }, [matches, userRole, selectedAge, selectedSeason, search]);
 
   const teamStats = useMemo(
     () => computeTeamStats(matches, selectedAge, selectedSeason),
@@ -170,7 +173,7 @@ export default function TeamsPage() {
       </div>
 
       {/* Filters Bar */}
-      <div className="flex flex-col sm:flex-row gap-3 bg-white border border-[#e2e5e9] rounded-xl p-3 overflow-x-auto">
+      <div className="flex flex-col sm:flex-row gap-3 bg-white border border-[#e2e5e9] rounded-xl p-3 overflow-visible relative">
         {/* Age group tabs */}
         <div className="flex gap-1 bg-[#f1f3f5] rounded-lg p-1 min-w-[260px]">
           {AGE_FILTERS.map((f) => (
@@ -227,6 +230,20 @@ export default function TeamsPage() {
               ))}
             </div>
           )}
+        </div>
+
+        {/* Maç arama inputu */}
+        <div className="flex-1 flex items-center gap-2 min-w-[200px]">
+          <div className="relative w-full">
+            <input
+              type="text"
+              className="w-full px-3 py-2 rounded-lg border border-[#e2e5e9] bg-white text-sm text-[#1a1a2e] focus:outline-none focus:ring-2 focus:ring-[#c4111d] pl-9"
+              placeholder="Rakip ara..."
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+            />
+            <Search size={18} className="absolute left-2 top-1/2 -translate-y-1/2 text-[#c4111d] pointer-events-none" />
+          </div>
         </div>
       </div>
 
