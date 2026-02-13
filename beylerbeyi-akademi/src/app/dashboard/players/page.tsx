@@ -232,7 +232,7 @@ export default function PlayersPage() {
               key={player.id}
               player={player}
               onClick={() => setSelectedPlayer(player)}
-              userRole={userRole}
+              userRole={userRole ? { role: userRole.role } : undefined}
             />
           ))
         )}
