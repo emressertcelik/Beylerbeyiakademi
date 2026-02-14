@@ -25,6 +25,7 @@ export default function DashboardPage() {
     const [selectedAge, setSelectedAge] = useState('U15');
     const [puanTable, setPuanTable] = useState<Array<Array<string | number>>>([]);
     const [tableLoading, setTableLoading] = useState(false);
+    const [showFullTable, setShowFullTable] = useState(false);
 
     // Age group link and group info
     const ageGroupInfo: Record<string, { url: string; group: string }> = {
@@ -286,317 +287,159 @@ export default function DashboardPage() {
   return (
     <div className="space-y-8 animate-slide-up">
       {/* Haftanın Panoraması ve Puan Durumu birlikte */}
-      <div className="rounded-2xl bg-gradient-to-br from-[#fff5f5] via-white to-[#fef2f2] border border-[#f5d0d0] overflow-hidden">
+      <div className="rounded-2xl bg-white border border-[#e8eaed] overflow-hidden shadow-sm">
         {/* Top bar */}
-        <div className="px-6 py-4 md:px-8 md:py-5 flex flex-col md:flex-row md:items-center md:justify-between gap-3 border-b border-[#f5d0d0]/60">
-          <div className="flex items-center gap-3">
+        <div className="px-5 py-3 md:px-6 md:py-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3 border-b border-[#e8eaed] bg-[#f8f9fb]">
+          <div className="flex items-center gap-2.5">
             <Image
               src="/Logo_S.png"
               alt="Beylerbeyi 1911 Akademi"
-              width={40}
-              height={40}
-              className="rounded-xl shadow-sm shrink-0"
+              width={32}
+              height={32}
+              className="rounded-lg shrink-0"
             />
             <div>
-              <h1 className="text-lg font-bold text-[#1a1a2e] tracking-tight">Haftanın Panoraması</h1>
-              <p className="text-[11px] text-[#8c919a]">{todayStr}</p>
+              <h1 className="text-sm font-semibold text-[#1a1a2e] tracking-tight">Haftanın Panoraması</h1>
+              <p className="text-[10px] text-[#8c919a]">{todayStr}</p>
             </div>
           </div>
           {/* Mini stats */}
-          <div className="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-5 gap-2 sm:flex sm:items-center sm:gap-4 w-full max-w-full overflow-x-auto">
+          <div className="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-5 gap-2 sm:flex sm:items-center sm:gap-3 w-full max-w-full overflow-x-auto">
             <MiniStat label="Atılan Gol" value={loading ? "—" : String(weeklyStats.goalsScored)} color="text-emerald-600" />
-            <div className="hidden sm:block w-px h-6 bg-[#e2e5e9]" />
+            <div className="hidden sm:block w-px h-5 bg-[#e8eaed]" />
             <MiniStat label="Yenilen Gol" value={loading ? "—" : String(weeklyStats.goalsConceded)} color="text-red-500" />
-            <div className="hidden sm:block w-px h-6 bg-[#e2e5e9]" />
+            <div className="hidden sm:block w-px h-5 bg-[#e8eaed]" />
             <MiniStat label="Galibiyet" value={loading ? "—" : String(weeklyStats.wins)} color="text-emerald-600" />
-            <div className="hidden sm:block w-px h-6 bg-[#e2e5e9]" />
+            <div className="hidden sm:block w-px h-5 bg-[#e8eaed]" />
             <MiniStat label="Beraberlik" value={loading ? "—" : String(weeklyStats.draws)} color="text-amber-600" />
-            <div className="hidden sm:block w-px h-6 bg-[#e2e5e9]" />
+            <div className="hidden sm:block w-px h-5 bg-[#e8eaed]" />
             <MiniStat label="Mağlubiyet" value={loading ? "—" : String(weeklyStats.losses)} color="text-red-600" />
           </div>
         </div>
-        {/* Content: Player of the week + Team of the week + Puan Durumu */}
-        <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-[#f5d0d0]/60">
-          {/* Haftanın Oyuncusu */}
-          <div className="p-3 md:p-4">
-            <p className="text-[10px] font-bold text-[#c4111d] uppercase tracking-[0.15em] mb-2">⭐ Haftanın Oyuncusu</p>
-            {loading ? (
-              <p className="text-xs text-[#8c919a]">Yükleniyor...</p>
-            ) : playerOfTheWeek ? (
-              <div>
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#c4111d] to-[#e8766e] flex items-center justify-center shadow-md shadow-[#c4111d]/15">
-                    <span className="text-white font-bold text-base">
-                      {playerOfTheWeek.name.charAt(0)}
-                    </span>
-                  </div>
-                  <div>
-                    <p className="text-sm font-bold text-[#1a1a2e]">{playerOfTheWeek.name}</p>
-                    <div className="flex items-center gap-0.5 mt-0.5">
-                      {/* ...existing code... */}
-                    </div>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="flex items-center gap-1 bg-emerald-50 border border-emerald-100 rounded-lg px-2 py-1">
-                    <Target size={11} className="text-emerald-600" />
-                    <span className="text-xs font-bold text-emerald-700">{/* ...existing code... */}</span>
-                    <span className="text-[10px] text-emerald-600">gol</span>
-                  </div>
-                  <div className="flex items-center gap-1 bg-blue-50 border border-blue-100 rounded-lg px-2 py-1">
-                    <TrendingUp size={11} className="text-blue-600" />
-                    <span className="text-xs font-bold text-blue-700">{/* ...existing code... */}</span>
-                    {/* ...existing code... */}
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <p className="text-xs text-[#8c919a]">Bu hafta henüz maç oynanmadı.</p>
-            )}
-          </div>
-          {/* Haftanın Takımı */}
-          <div className="p-3 md:p-4">
-            <p className="text-[10px] font-bold text-[#c4111d] uppercase tracking-[0.15em] mb-2">🛡️ Haftanın Takımı</p>
-            {loading ? (
-              <p className="text-xs text-[#8c919a]">Yükleniyor...</p>
-            ) : teamOfTheWeek ? (
-              <div>
-                <div className="flex items-center gap-2 mb-2">
-                  <div className={`w-9 h-9 rounded-full flex items-center justify-center shadow-md shadow-[#1a1a2e]/15 ${ageGroupColors[teamOfTheWeek.ageGroup] || ageGroupColors.default}`}>
-                    {/* ...existing code... */}
-                  </div>
-                  <div>
-                    {/* ...existing code... */}
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  {/* ...existing code... */}
-                </div>
-              </div>
-            ) : (
-              <p className="text-xs text-[#8c919a]">Bu hafta henüz maç oynanmadı.</p>
-            )}
-          </div>
-          {/* Puan Durumu Tablosu */}
-          <div className="p-3 md:p-4">
-            <p className="text-[10px] font-bold text-[#c4111d] uppercase tracking-[0.15em] mb-2">📊 Puan Durumu</p>
-            <div className="mb-1 flex gap-1 justify-center">
+        {/* Content: Puan Durumu + Son Maçlar */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 md:p-5">
+
+          {/* ── Puan Durumu Kartı ── */}
+          <div className="rounded-xl overflow-hidden border border-[#e8eaed]">
+            {/* Başlık */}
+            <div className="px-4 py-2.5 flex items-center justify-between bg-[#1a1a2e]">
+              <h3 className="text-[11px] font-semibold text-white/90 uppercase tracking-wider">{selectedAge} Puan Durumu</h3>
+              <span className="text-[9px] font-semibold text-white bg-[#c4111d] px-2 py-0.5 rounded-full">CANLI</span>
+            </div>
+            {/* Yaş grubu seçici */}
+            <div className="px-3 py-1.5 flex gap-1 justify-center border-b border-[#e8eaed] bg-[#f8f9fb]">
               {['U14', 'U15', 'U16', 'U17', 'U19'].map((age) => (
                 <button
                   key={age}
-                  className={`px-2 py-0.5 rounded-md text-xs font-medium border transition min-w-[28px] h-6 flex items-center justify-center ${selectedAge === age ? 'bg-[#e2e5e9] text-[#c4111d] border-[#c4111d]' : 'bg-[#f8f9fb] text-[#1a1a2e] border-[#e2e5e9] hover:bg-[#e2e5e9]'}`}
-                  onClick={() => setSelectedAge(age)}
-                  aria-label={age}
+                  className={`px-2 py-0.5 rounded text-[10px] font-medium transition ${selectedAge === age ? 'bg-[#1a1a2e] text-white' : 'text-[#5a6170] hover:bg-[#e2e5e9]'}`}
+                  onClick={() => { setSelectedAge(age); setShowFullTable(false); }}
                 >
                   {age}
                 </button>
               ))}
             </div>
-            <div id="puan-durumu-table">
+            {/* Tablo */}
+            <div className="bg-white">
               {tableLoading ? (
-                <div className="py-2 text-center text-[#8c919a] text-[10px]">Yükleniyor...</div>
+                <div className="py-6 text-center text-[#8c919a] text-[10px]">Yükleniyor...</div>
               ) : puanTable.length === 0 ? (
-                <div className="py-2 text-center text-[#8c919a] text-[10px]">Tablo bulunamadı.</div>
+                <div className="py-6 text-center text-[#8c919a] text-[10px]">Tablo bulunamadı.</div>
               ) : (
                 <div className="overflow-x-auto">
-                  <table className="w-full text-[9px] bg-white">
-                    <thead>
-                      <tr className="text-[#8c919a] border-b border-[#f8f9fb]">
-                        <th className="py-0.5 px-1 font-medium text-center">#</th>
-                        <th className="py-0.5 px-1 font-medium text-left">Takım</th>
-                        <th className="py-0.5 px-1 font-medium text-center">O</th>
-                        <th className="py-0.5 px-1 font-medium text-center">G</th>
-                        <th className="py-0.5 px-1 font-medium text-center">B</th>
-                        <th className="py-0.5 px-1 font-medium text-center">M</th>
-                        <th className="py-0.5 px-1 font-medium text-center">A</th>
-                        <th className="py-0.5 px-1 font-medium text-center">Y</th>
-                        <th className="py-0.5 px-1 font-medium text-center">AV</th>
-                        <th className="py-0.5 px-1 font-medium text-center">P</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {puanTable.map((row, idx) => (
-                        <tr
-                          key={row[0]}
-                          className={
-                            `hover:bg-[#f8f9fb] ${idx % 2 === 0 ? "bg-white" : "bg-[#f8f9fb]"}`
-                          }
-                        >
-                          <td className="py-0.5 px-1 text-center font-bold text-[#c4111d]">{row[0]}</td>
-                          <td className="py-0.5 px-1 text-left font-semibold text-[#1a1a2e] whitespace-nowrap">{row[1]}</td>
-                          <td className="py-0.5 px-1 text-center text-[#5a6170]">{row[2]}</td>
-                          <td className="py-0.5 px-1 text-center text-[#5a6170]">{row[3]}</td>
-                          <td className="py-0.5 px-1 text-center text-[#5a6170]">{row[4]}</td>
-                          <td className="py-0.5 px-1 text-center text-[#5a6170]">{row[5]}</td>
-                          <td className="py-0.5 px-1 text-center text-[#5a6170]">{row[6]}</td>
-                          <td className="py-0.5 px-1 text-center text-[#5a6170]">{row[7]}</td>
-                          <td className="py-0.5 px-1 text-center text-[#5a6170]">{row[8]}</td>
-                          <td className="py-0.5 px-1 text-center font-bold text-[#c4111d]">{row[9]}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                  {/* Tablo başlığı */}
+                  <div className="grid grid-cols-[32px_1fr_32px_32px] items-center px-3 py-1.5 text-[9px] font-medium text-[#8c919a] uppercase tracking-wider border-b border-[#f0f1f3]">
+                    <span>#</span>
+                    <span>Takım</span>
+                    <span className="text-center">O</span>
+                    <span className="text-center">P</span>
+                  </div>
+                  {/* Satırlar */}
+                  {(showFullTable ? puanTable : puanTable.slice(0, 6)).map((row, idx) => {
+                    const teamName = String(row[1]);
+                    const isBeylerbeyi = teamName.toUpperCase().includes("BEYLERBEYİ");
+                    return (
+                      <div
+                        key={row[0]}
+                        className={`grid grid-cols-[32px_1fr_32px_32px] items-center px-3 py-2 text-[11px] transition-colors ${
+                          isBeylerbeyi
+                            ? "bg-[#fef2f2] border-l-2 border-l-[#c4111d]"
+                            : idx % 2 === 0
+                            ? "bg-white"
+                            : "bg-[#fafbfc]"
+                        } hover:bg-[#f0f1f3]`}
+                      >
+                        <span className={`font-semibold ${isBeylerbeyi ? "text-[#c4111d]" : "text-[#8c919a]"}`}>{row[0]}</span>
+                        <span className={`font-medium truncate ${isBeylerbeyi ? "text-[#c4111d]" : "text-[#1a1a2e]"}`}>{row[1]}</span>
+                        <span className="text-center text-[#5a6170]">{row[2]}</span>
+                        <span className={`text-center font-semibold ${isBeylerbeyi ? "text-[#c4111d]" : "text-[#1a1a2e]"}`}>{row[9]}</span>
+                      </div>
+                    );
+                  })}
+                  {/* Tümünü göster / gizle */}
+                  {puanTable.length > 6 && (
+                    <button
+                      onClick={() => setShowFullTable(!showFullTable)}
+                      className="w-full py-2 text-[10px] font-semibold text-[#c4111d] hover:bg-[#fef2f2] transition-colors border-t border-[#f0f1f3]"
+                    >
+                      {showFullTable ? "▲ Daralt" : `▼ Tümünü Göster (${puanTable.length} takım)`}
+                    </button>
+                  )}
                 </div>
               )}
             </div>
           </div>
-        </div>
-      </div>
-      {/* ── Welcome Hero ── */}
-      <div className="rounded-2xl bg-gradient-to-br from-[#fff5f5] via-white to-[#fef2f2] border border-[#f5d0d0] overflow-hidden">
-        {/* Top bar */}
-        <div className="px-6 py-4 md:px-8 md:py-5 flex flex-col md:flex-row md:items-center md:justify-between gap-3 border-b border-[#f5d0d0]/60">
-          <div className="flex items-center gap-3">
-            <Image
-              src="/Logo_S.png"
-              alt="Beylerbeyi 1911 Akademi"
-              width={40}
-              height={40}
-              className="rounded-xl shadow-sm shrink-0"
-            />
-            <div>
-              <h1 className="text-lg font-bold text-[#1a1a2e] tracking-tight">Haftanın Panoraması</h1>
-              <p className="text-[11px] text-[#8c919a]">{todayStr}</p>
+
+          {/* ── Son Maçlar Kartı ── */}
+          <div className="rounded-xl overflow-hidden border border-[#e8eaed]">
+            {/* Başlık */}
+            <div className="px-4 py-2.5 bg-[#1a1a2e]">
+              <h3 className="text-[11px] font-semibold text-white/90 uppercase tracking-wider">Son Maçlar</h3>
             </div>
-          </div>
-
-          {/* Mini stats */}
-          <div className="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-5 gap-2 sm:flex sm:items-center sm:gap-4 w-full max-w-full overflow-x-auto">
-            <MiniStat label="Atılan Gol" value={loading ? "—" : String(weeklyStats.goalsScored)} color="text-emerald-600" />
-            <div className="hidden sm:block w-px h-6 bg-[#e2e5e9]" />
-            <MiniStat label="Yenilen Gol" value={loading ? "—" : String(weeklyStats.goalsConceded)} color="text-red-500" />
-            <div className="hidden sm:block w-px h-6 bg-[#e2e5e9]" />
-            <MiniStat label="Galibiyet" value={loading ? "—" : String(weeklyStats.wins)} color="text-emerald-600" />
-            <div className="hidden sm:block w-px h-6 bg-[#e2e5e9]" />
-            <MiniStat label="Beraberlik" value={loading ? "—" : String(weeklyStats.draws)} color="text-amber-600" />
-            <div className="hidden sm:block w-px h-6 bg-[#e2e5e9]" />
-            <MiniStat label="Mağlubiyet" value={loading ? "—" : String(weeklyStats.losses)} color="text-red-600" />
-          </div>
-        </div>
-
-        {/* Content: Player of the week + Team of the week + Recent results */}
-        <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-[#f5d0d0]/60">
-          {/* Haftanın Oyuncusu */}
-          <div className="p-4 sm:p-6 md:p-8">
-            <p className="text-[10px] font-bold text-[#c4111d] uppercase tracking-[0.15em] mb-3">⭐ Haftanın Oyuncusu</p>
-            {loading ? (
-              <p className="text-sm text-[#8c919a]">Yükleniyor...</p>
-            ) : playerOfTheWeek ? (
-              <div>
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#c4111d] to-[#e8766e] flex items-center justify-center shadow-md shadow-[#c4111d]/15">
-                    <span className="text-white font-bold text-lg">
-                      {playerOfTheWeek.name.charAt(0)}
-                    </span>
-                  </div>
-                  <div>
-                    <p className="text-base font-bold text-[#1a1a2e]">{playerOfTheWeek.name}</p>
-                    <div className="flex items-center gap-0.5 mt-0.5">
-                      {[1, 2, 3, 4, 5].map((s) => (
-                        <Star
-                          key={s}
-                          size={14}
-                          className={s <= Math.round(playerOfTheWeek.avgRating)
-                            ? "fill-amber-400 text-amber-400"
-                            : "fill-none text-gray-300"
-                          }
-                        />
-                      ))}
-                      <span className="ml-1 text-xs font-semibold text-amber-600">
-                        {playerOfTheWeek.avgRating.toFixed(1)}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="flex items-center gap-1.5 bg-emerald-50 border border-emerald-100 rounded-lg px-2.5 py-1.5">
-                    <Target size={12} className="text-emerald-600" />
-                    <span className="text-sm font-bold text-emerald-700">{playerOfTheWeek.goals}</span>
-                    <span className="text-[10px] text-emerald-600">gol</span>
-                  </div>
-                  <div className="flex items-center gap-1.5 bg-blue-50 border border-blue-100 rounded-lg px-2.5 py-1.5">
-                    <TrendingUp size={12} className="text-blue-600" />
-                    <span className="text-sm font-bold text-blue-700">{playerOfTheWeek.assists}</span>
-                    <span className="text-[10px] text-blue-600">asist</span>
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <p className="text-sm text-[#8c919a]">Bu hafta henüz maç oynanmadı.</p>
-            )}
-          </div>
-
-          {/* Haftanın Takımı */}
-          <div className="p-4 sm:p-6 md:p-8">
-            <p className="text-[10px] font-bold text-[#c4111d] uppercase tracking-[0.15em] mb-3">🛡️ Haftanın Takımı</p>
-            {loading ? (
-              <p className="text-sm text-[#8c919a]">Yükleniyor...</p>
-            ) : teamOfTheWeek ? (
-              <div>
-                <div className="flex items-center gap-3 mb-3">
-                  <div className={`w-12 h-12 rounded-full flex items-center justify-center shadow-md shadow-[#1a1a2e]/15 ${ageGroupColors[teamOfTheWeek.ageGroup] || ageGroupColors.default}`}>
-                    <span className="text-white font-bold text-sm">{teamOfTheWeek.ageGroup}</span>
-                  </div>
-                  <div>
-                    <p className="text-base font-bold text-[#1a1a2e]">{teamOfTheWeek.ageGroup}</p>
-                    <p className="text-xs text-[#8c919a]">{teamOfTheWeek.matches} maç oynandı</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="flex items-center gap-1.5 bg-emerald-50 border border-emerald-100 rounded-lg px-2.5 py-1.5">
-                    <Trophy size={12} className="text-emerald-600" />
-                    <span className="text-sm font-bold text-emerald-700">{teamOfTheWeek.wins}</span>
-                    <span className="text-[10px] text-emerald-600">galibiyet</span>
-                  </div>
-                  <div className="flex items-center gap-1.5 bg-emerald-50 border border-emerald-100 rounded-lg px-2.5 py-1.5">
-                    <Target size={12} className="text-emerald-600" />
-                    <span className="text-sm font-bold text-emerald-700">{teamOfTheWeek.goalsFor}</span>
-                    <span className="text-[10px] text-emerald-600">attığı gol</span>
-                  </div>
-                  <div className="flex items-center gap-1.5 bg-red-50 border border-red-100 rounded-lg px-2.5 py-1.5">
-                    <Target size={12} className="text-red-500" />
-                    <span className="text-sm font-bold text-red-700">{teamOfTheWeek.goalsAgainst}</span>
-                    <span className="text-[10px] text-red-500">yediği gol</span>
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <p className="text-sm text-[#8c919a]">Bu hafta henüz maç oynanmadı.</p>
-            )}
-          </div>
-
-          {/* Son Maç Sonuçları */}
-          <div className="p-4 sm:p-6 md:p-8">
-            <p className="text-[10px] font-bold text-[#c4111d] uppercase tracking-[0.15em] mb-3">🏆 Son Sonuçlar</p>
-            {loading ? (
-              <div className="flex items-center justify-center py-10 text-[#8c919a] text-lg">Yükleniyor...</div>
-            ) : recentResults.length === 0 ? (
-              <p className="text-sm text-[#8c919a]">Bu hafta henüz maç oynanmadı.</p>
-            ) : (
-              <div className="flex flex-col gap-2">
-                {recentResults.slice(0, 5).map((m) => {
-                  const rc = resultColor[m.result] || 'bg-blue-50 text-blue-600 border-blue-200';
+            {/* Maç listesi */}
+            <div className="bg-white divide-y divide-[#f0f1f3]">
+              {loading ? (
+                <div className="py-6 text-center text-[#8c919a] text-[10px]">Yükleniyor...</div>
+              ) : recentResults.length === 0 ? (
+                <div className="py-6 text-center text-[#8c919a] text-[10px]">Henüz maç oynanmadı.</div>
+              ) : (
+                recentResults.slice(0, 5).map((m) => {
+                  const matchDate = new Date(m.date);
+                  const dayMonth = matchDate.toLocaleDateString("tr-TR", { day: "numeric", month: "long" }).toUpperCase();
+                  const weekNum = m.week ? `${m.week}. HAFTA` : "";
                   return (
                     <button
                       key={m.id}
                       onClick={() => setSelectedMatch(m)}
-                      className="bg-white border border-[#e2e5e9] rounded-xl p-0 flex flex-row items-center shadow-sm hover:border-[#c4111d]/30 hover:shadow-md transition-all duration-200 min-w-[180px] max-w-[320px] w-full overflow-hidden"
+                      className="w-full px-4 py-3 hover:bg-[#f8f9fb] transition-colors text-left"
                     >
-                      <div className={`w-8 h-8 rounded-br-xl flex items-center justify-center text-base font-black ${rc} border-b shrink-0 mr-2`}>
-                        {resultMap[m.result]}
+                      {/* Hafta, yaş grubu ve tarih */}
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-[9px] font-medium text-[#8c919a] tracking-wider uppercase">{weekNum}</span>
+                          <span className="text-[9px] font-semibold text-white bg-[#1a1a2e] px-1.5 py-0.5 rounded">{m.ageGroup}</span>
+                        </div>
+                        <span className="text-[9px] font-medium text-[#8c919a] tracking-wider uppercase">{dayMonth}</span>
                       </div>
-                      <div className="flex-1 min-w-0 flex items-center gap-2 px-2 py-1">
-                        <span className="text-[12px] font-bold text-[#1a1a2e] truncate">{m.opponent}</span>
-                        <span className="text-[10px] font-semibold px-1 rounded ${ageGroupColors[m.ageGroup] || ageGroupColors.default}">{m.ageGroup}</span>
-                        <span className="text-[11px] font-medium">{formatDate(m.date)}</span>
-                        <span className="text-base font-bold text-[#c4111d]">{m.scoreHome}-{m.scoreAway}</span>
+                      {/* Skor satırı */}
+                      <div className="flex items-center justify-between">
+                        <span className="text-[11px] font-semibold text-[#1a1a2e] flex-1 truncate">BEYLERBEYİ</span>
+                        <div className="flex items-center gap-1 mx-2">
+                          <span className={`w-6 h-6 rounded flex items-center justify-center text-[11px] font-bold text-white ${m.scoreHome > m.scoreAway ? 'bg-[#c4111d]' : m.scoreHome === m.scoreAway ? 'bg-amber-500' : 'bg-[#1a1a2e]'}`}>
+                            {m.scoreHome}
+                          </span>
+                          <span className={`w-6 h-6 rounded flex items-center justify-center text-[11px] font-bold text-white ${m.scoreAway > m.scoreHome ? 'bg-[#c4111d]' : m.scoreAway === m.scoreHome ? 'bg-amber-500' : 'bg-[#1a1a2e]'}`}>
+                            {m.scoreAway}
+                          </span>
+                        </div>
+                        <span className="text-[11px] font-semibold text-[#1a1a2e] flex-1 truncate text-right">{m.opponent.toUpperCase()}</span>
                       </div>
                     </button>
                   );
-                })}
-              </div>
-            )}
+                })
+              )}
+            </div>
           </div>
+
         </div>
       </div>
 
@@ -831,8 +674,8 @@ export default function DashboardPage() {
 function MiniStat({ label, value, color }: { label: string; value: string; color?: string }) {
   return (
     <div className="text-center">
-      <p className={`text-base sm:text-lg font-bold ${color || "text-[#1a1a2e]"}`}>{value}</p>
-      <p className="text-[9px] sm:text-[10px] text-[#8c919a] font-medium whitespace-nowrap">{label}</p>
+      <p className={`text-sm sm:text-base font-semibold ${color || "text-[#1a1a2e]"}`}>{value}</p>
+      <p className="text-[8px] sm:text-[9px] text-[#8c919a] font-medium whitespace-nowrap">{label}</p>
     </div>
   );
 }
