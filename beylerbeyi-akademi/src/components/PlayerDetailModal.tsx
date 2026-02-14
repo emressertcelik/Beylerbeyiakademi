@@ -64,6 +64,18 @@ export default function PlayerDetailModal({ player, onClose, onEdit, onDelete, u
   const [historyOpen, setHistoryOpen] = useState(false);
   const [playerMatches, setPlayerMatches] = useState<Match[]>([]);
 
+  // Position-based header gradient colors (matching PlayerCard)
+  const positionGradient: Record<string, string> = {
+    Kaleci: "from-amber-500 to-amber-600",
+    Defans: "from-[#7a8a9e] to-[#5a6a80]",
+    "Orta Saha": "from-[#a0a5b5] to-[#858a9a]",
+    Forvet: "from-[#c4111d] to-[#8b0d15]",
+    "Kanat Forvet": "from-[#c4111d] to-[#8b0d15]",
+  };
+  const gradient = positionGradient[player.position] || "from-[#a0a5b5] to-[#858a9a]";
+  const initials = `${player.firstName.charAt(0)}${player.lastName.charAt(0)}`;
+  const birthYear = player.birthDate ? new Date(player.birthDate).getFullYear() : "";
+
   useEffect(() => {
     let cancelled = false;
     async function loadLogs() {
@@ -122,84 +134,73 @@ export default function PlayerDetailModal({ player, onClose, onEdit, onDelete, u
 
       {/* Modal */}
       <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto border border-[#e2e5e9] animate-slide-in-up">
-        {/* Header */}
-        <div className="sticky top-0 bg-white/95 backdrop-blur-md border-b border-[#e2e5e9] px-4 sm:px-6 py-4 sm:py-5 z-10 rounded-t-2xl">
-          <div className="flex items-center justify-between gap-3">
-            <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
-              <div className="w-11 h-11 sm:w-14 sm:h-14 rounded-xl bg-[#c4111d]/10 flex items-center justify-center text-lg sm:text-xl font-black text-[#c4111d] shrink-0">
-                {player.jerseyNumber}
-              </div>
-              <div className="min-w-0">
-                <h2 className="text-base sm:text-lg font-bold text-[#1a1a2e] truncate">
-                  {player.firstName} {player.lastName}
-                </h2>
-                <div className="flex items-center gap-2 mt-1">
-                  {/* Yaş grubu badge'i */}
-                  {player.ageGroup && (
-                    <span
-                      className={
-                        `px-2 py-0.5 rounded text-xs font-semibold ` +
-                        (player.ageGroup === "U15" ? "bg-blue-50 text-blue-700" :
-                         player.ageGroup === "U16" ? "bg-emerald-50 text-emerald-700" :
-                         player.ageGroup === "U17" ? "bg-amber-50 text-amber-700" :
-                         player.ageGroup === "U18" ? "bg-red-50 text-red-700" :
-                         "bg-slate-50 text-slate-600")
-                      }
-                    >{player.ageGroup}</span>
-                  )}
-                  <span className="text-xs text-[#5a6170]">{player.position} · {player.foot} Ayak</span>
-                </div>
-              </div>
-            </div>
-            <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
-              <a
-                href={`/dashboard/reports/${player.id}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-1.5 px-3 sm:px-4 py-2 bg-[#c4111d] hover:bg-[#9b0d16] text-white text-xs sm:text-sm font-medium rounded-lg transition-all duration-200 shadow-sm"
-                title="Özel Raporu Gör"
-              >
-                <span>Rapor</span>
-              </a>
-              {onEdit && (
-                <button
-                  onClick={() => onEdit(player)}
-                  className="flex items-center gap-1.5 px-3 sm:px-4 py-2 bg-[#f1f3f5] hover:bg-[#e2e5e9] text-[#c4111d] text-xs sm:text-sm font-medium rounded-lg transition-all duration-200 border border-[#e2e5e9]"
-                >
-                  <Edit3 size={14} />
-                  <span className="hidden sm:inline">Düzenle</span>
-                </button>
-              )}
-              {onDelete && (
-                <button
-                  onClick={() => { if (confirm(`${player.firstName} ${player.lastName} silinecek. Emin misiniz?`)) onDelete(player.id); }}
-                  className="flex items-center gap-1.5 px-3 sm:px-4 py-2 bg-white hover:bg-red-50 text-[#c4111d] text-xs sm:text-sm font-medium rounded-lg transition-all duration-200 border border-[#e2e5e9] hover:border-[#c4111d]/30"
-                >
-                  <Trash2 size={14} />
-                  <span className="hidden sm:inline">Sil</span>
-                </button>
-              )}
-              <button
-                onClick={onClose}
-                className="p-2 hover:bg-[#f1f3f5] rounded-lg transition-colors text-[#5a6170]"
-              >
-                <X size={20} />
-              </button>
-            </div>
+        {/* Renkli Header */}
+        <div className={`relative bg-gradient-to-br ${gradient} px-4 sm:px-6 py-3 sm:py-4 rounded-t-2xl`}>
+          {/* Kapat butonu */}
+          <button
+            onClick={onClose}
+            className="absolute top-2.5 right-2.5 p-1.5 hover:bg-white/20 rounded-lg transition-colors text-white/70 hover:text-white z-10"
+          >
+            <X size={16} />
+          </button>
+          {/* Forma numarası */}
+          <span className="absolute top-2 right-10 text-2xl sm:text-3xl font-black text-white/15 italic leading-none">
+            #{player.jerseyNumber}
+          </span>
+          {/* İsim baş harfleri */}
+          <div className="w-10 h-10 rounded-lg bg-white/90 backdrop-blur flex items-center justify-center text-sm font-black text-[#1a1a2e] shadow-sm mb-2">
+            {initials}
           </div>
+          <h2 className="text-sm sm:text-base font-bold text-white tracking-tight">
+            {player.firstName} {player.lastName}
+          </h2>
+          <p className="text-[10px] text-white/60 mt-0.5">
+            {player.position} · {player.ageGroup} · {birthYear}
+          </p>
         </div>
 
-        <div className="p-4 sm:p-6 space-y-5 sm:space-y-6">
+        {/* Aksiyon butonları */}
+        <div className="flex items-center gap-2 px-4 sm:px-6 py-2.5 border-b border-[#e2e5e9] bg-[#f8f9fb]">
+          <a
+            href={`/dashboard/reports/${player.id}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-[#c4111d] hover:bg-[#9b0d16] text-white text-[11px] font-semibold rounded-lg transition-all shadow-sm"
+          >
+            Rapor
+          </a>
+          {onEdit && (
+            <button
+              onClick={() => onEdit(player)}
+              className="flex items-center gap-1 px-3 py-1.5 bg-white hover:bg-[#f1f3f5] text-[#1a1a2e] text-[11px] font-semibold rounded-lg transition-all border border-[#e2e5e9] shadow-sm"
+            >
+              <Edit3 size={12} />
+              <span>Düzenle</span>
+            </button>
+          )}
+          {onDelete && (
+            <button
+              onClick={() => { if (confirm(`${player.firstName} ${player.lastName} silinecek. Emin misiniz?`)) onDelete(player.id); }}
+              className="flex items-center gap-1 px-3 py-1.5 bg-white hover:bg-red-50 text-red-500 text-[11px] font-semibold rounded-lg transition-all border border-[#e2e5e9] shadow-sm"
+            >
+              <Trash2 size={12} />
+              <span>Sil</span>
+            </button>
+          )}
+        </div>
+
+        <div className="p-4 sm:p-6 space-y-4 sm:space-y-5">
           {/* Genel Bilgiler */}
           <Section title="Genel Bilgiler">
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
               <InfoBox label="Doğum Tarihi" value={new Date(player.birthDate).toLocaleDateString("tr-TR")} />
               <InfoBox label="Boy" value={`${player.height} cm`} />
               <InfoBox label="Kilo" value={`${player.weight} kg`} />
-              <InfoBox label="Forma No" value={`#${player.jerseyNumber}`} />
+              <InfoBox label="Ayak" value={player.foot} />
             </div>
-            <div className="grid grid-cols-2 gap-3 mt-3">
+            <div className="grid grid-cols-2 gap-2 mt-2">
               <InfoBox label="Sezon" value={player.seasons.join(", ")} />
+              <InfoBox label="Forma No" value={`#${player.jerseyNumber}`} />
             </div>
             {player.previousTeams && player.previousTeams.length > 0 && (
               <div className="mt-3 bg-[#f8f9fb] rounded-xl p-4 border border-[#e2e5e9]">
@@ -296,7 +297,7 @@ export default function PlayerDetailModal({ player, onClose, onEdit, onDelete, u
 
           {/* İstatistikler */}
           <Section title="Maç İstatistikleri">
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
               <StatBox label="Maç" value={player.stats.matches} />
               <StatBox label="Dk. Oynanan" value={player.stats.minutesPlayed} />
               {isGoalkeeper ? (
@@ -311,7 +312,7 @@ export default function PlayerDetailModal({ player, onClose, onEdit, onDelete, u
                 </>
               )}
             </div>
-            <div className="grid grid-cols-2 gap-3 mt-3">
+            <div className="grid grid-cols-2 gap-2 mt-2">
               <div className="bg-[#f8f9fb] rounded-xl p-4 flex items-center gap-3 border border-[#e2e5e9]">
                 <span className="inline-block w-4 h-5 rounded-[3px] bg-yellow-400" />
                 <div>
@@ -328,7 +329,7 @@ export default function PlayerDetailModal({ player, onClose, onEdit, onDelete, u
               </div>
             </div>
             {/* Katılım Durumu */}
-            <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 mt-3">
+            <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 mt-2">
               <StatBox label="İlk 11" value={participationStats.ilk11} color="text-emerald-500" />
               <StatBox label="Yedek" value={participationStats.yedek} color="text-blue-500" />
               <StatBox label="Süre Almadı" value={participationStats.sureAlmadi} color="text-amber-500" />
@@ -374,7 +375,7 @@ export default function PlayerDetailModal({ player, onClose, onEdit, onDelete, u
                     }
                     // Modern card layout
                     return (
-                      <div key={match.id} className="bg-gradient-to-br from-[#f8f9fb] to-white rounded-2xl border border-[#e2e5e9] shadow-md px-4 py-4 mb-3 flex flex-col gap-2">
+                      <div key={match.id} className="bg-[#f8f9fb] rounded-xl border border-[#e2e5e9] px-3 py-3 flex flex-col gap-1.5">
                         <div className="flex items-center gap-3">
                           <span className="text-xs font-semibold text-[#1a1a2e]">
                             {match.week ? `${match.week}.Hafta` : "Hafta Bilgisi Yok"}
@@ -405,7 +406,7 @@ export default function PlayerDetailModal({ player, onClose, onEdit, onDelete, u
                           )}
                         </div>
                         {playerStat && (
-                          <div className="flex flex-wrap items-center gap-3 border-t border-[#f0f1f3] bg-[#fafbfc] mt-2 pt-2">
+                          <div className="flex flex-wrap items-center gap-3 border-t border-[#f0f1f3] bg-white/50 mt-1.5 pt-1.5 rounded-b-lg">
                             {(statusObj && (statusObj.tag === "İlk 11" || statusObj.tag === "Yedek")) ? (
                               <>
                                 <MatchMiniStat label="DK" value={String(playerStat.minutesPlayed)} />
@@ -575,18 +576,18 @@ function CollapsibleSection({ title, isOpen, onToggle, children }: {
 
 function InfoBox({ label, value }: { label: string; value: string }) {
   return (
-    <div className="bg-[#f8f9fb] rounded-lg p-3 border border-[#e2e5e9]">
-      <p className="text-[10px] text-[#8c919a] font-medium mb-0.5">{label}</p>
-      <p className="text-sm font-semibold text-[#1a1a2e]">{value}</p>
+    <div className="bg-[#f8f9fb] rounded-lg px-3 py-2 border border-[#e2e5e9]">
+      <p className="text-[9px] text-[#8c919a] font-medium uppercase tracking-wider">{label}</p>
+      <p className="text-xs font-semibold text-[#1a1a2e] mt-0.5">{value}</p>
     </div>
   );
 }
 
 function StatBox({ label, value, color }: { label: string; value: number; color?: string }) {
   return (
-    <div className="bg-[#f8f9fb] rounded-lg p-3 text-center border border-[#e2e5e9]">
-      <p className={`text-lg font-bold ${color || "text-[#1a1a2e]"}`}>{value}</p>
-      <p className="text-[10px] text-[#8c919a] font-medium">{label}</p>
+    <div className="bg-[#f8f9fb] rounded-lg px-3 py-2 text-center border border-[#e2e5e9]">
+      <p className={`text-base font-bold ${color || "text-[#1a1a2e]"}`}>{value}</p>
+      <p className="text-[9px] text-[#8c919a] font-medium uppercase tracking-wider">{label}</p>
     </div>
   );
 }
