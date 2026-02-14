@@ -1,13 +1,38 @@
-const CACHE_NAME = "bb-akademi-v1";
+const CACHE_NAME = "bb-akademi-v2";
 
+// Sadece gerçek statik dosyalar cache'lenir - sayfalar ve API asla cache'lenmez
 const STATIC_ASSETS = [
-  "/",
-  "/dashboard",
   "/manifest.json",
   "/Logo_S.png",
+  "/icons/icon-72x72.png",
+  "/icons/icon-96x96.png",
+  "/icons/icon-128x128.png",
+  "/icons/icon-144x144.png",
+  "/icons/icon-152x152.png",
   "/icons/icon-192x192.png",
+  "/icons/icon-384x384.png",
   "/icons/icon-512x512.png",
 ];
+
+// Cache'lenmemesi gereken yollar
+const NO_CACHE_PATTERNS = [
+  "/api/",
+  "/dashboard",
+  "/login",
+  "/supabase",
+  "/_next/data/", // Next.js data fetches (kullanıcıya özel olabilir)
+];
+
+function shouldCache(url) {
+  const path = new URL(url).pathname;
+  // HTML sayfaları cache'lenmesin
+  if (path === "/" || !path.includes(".")) return false;
+  // Belirli yollar cache'lenmesin
+  for (const pattern of NO_CACHE_PATTERNS) {
+    if (path.startsWith(pattern)) return false;
+  }
+  return true;
+}
 
 // Install: cache static assets
 self.addEventListener("install", (event) => {
@@ -33,34 +58,34 @@ self.addEventListener("activate", (event) => {
   self.clients.claim();
 });
 
-// Fetch: network-first strategy for API calls, cache-first for static assets
+// Fetch: network-first for everything, cache only static assets
 self.addEventListener("fetch", (event) => {
   const { request } = event;
-  const url = new URL(request.url);
 
   // Skip non-GET requests
   if (request.method !== "GET") return;
 
-  // API calls: network first, fallback to cache
-  if (url.pathname.startsWith("/api/")) {
+  // Navigation requests (HTML pages): always network, never cache
+  if (request.mode === "navigate") {
     event.respondWith(
-      fetch(request)
-        .then((response) => {
-          const clone = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
-          return response;
-        })
-        .catch(() => caches.match(request))
+      fetch(request).catch(() => caches.match("/"))
     );
     return;
   }
 
-  // Static assets: cache first, fallback to network
+  const url = request.url;
+
+  // API and dynamic content: always network, no cache
+  if (!shouldCache(url)) {
+    return; // Let browser handle normally
+  }
+
+  // Static assets only: cache-first
   event.respondWith(
     caches.match(request).then((cached) => {
       if (cached) return cached;
       return fetch(request).then((response) => {
-        if (response.status === 200) {
+        if (response.status === 200 && shouldCache(url)) {
           const clone = response.clone();
           caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
         }
