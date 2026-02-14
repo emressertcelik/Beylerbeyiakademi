@@ -8,7 +8,6 @@ import MatchFormModal from "@/components/MatchFormModal";
 import { Search } from "lucide-react";
 import MatchDetailModal from "@/components/MatchDetailModal";
 import { useToast } from "@/components/Toast";
-import EnablePushButton from "@/components/EnablePushButton";
 import {
   Plus,
   Calendar,
@@ -166,9 +165,6 @@ export default function TeamsPage() {
 
   return (
     <div className="space-y-6">
-      {/* Web Push Enable Button */}
-      <EnablePushButton />
-      {/* ...puan durumu linki kaldırıldı... */}
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
         <h1 className="text-xl font-bold text-[#1a1a2e]">Takımlar</h1>
