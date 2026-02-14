@@ -571,7 +571,24 @@ export default function DashboardPage() {
                         <div className="flex items-center gap-1.5">
                           <Image src="/Logo_S.png" alt="Beylerbeyi" width={14} height={14} className="rounded shrink-0 md:w-[18px] md:h-[18px]" />
                           <span className="text-[11px] md:text-sm font-bold text-[#c4111d]">Beylerbeyi</span>
-                          <span className="text-[10px] md:text-xs font-bold text-[#8c919a]">vs</span>
+                          {m.status === "played" ? (
+                            <>
+                              <div className="flex items-center gap-0.5 mx-1">
+                                <span className={`w-6 h-6 md:w-7 md:h-7 rounded-md flex items-center justify-center text-[11px] md:text-[13px] font-bold text-white shadow-sm ${
+                                  m.scoreHome > m.scoreAway ? 'bg-emerald-600' : m.scoreHome === m.scoreAway ? 'bg-amber-500' : 'bg-[#c4111d]'
+                                }`}>
+                                  {m.scoreHome}
+                                </span>
+                                <span className={`w-6 h-6 md:w-7 md:h-7 rounded-md flex items-center justify-center text-[11px] md:text-[13px] font-bold text-white shadow-sm ${
+                                  m.scoreAway > m.scoreHome ? 'bg-emerald-600' : m.scoreAway === m.scoreHome ? 'bg-amber-500' : 'bg-[#c4111d]'
+                                }`}>
+                                  {m.scoreAway}
+                                </span>
+                              </div>
+                            </>
+                          ) : (
+                            <span className="text-[10px] md:text-xs font-bold text-[#8c919a]">vs</span>
+                          )}
                           <span className="text-[11px] md:text-sm font-semibold text-[#1a1a2e] truncate">{m.opponent}</span>
                         </div>
                       </div>
