@@ -445,34 +445,35 @@ export default function DashboardPage() {
 
       {/* ── Haftalık Maç Takvimi ── */}
       <div className="rounded-2xl bg-white border border-[#e2e5e9] overflow-hidden">
-        <div className="flex items-center justify-between px-6 py-4 md:px-8 md:py-5 border-b border-[#e2e5e9]">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-lg bg-[#c4111d] flex items-center justify-center">
-              <Calendar size={18} className="text-white" />
+        <div className="flex items-center justify-between px-4 py-3 md:px-6 md:py-4 border-b border-[#e2e5e9]">
+          <div className="flex items-center gap-2">
+            <div className="w-7 h-7 md:w-9 md:h-9 rounded-lg bg-[#c4111d] flex items-center justify-center">
+              <Calendar size={14} className="text-white md:hidden" />
+              <Calendar size={18} className="text-white hidden md:block" />
             </div>
             <div>
-              <h2 className="text-base font-bold text-[#1a1a2e]">Haftalık Maç Takvimi</h2>
-              <p className="text-xs text-[#8c919a]">Önümüzdeki 7 gün</p>
+              <h2 className="text-sm md:text-base font-bold text-[#1a1a2e]">Haftalık Maç Takvimi</h2>
+              <p className="text-[10px] md:text-xs text-[#8c919a]">Önümüzdeki 7 gün</p>
             </div>
           </div>
           {!loading && upcomingMatches.length > 0 && (
-            <span className="text-xs font-bold text-[#c4111d] bg-[#fef2f2] px-2.5 py-1 rounded-full">
+            <span className="text-[10px] md:text-xs font-bold text-[#c4111d] bg-[#fef2f2] px-2 py-0.5 md:px-2.5 md:py-1 rounded-full">
               {upcomingMatches.length} maç
             </span>
           )}
         </div>
 
-        <div className="p-5 md:p-6">
+        <div className="p-3 md:p-5">
           {loading ? (
             <div className="text-center text-sm text-[#8c919a] py-6">Yükleniyor...</div>
           ) : upcomingMatches.length === 0 ? (
-            <div className="text-center py-10">
-              <Calendar size={36} className="mx-auto mb-3 text-[#e2e5e9]" />
-              <p className="text-sm font-medium text-[#5a6170]">Planlanmış maç yok</p>
-              <p className="text-xs text-[#8c919a] mt-1">Önümüzdeki 7 gün içinde maç bulunmuyor.</p>
+            <div className="text-center py-8">
+              <Calendar size={28} className="mx-auto mb-2 text-[#e2e5e9]" />
+              <p className="text-xs font-medium text-[#5a6170]">Planlanmış maç yok</p>
+              <p className="text-[10px] text-[#8c919a] mt-1">Önümüzdeki 7 gün içinde maç bulunmuyor.</p>
             </div>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-2">
               {upcomingMatches.map((m) => {
                 const d = new Date(m.date);
                 const dayName = d.toLocaleDateString("tr-TR", { weekday: "long" });
@@ -485,69 +486,71 @@ export default function DashboardPage() {
                   <button
                     key={m.id}
                     onClick={() => setSelectedMatch(m)}
-                    className={`w-full flex items-stretch rounded-xl border transition-all duration-200 text-left group hover:shadow-md ${
+                    className={`w-full flex items-stretch rounded-lg md:rounded-xl border transition-all duration-200 text-left group hover:shadow-md ${
                       isToday
                         ? "border-[#c4111d]/30 bg-[#fef8f8] hover:border-[#c4111d]/50 hover:shadow-[#c4111d]/10"
                         : "border-[#e2e5e9] bg-white hover:border-[#c4111d]/25 hover:shadow-[#c4111d]/5"
                     }`}
                   >
                     {/* Tarih bloğu */}
-                    <div className={`w-20 shrink-0 flex flex-col items-center justify-center py-4 rounded-l-xl ${
+                    <div className={`w-14 md:w-20 shrink-0 flex flex-col items-center justify-center py-2.5 md:py-4 rounded-l-lg md:rounded-l-xl ${
                       isToday ? "bg-[#c4111d]" : "bg-[#f8f9fb]"
                     }`}>
-                      <span className={`text-[10px] font-semibold uppercase ${isToday ? "text-white/70" : "text-[#8c919a]"}`}>
+                      <span className={`text-[8px] md:text-[10px] font-semibold uppercase ${isToday ? "text-white/70" : "text-[#8c919a]"}`}>
                         {isToday ? "BUGÜN" : dayName.slice(0, 3)}
                       </span>
-                      <span className={`text-2xl font-black leading-none ${isToday ? "text-white" : "text-[#1a1a2e]"}`}>
+                      <span className={`text-lg md:text-2xl font-black leading-none ${isToday ? "text-white" : "text-[#1a1a2e]"}`}>
                         {dayNum}
                       </span>
-                      <span className={`text-[10px] font-medium ${isToday ? "text-white/60" : "text-[#8c919a]"}`}>
+                      <span className={`text-[8px] md:text-[10px] font-medium ${isToday ? "text-white/60" : "text-[#8c919a]"}`}>
                         {monthStr.slice(0, 3)}
                       </span>
                     </div>
 
                     {/* İçerik */}
-                    <div className="flex-1 p-4 flex flex-col sm:flex-row sm:items-center gap-3">
+                    <div className="flex-1 min-w-0 p-2.5 md:p-4 flex flex-col sm:flex-row sm:items-center gap-1.5 md:gap-3">
                       {/* Maç bilgisi */}
                       <div className="flex-1 min-w-0">
                         {/* Etiketler */}
-                        <div className="flex items-center gap-1.5 mb-1.5">
-                          <span className="text-[10px] font-bold text-white bg-[#1a1a2e] px-1.5 py-0.5 rounded">
+                        <div className="flex items-center gap-1 mb-1">
+                          <span className="text-[8px] md:text-[10px] font-bold text-white bg-[#1a1a2e] px-1 md:px-1.5 py-0.5 rounded">
                             {m.ageGroup}
                           </span>
-                          <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded ${
+                          <span className={`text-[8px] md:text-[10px] font-semibold px-1 md:px-1.5 py-0.5 rounded ${
                             isHome ? "bg-blue-50 text-blue-600" : "bg-amber-50 text-amber-600"
                           }`}>
-                            {isHome ? "EV" : "DEPLASMAN"}
+                            {isHome ? "EV" : "DEP"}
                           </span>
                           {m.status === "played" && (
-                            <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-600">
+                            <span className="text-[8px] md:text-[10px] font-semibold px-1 md:px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-600">
                               OYNANDI
                             </span>
                           )}
                         </div>
 
                         {/* Takımlar */}
-                        <div className="flex items-center gap-2">
-                          <Image src="/Logo_S.png" alt="Beylerbeyi" width={18} height={18} className="rounded shrink-0" />
-                          <span className="text-sm font-bold text-[#c4111d]">Beylerbeyi</span>
-                          <span className="text-xs font-bold text-[#8c919a]">vs</span>
-                          <span className="text-sm font-semibold text-[#1a1a2e] truncate">{m.opponent}</span>
+                        <div className="flex items-center gap-1.5">
+                          <Image src="/Logo_S.png" alt="Beylerbeyi" width={14} height={14} className="rounded shrink-0 md:w-[18px] md:h-[18px]" />
+                          <span className="text-[11px] md:text-sm font-bold text-[#c4111d]">Beylerbeyi</span>
+                          <span className="text-[10px] md:text-xs font-bold text-[#8c919a]">vs</span>
+                          <span className="text-[11px] md:text-sm font-semibold text-[#1a1a2e] truncate">{m.opponent}</span>
                         </div>
                       </div>
 
                       {/* Saat & Konum bilgisi */}
-                      <div className="flex sm:flex-col items-start sm:items-end gap-2 sm:gap-1 shrink-0">
+                      <div className="flex sm:flex-col items-center sm:items-end gap-1.5 sm:gap-1 shrink-0">
                         {m.matchTime && (
-                          <div className="flex items-center gap-1.5 bg-[#f8f9fb] border border-[#e2e5e9] rounded-lg px-2.5 py-1.5">
-                            <Clock size={12} className="text-[#c4111d]" />
-                            <span className="text-xs font-bold text-[#1a1a2e]">{m.matchTime}</span>
+                          <div className="flex items-center gap-1 bg-[#f8f9fb] border border-[#e2e5e9] rounded px-1.5 py-1 md:rounded-lg md:px-2.5 md:py-1.5">
+                            <Clock size={10} className="text-[#c4111d] md:hidden" />
+                            <Clock size={12} className="text-[#c4111d] hidden md:block" />
+                            <span className="text-[10px] md:text-xs font-bold text-[#1a1a2e]">{m.matchTime}</span>
                           </div>
                         )}
                         {m.venue && (
-                          <div className="flex items-center gap-1 text-[10px] text-[#8c919a]">
-                            <MapPin size={10} className="shrink-0" />
-                            <span className="truncate max-w-[140px]">{m.venue}</span>
+                          <div className="flex items-center gap-1 text-[8px] md:text-[10px] text-[#8c919a]">
+                            <MapPin size={8} className="shrink-0 md:hidden" />
+                            <MapPin size={10} className="shrink-0 hidden md:block" />
+                            <span className="truncate max-w-[100px] md:max-w-[140px]">{m.venue}</span>
                           </div>
                         )}
                       </div>
