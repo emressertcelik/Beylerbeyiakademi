@@ -10,71 +10,71 @@ interface PlayerCardProps {
   userRole?: { role: string };
 }
 
-const positionStyle: Record<string, { bg: string; text: string; dot: string }> = {
-  Kaleci: { bg: "bg-amber-50", text: "text-amber-700", dot: "bg-amber-400" },
-  Defans: { bg: "bg-blue-50", text: "text-blue-700", dot: "bg-blue-400" },
-  "Orta Saha": { bg: "bg-emerald-50", text: "text-emerald-700", dot: "bg-emerald-400" },
-  Forvet: { bg: "bg-red-50", text: "text-red-700", dot: "bg-red-400" },
+const positionColor: Record<string, { from: string; to: string }> = {
+  Kaleci: { from: "from-amber-500", to: "to-amber-600" },
+  Defans: { from: "from-[#7a8a9e]", to: "to-[#5a6a80]" },
+  "Orta Saha": { from: "from-[#a0a5b5]", to: "to-[#858a9a]" },
+  Forvet: { from: "from-[#c4111d]", to: "to-[#8b0d15]" },
+  "Kanat Forvet": { from: "from-[#c4111d]", to: "to-[#8b0d15]" },
 };
 
+const defaultColor = { from: "from-[#9a9fb0]", to: "to-[#7b8095]" };
+
 export default function PlayerCard({ player, onClick, userRole }: PlayerCardProps) {
-  const isGoalkeeper = player.position === "Kaleci";
-  const style = positionStyle[player.position] || { bg: "bg-slate-50", text: "text-slate-600", dot: "bg-slate-400" };
+  const color = positionColor[player.position] || defaultColor;
+  const initials = `${player.firstName.charAt(0)}${player.lastName.charAt(0)}`;
+  const birthYear = player.birthDate ? new Date(player.birthDate).getFullYear() : "";
 
   return (
     <button
       onClick={onClick ? () => onClick(player) : undefined}
-      className="bg-white border border-[#e2e5e9] rounded-xl p-3 sm:p-5 text-left hover:border-[#c4111d]/30 hover:shadow-lg hover:shadow-[#c4111d]/5 transition-all duration-200 w-full group"
+      className="bg-white border border-[#e2e5e9] rounded-xl overflow-hidden text-left hover:border-[#c4111d]/30 hover:shadow-lg hover:shadow-[#c4111d]/5 transition-all duration-200 w-full group"
     >
-      {/* Header */}
-      <div className="flex items-start justify-between mb-4">
-        <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-xl bg-[#f1f3f5] border border-[#e2e5e9] flex items-center justify-center text-lg font-black text-[#c4111d]">
-            {player.jerseyNumber}
-          </div>
-          <div className="min-w-0">
-            <h3 className="font-semibold text-[#1a1a2e] text-sm group-hover:text-[#c4111d] transition-colors truncate">
-              {player.firstName} {player.lastName}
-            </h3>
-            <p className="text-xs text-[#8c919a] mt-0.5">
-              {player.ageGroup} · {player.foot} Ayak · {player.seasons.join(", ")}
-            </p>
-          </div>
-        </div>
-        <span className={`inline-flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-1 rounded-lg ${style.bg} ${style.text}`}>
-          <span className={`w-1.5 h-1.5 rounded-full ${style.dot}`} />
-          {player.position}
+      {/* Renkli başlık alanı */}
+      <div className={`relative bg-gradient-to-br ${color.from} ${color.to} h-20 sm:h-24`}>
+        {/* Forma numarası */}
+        <span className="absolute top-2 right-3 text-2xl sm:text-3xl font-black text-white/25 italic leading-none">
+          #{player.jerseyNumber}
         </span>
+        {/* İsim baş harfleri */}
+        <div className="absolute bottom-3 left-3 w-10 h-10 sm:w-11 sm:h-11 rounded-lg bg-white/90 backdrop-blur flex items-center justify-center text-sm sm:text-base font-black text-[#1a1a2e] shadow-sm">
+          {initials}
+        </div>
       </div>
 
-      {/* Divider */}
-      <div className="h-px bg-[#e2e5e9] mb-3" />
+      {/* İsim & pozisyon */}
+      <div className="px-3 pt-3 pb-2 sm:px-4 sm:pt-4 sm:pb-3">
+        <h3 className="text-xs sm:text-sm font-bold text-[#1a1a2e] group-hover:text-[#c4111d] transition-colors truncate uppercase tracking-wide">
+          {player.firstName} {player.lastName}
+        </h3>
+        <p className="text-[10px] sm:text-xs text-[#8c919a] mt-0.5">
+          {player.position} | {birthYear}
+        </p>
+      </div>
 
-
-      {/* Minimal Stats: Maç, Gol, Asist, Yediği Gol */}
-      <div className="grid grid-cols-4 gap-2 mt-4">
-        <StatMini label="Maç" value={player.stats.matches} />
-        <StatMini label="Gol" value={player.stats.goals} color="text-emerald-500" />
-        <StatMini label="Asist" value={player.stats.assists} color="text-blue-500" />
-        <StatMini label="Yediği Gol" value={player.stats.goalsConceded} color="text-orange-500" />
+      {/* İstatistikler */}
+      <div className="grid grid-cols-3 gap-2 px-3 pb-3 sm:px-4 sm:pb-4">
+        <StatBox label="SÜRE" value={`${player.stats.minutesPlayed}'`} borderColor="border-[#c4111d]" />
+        <StatBox label="GOL" value={player.stats.goals} borderColor="border-emerald-500" />
+        <StatBox label="ASİST" value={player.stats.assists} borderColor="border-amber-400" />
       </div>
     </button>
   );
 }
 
-function StatMini({
+function StatBox({
   label,
   value,
-  color,
+  borderColor,
 }: {
   label: string;
   value: React.ReactNode;
-  color?: string;
+  borderColor: string;
 }) {
   return (
-    <div className="bg-[#f8f9fb] rounded-lg py-2 px-1 text-center">
-      <div className={`text-sm font-bold ${color || "text-[#1a1a2e]"}`}>{value}</div>
-      <div className="text-[9px] text-[#8c919a] font-medium uppercase tracking-wider mt-0.5">{label}</div>
+    <div className={`bg-[#f8f9fb] rounded-lg py-2 px-1 text-center border-b-2 ${borderColor}`}>
+      <div className="text-[8px] sm:text-[9px] text-[#8c919a] font-medium uppercase tracking-wider">{label}</div>
+      <div className="text-sm sm:text-base font-bold text-[#1a1a2e] mt-0.5">{value}</div>
     </div>
   );
 }

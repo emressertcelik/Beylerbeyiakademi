@@ -422,7 +422,7 @@ export default function DashboardPage() {
                       </div>
                       {/* Skor satırı */}
                       <div className="flex items-center justify-between">
-                        <span className="text-[11px] font-semibold text-[#1a1a2e] flex-1 truncate">BEYLERBEYİ</span>
+                        <span className="text-[11px] font-semibold text-[#1a1a2e] flex-1 truncate">Beylerbeyi</span>
                         <div className="flex items-center gap-1 mx-2">
                           <span className={`w-6 h-6 rounded flex items-center justify-center text-[11px] font-bold text-white ${m.scoreHome > m.scoreAway ? 'bg-[#c4111d]' : m.scoreHome === m.scoreAway ? 'bg-amber-500' : 'bg-[#1a1a2e]'}`}>
                             {m.scoreHome}
@@ -431,7 +431,7 @@ export default function DashboardPage() {
                             {m.scoreAway}
                           </span>
                         </div>
-                        <span className="text-[11px] font-semibold text-[#1a1a2e] flex-1 truncate text-right">{m.opponent.toUpperCase()}</span>
+                        <span className="text-[11px] font-semibold text-[#1a1a2e] flex-1 truncate text-right">{m.opponent}</span>
                       </div>
                     </button>
                   );
