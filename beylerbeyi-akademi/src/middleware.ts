@@ -3,6 +3,11 @@ import { NextResponse, type NextRequest } from "next/server";
 
 export async function middleware(request: NextRequest) {
   try {
+    // Public API routes - skip auth
+    if (request.nextUrl.pathname.startsWith("/api/puan-durumu")) {
+      return NextResponse.next();
+    }
+
     // Env değişkenleri yoksa middleware'i atla
     if (
       !process.env.NEXT_PUBLIC_SUPABASE_URL ||

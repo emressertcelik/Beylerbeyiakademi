@@ -36,64 +36,22 @@ export default function DashboardPage() {
       U19: { url: 'https://bakhaberinolsun.com/gelisim-ligleri-u-19/', group: 'U-19 GELİŞİM 3.GRUP' },
     };
 
-    // Fetch puan durumu table (mocked for now)
+    // Fetch puan durumu table from API
     const fetchPuanTable = async (age: string) => {
       setTableLoading(true);
-      // Yeni mockTables U14, U15, U16, U17 ve U19 ile başlıyor
-      const mockTables: Record<string, Array<Array<string | number>>> = {
-        U14: [
-          [1, "İNEGÖL KAFKASSPOR", 20, 17, 2, 1, 76, 18, 58, 53],
-          [2, "KESTEL ÇİLEKSPOR", 20, 15, 1, 4, 56, 24, 32, 46],
-          [3, "GEBZESPOR", 20, 13, 3, 4, 67, 27, 40, 42],
-          [4, "PANAYIRSPOR", 20, 13, 3, 4, 68, 34, 34, 42],
-          [5, "DEĞİRMENDERE", 20, 12, 2, 6, 55, 31, 24, 38],
-          [6, "KARACABEY BEL.SPOR", 20, 10, 3, 7, 57, 47, 10, 33],
-          [7, "BULVARSPOR", 20, 9, 2, 9, 51, 49, 2, 29],
-          [8, "BEYOĞLU YENİÇARŞI", 20, 7, 3, 10, 46, 50, -4, 24],
-          [9, "BEYLERBEYİ 1911 FK.", 20, 7, 3, 10, 39, 46, -7, 24],
-          [10, "GÖLCÜKSPOR", 20, 6, 5, 9, 30, 36, -6, 23],
-          [11, "İNKİLAPSPOR", 20, 7, 1, 12, 33, 57, -24, 22],
-          [12, "KAVACIKSPOR", 20, 6, 2, 12, 29, 51, -22, 20],
-          [13, "ZARA EKİNLİ", 20, 1, 2, 17, 15, 79, -64, 5],
-          [14, "SAKARYA TEKSPOR", 20, 1, 0, 19, 25, 97, -72, 3],
-        ],
-        U15: [
-          [1, "İNEGÖL KAFKASSPOR", 20, 16, 1, 3, 97, 19, 78, 49],
-          [2, "KESTEL ÇİLEKLİSPOR", 20, 15, 1, 4, 70, 21, 49, 46],
-          [3, "GEBZESPOR", 20, 13, 3, 4, 52, 18, 34, 42],
-          [4, "BEYLERBEYİ 1911 FK.", 20, 12, 2, 6, 60, 34, 26, 38],
-          [5, "BEYOĞLU YENİÇARŞI", 20, 10, 6, 4, 39, 30, 9, 35],
-          [6, "DEĞİRMENDERESPOR", 20, 10, 4, 6, 42, 29, 13, 34],
-          [7, "BULVARSPOR", 20, 9, 6, 5, 40, 29, 11, 33],
-          [8, "KARACABEY BEL.SPOR", 20, 9, 4, 7, 41, 39, 2, 31],
-          [9, "GÖLCÜKSPOR", 20, 7, 2, 11, 35, 46, -11, 23],
-          [10, "ZARA EKİNLİ", 20, 7, 2, 11, 44, 60, -16, 23],
-          [11, "PANAYIRSPOR", 20, 6, 2, 12, 32, 43, -11, 20],
-          [12, "KAVACIKSPOR", 20, 4, 1, 15, 20, 55, -45, 13],
-          [13, "İNKİLAPSPOR", 20, 3, 3, 14, 21, 64, -43, 12],
-          [14, "SAKARYA TEKSPOR", 20, 0, 1, 19, 15, 111, -96, 1],
-        ],
-        U16: [
-          [1, "ARNAVUTKÖY BEL.SPOR", 18, 15, 1, 2, 59, 17, 42, 46],
-          [2, "AYAZAĞASPOR", 18, 13, 1, 4, 53, 24, 29, 40],
-          [3, "FERİKÖYSPOR", 18, 13, 1, 4, 42, 17, 25, 40],
-          [4, "BEYLERBEYİ 1911 FK", 18, 12, 2, 4, 52, 23, 29, 38],
-          [5, "K.ÇEKMECE SİNOP", 18, 11, 1, 6, 37, 22, 15, 34],
-          [6, "TUNÇSPOR", 18, 11, 0, 7, 50, 35, 15, 33],
-          [7, "GÜNGÖREN BEL.", 18, 9, 3, 6, 35, 25, 10, 30],
-          [8, "İNKİLAPSPOR", 18, 8, 4, 6, 39, 31, 8, 28],
-          [9, "K.ÇEKMECESPOR", 18, 7, 2, 9, 33, 28, 5, 23],
-          [10, "İST.BEYLİKDÜZÜ", 18, 7, 1, 10, 29, 39, -10, 22],
-          [11, "BAŞAKŞEHİRSPOR", 18, 4, 1, 13, 24, 49, -25, 13],
-          [12, "ZARA EKİNLİ", 18, 3, 1, 14, 15, 66, -51, 10],
-          [13, "İST.GENÇLERBİRLİGİ", 18, 3, 0, 15, 20, 41, -21, 9],
-          [14, "KAVACIKSPOR", 18, 1, 0, 17, 10, 69, -56, 3],
-        ],
-      };
-      setTimeout(() => {
-        setPuanTable(mockTables[age] || []);
+      try {
+        const res = await fetch(`/api/puan-durumu?age=${age}`);
+        const json = await res.json();
+        if (res.ok && json.data) {
+          setPuanTable(json.data);
+        } else {
+          setPuanTable([]);
+        }
+      } catch {
+        setPuanTable([]);
+      } finally {
         setTableLoading(false);
-      }, 500);
+      }
     };
 
     // Fetch on mount and when age changes
