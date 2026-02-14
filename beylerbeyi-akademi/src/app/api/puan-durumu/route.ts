@@ -9,9 +9,119 @@ const AGE_GROUP_CONFIG: Record<string, { url: string; group: string }> = {
   U19: { url: "https://bakhaberinolsun.com/gelisim-ligleri-u-19/", group: "U-19 GELİŞİM 3.GRUP" },
 };
 
-// Simple in-memory cache: { [age]: { data, fetchedAt } }
-const cache: Record<string, { data: Array<Array<string | number>>; fetchedAt: number }> = {};
+// Simple in-memory cache: { [age]: { data, matches, week, fetchedAt } }
+const cache: Record<string, { data: Array<Array<string | number>>; matches: MatchResult[]; week: number; fetchedAt: number }> = {};
 const CACHE_TTL = 10 * 60 * 1000; // 10 minutes
+
+interface MatchResult {
+  date: string;       // e.g. "15.02.2026"
+  venue: string;      // e.g. "GÖLCÜK"
+  time: string;       // e.g. "13.00"
+  homeTeam: string;   // e.g. "GÖLCÜKSPOR"
+  awayTeam: string;   // e.g. "BULVARSPOR"
+  score: string;      // e.g. "2 – 1" or "" (not played yet)
+  week: number;       // e.g. 21
+}
+
+/** Decode common HTML entities */
+function decodeEntities(text: string): string {
+  return text
+    .replace(/&#8211;/g, "–")
+    .replace(/&#8212;/g, "—")
+    .replace(/&#8217;/g, "'")
+    .replace(/&#8220;/g, '"')
+    .replace(/&#8221;/g, '"')
+    .replace(/&amp;/gi, "&")
+    .replace(/&lt;/gi, "<")
+    .replace(/&gt;/gi, ">")
+    .replace(/&quot;/gi, '"')
+    .replace(/&#(\d+);/g, (_, code) => String.fromCharCode(parseInt(code)));
+}
+
+/**
+ * Parses the match schedule ("HAFTA PROĞRAMI") table for the specified group.
+ * Returns all matches with date, venue, time, teams and score.
+ */
+function parseMatchSchedule(html: string, targetGroup: string): { week: number; matches: MatchResult[] } {
+  const matches: MatchResult[] = [];
+  let week = 0;
+
+  // Find the target group section
+  const normalizedTarget = targetGroup.replace(/\s+/g, "\\s*").replace(/\./g, "\\.?");
+  const groupRegex = new RegExp(normalizedTarget, "i");
+  const groupMatch = groupRegex.exec(html);
+  if (!groupMatch) return { week, matches };
+
+  // Get content between this group and the next group or "PUAN DURUMU"
+  const afterGroup = html.substring(groupMatch.index);
+  
+  // Find "PUAN DURUMU" to limit our search area (schedule is before it)
+  const puanMatch = /PUAN\s+DURUMU/i.exec(afterGroup);
+  const scheduleArea = puanMatch ? afterGroup.substring(0, puanMatch.index) : afterGroup.substring(0, 5000);
+
+  // Extract week number from "XX.HAFTA PROĞRAMI" or "XX.HAFTA"
+  const weekMatch = /(\d+)\s*\.\s*HAFTA/i.exec(scheduleArea);
+  if (weekMatch) {
+    week = parseInt(weekMatch[1]);
+  }
+
+  // Find the schedule table (TARİH | SAHA | SAAT | EV SAHİBİ | MİSAFİR | SKOR)
+  const tableMatch = /<table[^>]*>([\s\S]*?)<\/table>/i.exec(scheduleArea);
+  if (!tableMatch) return { week, matches };
+
+  const tableHtml = tableMatch[1];
+  const tbodyMatch = /<tbody[^>]*>([\s\S]*?)<\/tbody>/i.exec(tableHtml);
+  const rowsHtml = tbodyMatch ? tbodyMatch[1] : tableHtml;
+
+  // Parse each <tr>
+  const trRegex = /<tr[^>]*>([\s\S]*?)<\/tr>/gi;
+  let trMatch;
+
+  while ((trMatch = trRegex.exec(rowsHtml)) !== null) {
+    const trContent = trMatch[1];
+
+    // Skip header rows
+    if (/<th/i.test(trContent)) continue;
+
+    const cells: string[] = [];
+    const tdRegex = /<td[^>]*>([\s\S]*?)<\/td>/gi;
+    let tdMatch;
+    while ((tdMatch = tdRegex.exec(trContent)) !== null) {
+      const cellText = decodeEntities(tdMatch[1].replace(/<[^>]*>/g, "").replace(/&nbsp;/gi, " ").trim());
+      cells.push(cellText);
+    }
+
+    // Expected: TARİH, SAHA, SAAT, EV SAHİBİ, MİSAFİR, SKOR (6 columns)
+    if (cells.length >= 5) {
+      const date = cells[0].trim();
+      const venue = cells[1].trim();
+      const time = cells[2].trim();
+      const homeTeam = cells[3].trim();
+      const awayTeam = cells[4].trim();
+      // Score: decode entities and clean up
+      const rawScore = (cells[5] || "").replace(/\s+/g, " ").trim();
+      // Normalize score: "4. – 1" → "4 – 1", remove trailing period from numbers
+      const score = rawScore.replace(/(\d)\.\s*([–-])/g, "$1 $2").trim();
+
+      // Skip rows that look like headers (TARİH in first cell)
+      if (date.toUpperCase() === "TARİH") continue;
+      // Skip rows with no team names
+      if (!homeTeam && !awayTeam) continue;
+
+      matches.push({
+        date,
+        venue,
+        time,
+        homeTeam,
+        awayTeam,
+        score,
+        week,
+      });
+    }
+  }
+
+  return { week, matches };
+}
 
 /**
  * Parses the HTML of bakhaberinolsun.com pages to extract the standings table
@@ -69,8 +179,8 @@ function parseStandings(html: string, targetGroup: string): Array<Array<string |
     const tdRegex = /<td[^>]*>([\s\S]*?)<\/td>/gi;
     let tdMatch;
     while ((tdMatch = tdRegex.exec(trContent)) !== null) {
-      // Strip HTML tags and trim
-      const cellText = tdMatch[1].replace(/<[^>]*>/g, "").trim();
+      // Strip HTML tags, decode entities and trim
+      const cellText = decodeEntities(tdMatch[1].replace(/<[^>]*>/g, "").trim());
       cells.push(cellText);
     }
     
@@ -113,7 +223,7 @@ export async function GET(request: NextRequest) {
   // Check cache
   const cached = cache[age];
   if (cached && Date.now() - cached.fetchedAt < CACHE_TTL) {
-    return NextResponse.json({ age, group: config.group, data: cached.data, cached: true });
+    return NextResponse.json({ age, group: config.group, data: cached.data, matches: cached.matches, week: cached.week, cached: true });
   }
   
   try {
@@ -138,6 +248,7 @@ export async function GET(request: NextRequest) {
     const decoder = new TextDecoder(charset);
     const html = decoder.decode(buffer);
     const data = parseStandings(html, config.group);
+    const { week, matches: matchResults } = parseMatchSchedule(html, config.group);
     
     if (data.length === 0) {
       return NextResponse.json(
@@ -147,16 +258,16 @@ export async function GET(request: NextRequest) {
     }
     
     // Update cache
-    cache[age] = { data, fetchedAt: Date.now() };
+    cache[age] = { data, matches: matchResults, week, fetchedAt: Date.now() };
     
-    return NextResponse.json({ age, group: config.group, data, cached: false });
+    return NextResponse.json({ age, group: config.group, data, matches: matchResults, week, cached: false });
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : "Bilinmeyen hata";
     console.error(`[puan-durumu] ${age} fetch error:`, message);
     
     // Return cached data if available even if stale
     if (cached) {
-      return NextResponse.json({ age, group: config.group, data: cached.data, cached: true, stale: true });
+      return NextResponse.json({ age, group: config.group, data: cached.data, matches: cached.matches, week: cached.week, cached: true, stale: true });
     }
     
     return NextResponse.json(

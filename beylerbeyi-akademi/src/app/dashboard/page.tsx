@@ -26,6 +26,20 @@ export default function DashboardPage() {
     const [puanTable, setPuanTable] = useState<Array<Array<string | number>>>([]);
     const [tableLoading, setTableLoading] = useState(false);
     const [showFullTable, setShowFullTable] = useState(false);
+    const [showFullMatches, setShowFullMatches] = useState(false);
+
+    // Scraped match schedule
+    interface ScrapedMatch {
+      date: string;
+      venue: string;
+      time: string;
+      homeTeam: string;
+      awayTeam: string;
+      score: string;
+      week: number;
+    }
+    const [scrapedMatches, setScrapedMatches] = useState<ScrapedMatch[]>([]);
+    const [matchWeek, setMatchWeek] = useState(0);
 
     // Age group link and group info
     const ageGroupInfo: Record<string, { url: string; group: string }> = {
@@ -44,11 +58,15 @@ export default function DashboardPage() {
         const json = await res.json();
         if (res.ok && json.data) {
           setPuanTable(json.data);
+          setScrapedMatches(json.matches || []);
+          setMatchWeek(json.week || 0);
         } else {
           setPuanTable([]);
+          setScrapedMatches([]);
         }
       } catch {
         setPuanTable([]);
+        setScrapedMatches([]);
       } finally {
         setTableLoading(false);
       }
@@ -280,9 +298,8 @@ export default function DashboardPage() {
           {/* ── Puan Durumu Kartı ── */}
           <div className="rounded-xl overflow-hidden border border-[#e8eaed]">
             {/* Başlık */}
-            <div className="px-4 py-2.5 flex items-center justify-between bg-[#1a1a2e]">
+            <div className="px-4 py-2.5 bg-[#1a1a2e]">
               <h3 className="text-[11px] font-semibold text-white/90 uppercase tracking-wider">{selectedAge} Puan Durumu</h3>
-              <span className="text-[9px] font-semibold text-white bg-[#c4111d] px-2 py-0.5 rounded-full">CANLI</span>
             </div>
             {/* Yaş grubu seçici */}
             <div className="px-3 py-1.5 flex gap-1 justify-center border-b border-[#e8eaed] bg-[#f8f9fb]">
@@ -290,7 +307,7 @@ export default function DashboardPage() {
                 <button
                   key={age}
                   className={`px-2 py-0.5 rounded text-[10px] font-medium transition ${selectedAge === age ? 'bg-[#1a1a2e] text-white' : 'text-[#5a6170] hover:bg-[#e2e5e9]'}`}
-                  onClick={() => { setSelectedAge(age); setShowFullTable(false); }}
+                  onClick={() => { setSelectedAge(age); setShowFullTable(false); setShowFullMatches(false); }}
                 >
                   {age}
                 </button>
@@ -347,56 +364,117 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* ── Son Maçlar Kartı ── */}
+          {/* ── Son Hafta Sonuçları Kartı (Siteden) ── */}
           <div className="rounded-xl overflow-hidden border border-[#e8eaed]">
             {/* Başlık */}
-            <div className="px-4 py-2.5 bg-[#1a1a2e]">
-              <h3 className="text-[11px] font-semibold text-white/90 uppercase tracking-wider">Son Maçlar</h3>
+            <div className="px-4 py-2.5 bg-[#1a1a2e] flex items-center justify-between">
+              <h3 className="text-[11px] font-semibold text-white/90 uppercase tracking-wider">Son Hafta Sonuçları</h3>
+              {matchWeek > 0 && (
+                <span className="text-[9px] font-bold text-white bg-[#c4111d] px-2 py-0.5 rounded-full">{matchWeek}. HAFTA</span>
+              )}
+            </div>
+            {/* Yaş grubu seçici (Puan Durumu ile aynı) */}
+            <div className="px-3 py-1.5 flex gap-1 justify-center border-b border-[#e8eaed] bg-[#f8f9fb]">
+              {['U14', 'U15', 'U16', 'U17', 'U19'].map((age) => (
+                <button
+                  key={age}
+                  className={`px-2 py-0.5 rounded text-[10px] font-medium transition ${selectedAge === age ? 'bg-[#1a1a2e] text-white' : 'text-[#5a6170] hover:bg-[#e2e5e9]'}`}
+                  onClick={() => { setSelectedAge(age); setShowFullTable(false); setShowFullMatches(false); }}
+                >
+                  {age}
+                </button>
+              ))}
             </div>
             {/* Maç listesi */}
-            <div className="bg-white divide-y divide-[#f0f1f3]">
-              {loading ? (
+            <div className="bg-white">
+              {tableLoading ? (
                 <div className="py-6 text-center text-[#8c919a] text-[10px]">Yükleniyor...</div>
-              ) : recentResults.length === 0 ? (
-                <div className="py-6 text-center text-[#8c919a] text-[10px]">Henüz maç oynanmadı.</div>
+              ) : scrapedMatches.length === 0 ? (
+                <div className="py-6 text-center text-[#8c919a] text-[10px]">Maç sonucu bulunamadı.</div>
               ) : (
-                recentResults.slice(0, 5).map((m) => {
-                  const matchDate = new Date(m.date);
-                  const dayMonth = matchDate.toLocaleDateString("tr-TR", { day: "numeric", month: "long" }).toUpperCase();
-                  const weekNum = m.week ? `${m.week}. HAFTA` : "";
-                  return (
+                <>
+                  {(showFullMatches ? scrapedMatches : scrapedMatches.slice(0, 3)).map((m, idx) => {
+                    const isBeylerbeyi = (team: string) => team.toUpperCase().includes("BEYLERBEYİ") || team.toUpperCase().includes("BEYLERBEYI");
+                    const isBBHome = isBeylerbeyi(m.homeTeam);
+                    const isBBAway = isBeylerbeyi(m.awayTeam);
+                    const isBBMatch = isBBHome || isBBAway;
+                    const hasScore = m.score && m.score !== "" && m.score !== "xxx";
+
+                    // Parse score like "2 – 1" or "3 - 0"
+                    let homeScore = "";
+                    let awayScore = "";
+                    if (hasScore) {
+                      const scoreParts = m.score.split(/\s*[–\u2013-]\s*/);
+                      if (scoreParts.length >= 2) {
+                        homeScore = scoreParts[0].trim();
+                        awayScore = scoreParts[1].replace(/\s*H\.?\s*/i, "").trim();
+                      }
+                    }
+
+                    return (
+                      <div
+                        key={idx}
+                        className={`px-3 py-3 border-b border-[#f0f1f3] last:border-b-0 ${isBBMatch ? 'bg-[#fef8f8]' : idx % 2 === 0 ? 'bg-white' : 'bg-[#fafbfc]'}`}
+                      >
+                        {/* Tarih, saat ve saha */}
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="flex items-center gap-1">
+                            {m.date && <span className="text-[9px] font-semibold text-[#5a6170]">{m.date}</span>}
+                            {m.time && (
+                              <>
+                                <span className="text-[9px] text-[#b0b5be]">•</span>
+                                <span className="text-[9px] font-medium text-[#5a6170]">{m.time}</span>
+                              </>
+                            )}
+                          </div>
+                          {m.venue && (
+                            <div className="flex items-center gap-0.5">
+                              <MapPin size={8} className="text-[#b0b5be]" />
+                              <span className="text-[9px] font-medium text-[#8c919a] uppercase truncate max-w-[120px]">{m.venue}</span>
+                            </div>
+                          )}
+                        </div>
+                        {/* Takımlar ve skor */}
+                        <div className="flex items-center">
+                          {/* Ev sahibi */}
+                          <div className="flex items-center gap-1.5 flex-1 min-w-0">
+                            {isBBHome && <Image src="/Logo_S.png" alt="BB" width={16} height={16} className="rounded-sm shrink-0" />}
+                            <span className={`text-[11px] truncate ${isBBHome ? 'font-bold text-[#c4111d]' : 'font-semibold text-[#1a1a2e]'}`}>{m.homeTeam}</span>
+                          </div>
+                          {/* Skor */}
+                          <div className="flex items-center gap-1 mx-3 shrink-0">
+                            {hasScore ? (
+                              <>
+                                <span className="w-7 h-7 rounded-md flex items-center justify-center text-[12px] font-bold text-white bg-[#1a1a2e] shadow-sm">
+                                  {homeScore}
+                                </span>
+                                <span className="w-7 h-7 rounded-md flex items-center justify-center text-[12px] font-bold text-white bg-[#1a1a2e] shadow-sm">
+                                  {awayScore}
+                                </span>
+                              </>
+                            ) : (
+                              <span className="text-[10px] font-semibold text-[#b0b5be] px-2">vs</span>
+                            )}
+                          </div>
+                          {/* Misafir */}
+                          <div className="flex items-center gap-1.5 flex-1 min-w-0 justify-end">
+                            <span className={`text-[11px] truncate text-right ${isBBAway ? 'font-bold text-[#c4111d]' : 'font-semibold text-[#1a1a2e]'}`}>{m.awayTeam}</span>
+                            {isBBAway && <Image src="/Logo_S.png" alt="BB" width={16} height={16} className="rounded-sm shrink-0" />}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                  {/* Tümünü göster / daralt */}
+                  {scrapedMatches.length > 3 && (
                     <button
-                      key={m.id}
-                      onClick={() => setSelectedMatch(m)}
-                      className="w-full px-4 py-3 hover:bg-[#f8f9fb] transition-colors text-left"
+                      onClick={() => setShowFullMatches(!showFullMatches)}
+                      className="w-full py-2 text-[10px] font-semibold text-[#c4111d] hover:bg-[#fef2f2] transition-colors border-t border-[#f0f1f3]"
                     >
-                      {/* Hafta, yaş grubu ve tarih */}
-                      <div className="flex items-center justify-between mb-2">
-                        <div className="flex items-center gap-1.5">
-                          <span className="text-[9px] font-medium text-[#8c919a] tracking-wider uppercase">{weekNum}</span>
-                          <span className="text-[9px] font-semibold text-white bg-[#1a1a2e] px-1.5 py-0.5 rounded">{m.ageGroup}</span>
-                        </div>
-                        <span className="text-[9px] font-medium text-[#8c919a] tracking-wider uppercase">{dayMonth}</span>
-                      </div>
-                      {/* Skor satırı */}
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-1.5 flex-1 min-w-0">
-                          <Image src="/Logo_S.png" alt="Beylerbeyi" width={16} height={16} className="rounded shrink-0" />
-                          <span className="text-[11px] font-bold text-[#c4111d] truncate">Beylerbeyi</span>
-                        </div>
-                        <div className="flex items-center gap-1 mx-2">
-                          <span className={`w-6 h-6 rounded flex items-center justify-center text-[11px] font-bold text-white ${m.scoreHome > m.scoreAway ? 'bg-[#c4111d]' : m.scoreHome === m.scoreAway ? 'bg-amber-500' : 'bg-[#1a1a2e]'}`}>
-                            {m.scoreHome}
-                          </span>
-                          <span className={`w-6 h-6 rounded flex items-center justify-center text-[11px] font-bold text-white ${m.scoreAway > m.scoreHome ? 'bg-[#c4111d]' : m.scoreAway === m.scoreHome ? 'bg-amber-500' : 'bg-[#1a1a2e]'}`}>
-                            {m.scoreAway}
-                          </span>
-                        </div>
-                        <span className="text-[11px] font-semibold text-[#1a1a2e] flex-1 truncate text-right">{m.opponent}</span>
-                      </div>
+                      {showFullMatches ? '▲ Daralt' : `▼ Tümünü Göster (${scrapedMatches.length} maç)`}
                     </button>
-                  );
-                })
+                  )}
+                </>
               )}
             </div>
           </div>
