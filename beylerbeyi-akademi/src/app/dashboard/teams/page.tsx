@@ -295,56 +295,78 @@ export default function TeamsPage() {
           <p className="text-xs text-[#8c919a] mt-1">Bu filtre için henüz maç eklenmemiş</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mt-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 mt-4">
           {filteredMatches.map((match) => {
             const isPlayed = match.status === "played";
-            const rc = isPlayed ? resultColors[match.result] : { bg: "bg-blue-50", text: "text-blue-600", border: "border-blue-200" };
+            const rc = isPlayed ? resultColors[match.result] : null;
+            const resultLetter = isPlayed ? resultLabels[match.result] : null;
+            const matchDate = new Date(match.date);
+            const dayMonth = matchDate.toLocaleDateString("tr-TR", { day: "numeric", month: "short" });
+            const year = matchDate.getFullYear();
+
             return (
               <button
                 key={match.id}
                 onClick={() => setSelectedMatch(match)}
-                className="bg-white border border-[#e2e5e9] rounded-2xl p-0 flex flex-col shadow-sm hover:border-[#c4111d]/30 hover:shadow-md transition-all duration-200 group min-w-[260px] overflow-hidden"
+                className="bg-white border border-[#e2e5e9] rounded-xl overflow-hidden text-left hover:border-[#c4111d]/30 hover:shadow-lg hover:shadow-[#c4111d]/5 transition-all duration-200 group w-full"
               >
-                <div className="flex items-center gap-0 p-0">
-                  {/* Sonuç/Statü Badge */}
-                  <div className={`w-12 h-12 rounded-br-2xl flex items-center justify-center text-lg font-black ${rc.bg} ${rc.text} border-b ${rc.border} shrink-0`}>
-                    {isPlayed ? resultLabels[match.result] : "📅"}
-                  </div>
-                  <div className="flex-1 min-w-0 flex items-center gap-2 px-3 py-2">
-                    <div className="w-8 h-8 relative flex items-center justify-center">
-                      <img src="/Logo_S.png" alt="Beylerbeyi" className="w-8 h-8 object-contain" />
-                    </div>
-                    {isPlayed ? (
-                      <span className="text-lg font-black text-[#c4111d]">{match.scoreHome} - {match.scoreAway}</span>
-                    ) : (
-                      <span className="ml-2 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-100 text-amber-700">Planlandı</span>
+                {/* Üst bar: tarih & yaş grubu & sonuç */}
+                <div className="flex items-center justify-between px-3 py-2 bg-[#f8f9fb] border-b border-[#e2e5e9]">
+                  <div className="flex items-center gap-1.5">
+                    {match.week && (
+                      <span className="text-[9px] font-bold text-[#c4111d] bg-[#fef2f2] px-1.5 py-0.5 rounded">{match.week}. Hafta</span>
                     )}
-                    <span className="text-base font-bold text-[#1a1a2e] truncate">{match.opponent}</span>
+                    <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded ${ageGroupColors[match.ageGroup] || ageGroupColors.default}`}>{match.ageGroup}</span>
+                  </div>
+                  <span className="text-[9px] font-medium text-[#8c919a]">{dayMonth} {year}</span>
+                </div>
+
+                {/* Maç bilgisi: takımlar ve skor */}
+                <div className="px-3 py-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2 flex-1 min-w-0">
+                      <img src="/Logo_S.png" alt="Beylerbeyi" className="w-6 h-6 object-contain shrink-0" />
+                      <span className="text-[11px] font-bold text-[#1a1a2e] truncate">Beylerbeyi</span>
+                    </div>
+
+                    {isPlayed ? (
+                      <div className="flex items-center gap-1 mx-2 shrink-0">
+                        <span className={`w-7 h-7 rounded flex items-center justify-center text-sm font-black text-white ${match.scoreHome > match.scoreAway ? 'bg-[#c4111d]' : match.scoreHome === match.scoreAway ? 'bg-amber-500' : 'bg-[#1a1a2e]'}`}>
+                          {match.scoreHome}
+                        </span>
+                        <span className={`w-7 h-7 rounded flex items-center justify-center text-sm font-black text-white ${match.scoreAway > match.scoreHome ? 'bg-[#c4111d]' : match.scoreAway === match.scoreHome ? 'bg-amber-500' : 'bg-[#1a1a2e]'}`}>
+                          {match.scoreAway}
+                        </span>
+                      </div>
+                    ) : (
+                      <div className="mx-2 shrink-0">
+                        <span className="text-[10px] font-semibold text-amber-600 bg-amber-50 px-2 py-1 rounded">VS</span>
+                      </div>
+                    )}
+
+                    <div className="flex items-center justify-end gap-2 flex-1 min-w-0">
+                      <span className="text-[11px] font-bold text-[#1a1a2e] truncate text-right">{match.opponent}</span>
+                    </div>
                   </div>
                 </div>
-                <div className="flex flex-wrap items-center gap-1 text-[11px] sm:text-[12px] text-[#8c919a] px-2 sm:px-4 pb-2 sm:pb-3 pt-1">
-                  {match.week && (
-                    <>
-                      <span className="font-bold text-[#c4111d]">Hafta {match.week}</span>
-                      <span>·</span>
-                    </>
+
+                {/* Alt bilgi satırı */}
+                <div className="flex items-center justify-between px-3 py-1.5 border-t border-[#f0f1f3] bg-[#fafbfc]">
+                  <div className="flex items-center gap-1.5">
+                    <span className={`text-[9px] font-semibold px-1.5 py-0.5 rounded ${match.homeAway === 'home' ? 'bg-blue-50 text-blue-600' : 'bg-amber-50 text-amber-600'}`}>
+                      {match.homeAway === "home" ? "EV" : "DEP"}
+                    </span>
+                    {match.venue && (
+                      <span className="text-[9px] text-[#8c919a] truncate max-w-[100px]">{match.venue}</span>
+                    )}
+                  </div>
+                  {isPlayed && rc && (
+                    <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded ${rc.bg} ${rc.text}`}>
+                      {resultLetter === "G" ? "GALİBİYET" : resultLetter === "B" ? "BERABERLİK" : "MAĞLUBİYET"}
+                    </span>
                   )}
-                  <span className="text-[11px] sm:text-[12px] font-medium">{new Date(match.date).toLocaleDateString("tr-TR", { day: "numeric", month: "short", year: "numeric" })}</span>
-                  <span>·</span>
-                  <span className={`px-1.5 py-0 rounded font-bold text-[10px] sm:text-[11px] ${ageGroupColors[match.ageGroup] || ageGroupColors.default}`}>{match.ageGroup}</span>
-                  <span>·</span>
-                  <span>{match.homeAway === "home" ? "Ev" : "Deplasman"}</span>
-                  {match.venue && (
-                    <>
-                      <span>·</span>
-                      <span className="truncate">{match.venue}</span>
-                    </>
-                  )}
-                  {isPlayed && (
-                    <>
-                      <span>·</span>
-                      <span className="font-medium text-[#c4111d]">{match.playerStats.length} oyuncu</span>
-                    </>
+                  {!isPlayed && match.matchTime && (
+                    <span className="text-[9px] font-semibold text-[#1a1a2e] bg-[#f1f3f5] px-1.5 py-0.5 rounded">{match.matchTime}</span>
                   )}
                 </div>
               </button>
@@ -389,12 +411,14 @@ function StatCard({
   color?: string;
 }) {
   return (
-    <div className="bg-white border border-[#e2e5e9] rounded-xl p-4">
-      <div className="flex items-center gap-1.5 text-[#8c919a] mb-2">
+    <div className="bg-white border border-[#e2e5e9] rounded-xl px-3 py-3 flex items-center gap-3">
+      <div className="w-8 h-8 rounded-lg bg-[#f8f9fb] flex items-center justify-center text-[#8c919a] shrink-0">
         {icon}
-        <span className="text-[10px] font-semibold uppercase tracking-wider">{label}</span>
       </div>
-      <p className={`text-xl font-black ${color || "text-[#1a1a2e]"}`}>{value}</p>
+      <div>
+        <p className="text-[9px] text-[#8c919a] font-medium uppercase tracking-wider">{label}</p>
+        <p className={`text-base font-bold ${color || "text-[#1a1a2e]"}`}>{value}</p>
+      </div>
     </div>
   );
 }
