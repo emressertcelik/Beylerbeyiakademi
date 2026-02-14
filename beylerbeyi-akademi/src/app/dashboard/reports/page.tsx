@@ -58,10 +58,7 @@ export default function ReportsPage() {
     );
   }
 
-  // DEBUG: matches içeriğini konsola yaz
-  if (typeof window !== "undefined") {
-    console.log("DEBUG matches:", matches);
-  }
+
   const AGE_GROUPS = lookups.ageGroups.filter((a) => a.isActive).map((a) => a.value);
   const SEASONS = lookups.seasons.filter((s) => s.isActive).map((s) => s.value);
 
@@ -89,10 +86,7 @@ export default function ReportsPage() {
     // Oyuncu istatistiklerini tüm maçlardan global olarak biriktir
     const playerStatsById: Record<string, { starts: number; sub: number; sakat: number; cezali: number; kadroYok: number; sureAlmadi: number; matches: number; psList: any[] }> = {};
     for (const match of playedMatches) {
-      // DEBUG: Her maçın playerStats'ını konsola yaz
-      if (typeof window !== "undefined") {
-        console.log("DEBUG match", match.id, "playerStats:", match.playerStats);
-      }
+
       for (const ps of match.playerStats) {
         const statusRaw = ps.participationStatus;
         const status = (statusRaw || "").trim().toLowerCase();
@@ -123,16 +117,10 @@ export default function ReportsPage() {
         playerStatsById[ps.playerId].psList.push(ps);
       }
     }
-    // DEBUG: playerStatsById içeriğini konsola yaz
-    if (typeof window !== "undefined") {
-      console.log("DEBUG playerStatsById:", playerStatsById);
-    }
+
     for (const playerId in playerStatsById) {
       const { starts, sub, sakat, cezali, kadroYok, sureAlmadi, matches: matchCount, psList } = playerStatsById[playerId];
-      // DEBUG: Hesaplanan istatistikleri konsola yaz
-      if (typeof window !== "undefined") {
-        console.log("DEBUG istatistik:", playerId, "starts:", starts, "sub:", sub, "sakat:", sakat, "cezali:", cezali, "kadroYok:", kadroYok, "sureAlmadi:", sureAlmadi);
-      }
+
       // Diğer istatistikleri de topla
       let minutesPlayed = 0, goals = 0, assists = 0, yellowCards = 0, redCards = 0, goalsConceded = 0, cleanSheets = 0, avgRating = 0, ratingCount = 0;
       for (const ps of psList) {
@@ -266,25 +254,23 @@ export default function ReportsPage() {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-xl sm:text-2xl font-bold text-[#1a1a2e] flex items-center gap-2">
-            <BarChart3 size={24} className="text-[#c4111d]" />
-            Oyuncu Raporları
-          </h1>
-          <p className="text-sm text-[#5a6170] mt-1">
-            Maç bazlı istatistik ve performans analizi
-          </p>
-        </div>
-      </div>
-
-      {/* Filters */}
+    <div className="space-y-5">
+      {/* Header + Filters */}
       <div className="bg-white rounded-xl border border-[#e2e5e9] p-4 shadow-sm">
-        <div className="flex items-center gap-2 mb-3">
-          <Filter size={14} className="text-[#8c919a]" />
-          <span className="text-xs font-semibold text-[#8c919a] uppercase tracking-wider">Filtreler</span>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-xl bg-[#c4111d]/10 flex items-center justify-center">
+              <BarChart3 size={18} className="text-[#c4111d]" />
+            </div>
+            <div>
+              <h1 className="text-base font-bold text-[#1a1a2e]">Oyuncu Raporları</h1>
+              <p className="text-[10px] text-[#8c919a]">Maç bazlı istatistik ve performans analizi</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <Filter size={12} className="text-[#8c919a]" />
+            <span className="text-[9px] font-semibold text-[#8c919a] uppercase tracking-wider">Filtreler</span>
+          </div>
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           <div>
@@ -349,18 +335,19 @@ export default function ReportsPage() {
         </div>
       </div>
 
-      {/* Top Performers - Modern Glassmorphism Grid */}
+      {/* Top Performers */}
       {(topScorer || topAssist || topMinutes || topRated || topContributor || topCleanSheet) && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
           {topScorer && (
             <TopCard
               icon={Trophy}
               iconColor="text-amber-500"
-              iconBg="bg-gradient-to-br from-amber-100/80 to-amber-200/60"
+              iconBg="bg-amber-50"
               title="Gol Kralı"
               name={topScorer.name}
               jersey={topScorer.jerseyNumber}
-              value={`${topScorer.goals} gol`}
+              value={`${topScorer.goals}`}
+              unit="gol"
               sub={`İ11: ${topScorer.starts} · Y: ${topScorer.sub} · ${topScorer.matches} maç`}
             />
           )}
@@ -368,11 +355,12 @@ export default function ReportsPage() {
             <TopCard
               icon={Target}
               iconColor="text-blue-500"
-              iconBg="bg-gradient-to-br from-blue-100/80 to-blue-200/60"
+              iconBg="bg-blue-50"
               title="Asist Kralı"
               name={topAssist.name}
               jersey={topAssist.jerseyNumber}
-              value={`${topAssist.assists} asist`}
+              value={`${topAssist.assists}`}
+              unit="asist"
               sub={`İ11: ${topAssist.starts} · Y: ${topAssist.sub} · ${topAssist.matches} maç`}
             />
           )}
@@ -380,23 +368,25 @@ export default function ReportsPage() {
             <TopCard
               icon={Handshake}
               iconColor="text-teal-500"
-              iconBg="bg-gradient-to-br from-teal-100/80 to-teal-200/60"
+              iconBg="bg-teal-50"
               title="Gol Katkısı"
               name={topContributor.name}
               jersey={topContributor.jerseyNumber}
-              value={`${topContributor.goals + topContributor.assists} katkı`}
-              sub={`İ11: ${topContributor.starts} · Y: ${topContributor.sub} · ${topContributor.goals}G + ${topContributor.assists}A`}
+              value={`${topContributor.goals + topContributor.assists}`}
+              unit="katkı"
+              sub={`${topContributor.goals}G + ${topContributor.assists}A`}
             />
           )}
           {topMinutes && (
             <TopCard
               icon={Clock}
               iconColor="text-emerald-500"
-              iconBg="bg-gradient-to-br from-emerald-100/80 to-emerald-200/60"
+              iconBg="bg-emerald-50"
               title="En Çok Süre"
               name={topMinutes.name}
               jersey={topMinutes.jerseyNumber}
-              value={`${topMinutes.minutesPlayed} dk`}
+              value={`${topMinutes.minutesPlayed}`}
+              unit="dk"
               sub={`İ11: ${topMinutes.starts} · Y: ${topMinutes.sub} · ${topMinutes.matches} maç`}
             />
           )}
@@ -404,11 +394,12 @@ export default function ReportsPage() {
             <TopCard
               icon={Star}
               iconColor="text-purple-500"
-              iconBg="bg-gradient-to-br from-purple-100/80 to-purple-200/60"
+              iconBg="bg-purple-50"
               title="En İyi Puan"
               name={topRated.name}
               jersey={topRated.jerseyNumber}
-              value={`${topRated.avgRating.toFixed(1)} ★`}
+              value={`${topRated.avgRating.toFixed(1)}`}
+              unit="★"
               sub={`${topRated.ratingCount} değerlendirme`}
             />
           )}
@@ -416,25 +407,25 @@ export default function ReportsPage() {
             <TopCard
               icon={ShieldCheck}
               iconColor="text-cyan-500"
-              iconBg="bg-gradient-to-br from-cyan-100/80 to-cyan-200/60"
+              iconBg="bg-cyan-50"
               title="Gole Kapatan"
               name={topCleanSheet.name}
               jersey={topCleanSheet.jerseyNumber}
-              value={`${topCleanSheet.cleanSheets} maç`}
+              value={`${topCleanSheet.cleanSheets}`}
+              unit="maç"
               sub={`İ11: ${topCleanSheet.starts} · Y: ${topCleanSheet.sub} · ${topCleanSheet.matches} maç`}
             />
           )}
-          {/* Taktik Lider (tacticalAvg) card hidden for oyuncu role */}
-          {/* Taktik Lider kartı oyuncu rolünde kesinlikle render edilmiyor */}
           {topRated && (
             <TopCard
               icon={Award}
               iconColor="text-blue-500"
-              iconBg="bg-gradient-to-br from-blue-100/80 to-blue-200/60"
+              iconBg="bg-blue-50"
               title="Taktik Lider"
               name={topRated.name}
               jersey={topRated.jerseyNumber}
-              value={`${topRated.tacticalAvg} TAK`}
+              value={`${topRated.tacticalAvg}`}
+              unit="TAK"
               sub={`İ11: ${topRated.starts} · Y: ${topRated.sub} · ${topRated.matches} maç`}
             />
           )}
@@ -443,11 +434,11 @@ export default function ReportsPage() {
 
       {/* Data Table */}
       <div className="bg-white rounded-xl border border-[#e2e5e9] shadow-sm overflow-hidden">
-        <div className="px-4 py-3 border-b border-[#e2e5e9] flex items-center justify-between">
-          <h3 className="text-sm font-semibold text-[#1a1a2e] flex items-center gap-2">
-            <Users size={16} className="text-[#c4111d]" />
+        <div className="px-4 py-2.5 border-b border-[#e2e5e9] bg-[#fafbfc] flex items-center justify-between">
+          <h3 className="text-xs font-semibold text-[#1a1a2e] flex items-center gap-2">
+            <Users size={14} className="text-[#c4111d]" />
             Oyuncu İstatistikleri
-            <span className="text-xs font-normal text-[#8c919a]">({sortedReports.length} oyuncu)</span>
+            <span className="text-[10px] font-normal text-[#8c919a] bg-[#e2e5e9] px-1.5 py-0.5 rounded-md">{sortedReports.length} oyuncu</span>
           </h3>
         </div>
 
@@ -571,13 +562,16 @@ export default function ReportsPage() {
 
       {/* Summary Cards */}
       {sortedReports.length > 0 && (
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           {/* Disiplin */}
-          <div className="bg-white rounded-xl border border-[#e2e5e9] p-4 shadow-sm">
-            <h4 className="text-xs font-semibold text-[#8c919a] uppercase tracking-wider flex items-center gap-1.5 mb-3">
-              <AlertTriangle size={13} className="text-yellow-500" />
-              Disiplin Raporu
-            </h4>
+          <div className="bg-white rounded-xl border border-[#e2e5e9] overflow-hidden shadow-sm">
+            <div className="px-4 py-2.5 bg-[#fafbfc] border-b border-[#e2e5e9] flex items-center gap-2">
+              <div className="w-6 h-6 rounded-lg bg-yellow-50 flex items-center justify-center">
+                <AlertTriangle size={12} className="text-yellow-500" />
+              </div>
+              <h4 className="text-[10px] font-semibold text-[#1a1a2e] uppercase tracking-wider">Disiplin Raporu</h4>
+            </div>
+            <div className="p-3">
             <div className="space-y-2">
               {playerReports
                 .filter((r) => r.yellowCards + r.redCards > 0)
@@ -609,14 +603,18 @@ export default function ReportsPage() {
                 <p className="text-xs text-[#8c919a] text-center py-2">Kart alan oyuncu yok.</p>
               )}
             </div>
+            </div>
           </div>
 
           {/* Beceri Liderleri */}
-          <div className="bg-white rounded-xl border border-[#e2e5e9] p-4 shadow-sm">
-            <h4 className="text-xs font-semibold text-[#8c919a] uppercase tracking-wider flex items-center gap-1.5 mb-3">
-              <TrendingUp size={13} className="text-blue-500" />
-              Taktik Liderleri
-            </h4>
+          <div className="bg-white rounded-xl border border-[#e2e5e9] overflow-hidden shadow-sm">
+            <div className="px-4 py-2.5 bg-[#fafbfc] border-b border-[#e2e5e9] flex items-center gap-2">
+              <div className="w-6 h-6 rounded-lg bg-blue-50 flex items-center justify-center">
+                <TrendingUp size={12} className="text-blue-500" />
+              </div>
+              <h4 className="text-[10px] font-semibold text-[#1a1a2e] uppercase tracking-wider">Taktik Liderleri</h4>
+            </div>
+            <div className="p-3">
             <div className="space-y-2">
               {playerReports
                 .filter((r) => r.tacticalAvg > 0)
@@ -633,14 +631,18 @@ export default function ReportsPage() {
                   </div>
                 ))}
             </div>
+            </div>
           </div>
 
           {/* Atletik Liderleri */}
-          <div className="bg-white rounded-xl border border-[#e2e5e9] p-4 shadow-sm">
-            <h4 className="text-xs font-semibold text-[#8c919a] uppercase tracking-wider flex items-center gap-1.5 mb-3">
-              <Zap size={13} className="text-emerald-500" />
-              Atletik Liderleri
-            </h4>
+          <div className="bg-white rounded-xl border border-[#e2e5e9] overflow-hidden shadow-sm">
+            <div className="px-4 py-2.5 bg-[#fafbfc] border-b border-[#e2e5e9] flex items-center gap-2">
+              <div className="w-6 h-6 rounded-lg bg-emerald-50 flex items-center justify-center">
+                <Zap size={12} className="text-emerald-500" />
+              </div>
+              <h4 className="text-[10px] font-semibold text-[#1a1a2e] uppercase tracking-wider">Atletik Liderleri</h4>
+            </div>
+            <div className="p-3">
             <div className="space-y-2">
               {playerReports
                 .filter((r) => r.athleticAvg > 0)
@@ -657,6 +659,7 @@ export default function ReportsPage() {
                   </div>
                 ))}
             </div>
+            </div>
           </div>
         </div>
       )}
@@ -666,7 +669,7 @@ export default function ReportsPage() {
 
 /* ── Helper Components ── */
 
-function TopCard({ icon: Icon, iconColor, iconBg, title, name, jersey, value, sub }: {
+function TopCard({ icon: Icon, iconColor, iconBg, title, name, jersey, value, unit, sub }: {
   icon: React.ElementType;
   iconColor: string;
   iconBg: string;
@@ -674,21 +677,25 @@ function TopCard({ icon: Icon, iconColor, iconBg, title, name, jersey, value, su
   name: string;
   jersey: number;
   value: string;
+  unit?: string;
   sub: string;
 }) {
   return (
-    <div className="bg-white/80 border border-[#e5e7eb] rounded-xl shadow p-3 flex flex-col items-center text-center transition hover:shadow-md duration-150 min-w-0">
-      <div className={`w-8 h-8 rounded-lg flex items-center justify-center mb-2 ${iconBg}`}>
+    <div className="bg-white border border-[#e2e5e9] rounded-xl p-3 flex items-center gap-3 hover:shadow-md transition-shadow duration-150">
+      <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${iconBg}`}>
         <Icon size={18} className={iconColor} />
       </div>
-      <div className="text-[10px] font-semibold text-[#c4111d] uppercase tracking-wider mb-0.5">{title}</div>
-      <div className="flex items-center justify-center gap-1 mb-1 max-w-full">
-        <span className="text-[10px] font-bold text-[#c4111d] bg-[#fff0f3] rounded px-1 py-0.5">#{jersey}</span>
-        <span className="text-xs font-semibold text-[#1a1a2e] truncate max-w-[140px] sm:max-w-[180px] md:max-w-[220px] lg:max-w-[260px] xl:max-w-[320px]">{name}</span>
+      <div className="flex-1 min-w-0">
+        <p className="text-[9px] font-semibold text-[#c4111d] uppercase tracking-wider">{title}</p>
+        <div className="flex items-center gap-1.5 mt-0.5">
+          <span className="text-[9px] font-bold text-[#c4111d] bg-[#c4111d]/8 rounded px-1 py-0.5">#{jersey}</span>
+          <span className="text-xs font-semibold text-[#1a1a2e] truncate">{name}</span>
+        </div>
+        <p className="text-[9px] text-[#8c919a] mt-0.5">{sub}</p>
       </div>
-      <div className="flex flex-col items-center gap-0.5 mt-0.5">
-        <span className="text-lg font-extrabold text-[#1a1a2e]">{value}</span>
-        <span className="text-[10px] text-[#64748b] font-medium">{sub}</span>
+      <div className="text-right shrink-0">
+        <p className="text-xl font-black text-[#1a1a2e] leading-none">{value}</p>
+        {unit && <p className="text-[9px] text-[#8c919a] font-medium mt-0.5">{unit}</p>}
       </div>
     </div>
   );
