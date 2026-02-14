@@ -1,7 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useState, useCallback, useMemo, useEffect } from "react";
-import { fetchCurrentUserRole } from "@/lib/supabase/userRole";
+import { fetchCurrentUserRole, fetchCurrentUserEmail } from "@/lib/supabase/userRole";
 import { UserRoleInfo } from "@/types/userRole";
 import { Player } from "@/types/player";
 import { Match } from "@/types/match";
@@ -44,6 +44,7 @@ interface AppData {
     minutesPlayed: number;
   };
   userRole: UserRoleInfo | null;
+  userEmail: string | null;
   refreshUserRole: () => Promise<void>;
 }
 
@@ -61,10 +62,13 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
   });
   const [loading, setLoading] = useState(true);
   const [userRole, setUserRole] = useState<UserRoleInfo | null>(null);
-  // Kullanıcı rolünü çek
+  const [userEmail, setUserEmail] = useState<string | null>(null);
+  // Kullanıcı rolünü ve email bilgisini çek
   const refreshUserRole = useCallback(async () => {
     const role = await fetchCurrentUserRole();
     setUserRole(role);
+    const email = await fetchCurrentUserEmail();
+    setUserEmail(email);
   }, []);
 
   useEffect(() => {
@@ -212,8 +216,8 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
   );
 
   const value = useMemo(
-    () => ({ players, matches, lookups, loading, setPlayers, setMatches, refreshPlayers, refreshMatches, refreshLookups, savePlayer, removePlayer, saveMatch, removeMatch, getPlayerStatsFromMatches, userRole, refreshUserRole }),
-    [players, matches, lookups, loading, refreshPlayers, refreshMatches, refreshLookups, savePlayer, removePlayer, saveMatch, removeMatch, getPlayerStatsFromMatches, userRole, refreshUserRole]
+    () => ({ players, matches, lookups, loading, setPlayers, setMatches, refreshPlayers, refreshMatches, refreshLookups, savePlayer, removePlayer, saveMatch, removeMatch, getPlayerStatsFromMatches, userRole, userEmail, refreshUserRole }),
+    [players, matches, lookups, loading, refreshPlayers, refreshMatches, refreshLookups, savePlayer, removePlayer, saveMatch, removeMatch, getPlayerStatsFromMatches, userRole, userEmail, refreshUserRole]
   );
 
   return (

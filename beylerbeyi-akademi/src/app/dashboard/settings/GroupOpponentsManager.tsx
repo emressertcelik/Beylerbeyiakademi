@@ -36,10 +36,10 @@ export default function GroupOpponentsManager() {
   };
 
   return (
-    <div className="bg-white rounded-xl border p-6 max-w-2xl mx-auto mt-8 space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-        <h2 className="text-xl font-bold text-[#1a1a2e]">Grup Rakipleri Yönetimi</h2>
-        <p className="text-sm text-[#8c919a] mt-1">Sezon, yaş grubu ve grup numarası için rakip tanımlayın.</p>
+    <div className="bg-white rounded-xl border p-4 sm:p-6 max-w-2xl mx-auto mt-4 sm:mt-8 space-y-4 sm:space-y-6">
+      <div className="flex flex-col gap-1">
+        <h2 className="text-lg sm:text-xl font-bold text-[#1a1a2e]">Grup Rakipleri Yönetimi</h2>
+        <p className="text-xs sm:text-sm text-[#8c919a]">Sezon, yaş grubu ve grup numarası için rakip tanımlayın.</p>
       </div>
       {!lookups ? (
         <div className="flex items-center justify-center min-h-[120px] text-[#8c919a]">
@@ -47,26 +47,77 @@ export default function GroupOpponentsManager() {
         </div>
       ) : (
         <>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
-            <select value={season} onChange={e => setSeason(e.target.value)} className="px-3 py-2 rounded-lg border border-[#e2e5e9] text-sm focus:outline-none focus:ring-2 focus:ring-[#c4111d]/20">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mb-4">
+            <select value={season} onChange={e => setSeason(e.target.value)} className="w-full px-3 py-2 rounded-lg border border-[#e2e5e9] text-sm focus:outline-none focus:ring-2 focus:ring-[#c4111d]/20">
               <option value="">Sezon Seç</option>
               {lookups.seasons.map((s: any) => (
                 <option key={s.value} value={s.value}>{s.value}</option>
               ))}
             </select>
-            <select value={ageGroup} onChange={e => setAgeGroup(e.target.value)} className="px-3 py-2 rounded-lg border border-[#e2e5e9] text-sm focus:outline-none focus:ring-2 focus:ring-[#c4111d]/20">
+            <select value={ageGroup} onChange={e => setAgeGroup(e.target.value)} className="w-full px-3 py-2 rounded-lg border border-[#e2e5e9] text-sm focus:outline-none focus:ring-2 focus:ring-[#c4111d]/20">
               <option value="">Yaş Grubu Seç</option>
               {lookups.ageGroups.map((ag: any) => (
                 <option key={ag.value} value={ag.value}>{ag.value}</option>
               ))}
             </select>
-            <input type="number" min={1} value={groupNumber} onChange={e => setGroupNumber(Number(e.target.value))} className="px-3 py-2 rounded-lg border border-[#e2e5e9] text-sm focus:outline-none focus:ring-2 focus:ring-[#c4111d]/20" placeholder="Grup No" />
+            <input type="number" min={1} value={groupNumber} onChange={e => setGroupNumber(Number(e.target.value))} className="w-full px-3 py-2 rounded-lg border border-[#e2e5e9] text-sm focus:outline-none focus:ring-2 focus:ring-[#c4111d]/20" placeholder="Grup No" />
           </div>
           <div className="flex gap-2 mb-4">
             <input value={opponent} onChange={e => setOpponent(e.target.value)} className="px-3 py-2 rounded-lg border border-[#e2e5e9] text-sm flex-1 focus:outline-none focus:ring-2 focus:ring-[#c4111d]/20" placeholder="Rakip Adı" />
-            <button onClick={handleAdd} className="px-4 py-2 rounded-lg bg-[#c4111d] text-white text-sm font-semibold hover:bg-[#a30e17] transition-colors disabled:opacity-50">Ekle</button>
+            <button onClick={handleAdd} className="px-4 py-2 rounded-lg bg-[#c4111d] text-white text-sm font-semibold hover:bg-[#a30e17] transition-colors disabled:opacity-50 shrink-0">Ekle</button>
           </div>
-          <div className="overflow-x-auto">
+
+          {/* Mobil: Kart görünümü */}
+          <div className="sm:hidden space-y-2">
+            {loading ? <div className="text-center py-8 text-[#8c919a]">Yükleniyor...</div> : (
+              <>
+                {opponents.map(o => (
+                  <div key={o.id} className="bg-[#f8f9fb] rounded-xl border border-[#e2e5e9] p-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium text-[#1a1a2e]">{o.opponent}</span>
+                      {deleteConfirm === o.id ? (
+                        <div className="flex items-center gap-1">
+                          <button
+                            onClick={async () => {
+                              setLoading(true);
+                              await import("@/lib/supabase/groupOpponents").then(mod => mod.deleteGroupOpponent(o.id));
+                              fetchGroupOpponents(season, ageGroup, groupNumber)
+                                .then(setOpponents)
+                                .finally(() => setLoading(false));
+                              setDeleteConfirm(null);
+                            }}
+                            className="px-2 py-1 rounded-lg bg-red-500 text-white text-[10px] font-medium"
+                          >Sil</button>
+                          <button
+                            onClick={() => setDeleteConfirm(null)}
+                            className="px-2 py-1 rounded-lg bg-[#f1f3f5] text-[#5a6170] text-[10px] font-medium"
+                          >İptal</button>
+                        </div>
+                      ) : (
+                        <button
+                          onClick={() => setDeleteConfirm(o.id)}
+                          className="p-1.5 rounded-lg text-[#8c919a] hover:text-red-500 hover:bg-red-50"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      )}
+                    </div>
+                    <div className="flex gap-3 mt-1.5 text-[10px] text-[#8c919a]">
+                      <span>{o.season}</span>
+                      <span>{o.age_group}</span>
+                      <span>Grup {o.group_number}</span>
+                    </div>
+                  </div>
+                ))}
+                {opponents.length === 0 && (
+                  <div className="text-xs text-[#8c919a] py-4 text-center">Tanımlı rakip yok.</div>
+                )}
+              </>
+            )}
+          </div>
+
+          {/* Masaüstü: Tablo görünümü */}
+          <div className="hidden sm:block overflow-x-auto">
             {loading ? <div className="text-center py-8 text-[#8c919a]">Yükleniyor...</div> : (
               <table className="min-w-full text-sm">
                 <thead>
@@ -81,11 +132,11 @@ export default function GroupOpponentsManager() {
                 <tbody>
                   {opponents.map(o => (
                     <tr key={o.id} className="hover:bg-[#f8f9fb] transition-colors">
-                      <td className="align-middle font-medium text-[#1a1a2e]">{o.opponent}</td>
-                      <td className="align-middle text-[#8c919a]">{o.season}</td>
-                      <td className="align-middle text-[#8c919a]">{o.age_group}</td>
-                      <td className="align-middle text-[#8c919a]">{o.group_number}</td>
-                      <td className="align-middle">
+                      <td className="px-4 py-2.5 align-middle font-medium text-[#1a1a2e]">{o.opponent}</td>
+                      <td className="px-4 py-2.5 align-middle text-[#8c919a]">{o.season}</td>
+                      <td className="px-4 py-2.5 align-middle text-[#8c919a]">{o.age_group}</td>
+                      <td className="px-4 py-2.5 align-middle text-[#8c919a]">{o.group_number}</td>
+                      <td className="px-4 py-2.5 align-middle">
                         {deleteConfirm === o.id ? (
                           <div className="flex items-center gap-1">
                             <span className="text-xs text-red-500 mr-1">Emin misiniz?</span>

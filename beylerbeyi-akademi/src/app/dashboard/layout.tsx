@@ -7,7 +7,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { AppDataProvider, useAppData } from "@/lib/app-data";
 import { ToastProvider } from "@/components/Toast";
-import { Users, LogOut, Home, Menu, X, ChevronRight, Shield, Settings, BarChart3 } from "lucide-react";
+import { Users, LogOut, Home, Menu, X, ChevronRight, Shield, Settings, BarChart3, User } from "lucide-react";
 
 const NAV_ITEMS = [
   { href: "/dashboard", label: "Ana Sayfa", icon: Home },
@@ -88,8 +88,9 @@ export default function DashboardLayout({
             </nav>
           </div>
 
-          {/* Right: Settings + Logout */}
+          {/* Right: User Info + Settings + Logout */}
           <div className="flex items-center gap-1">
+            <UserInfoBadge />
             <SettingsMenuButton pathname={pathname} />
             <nav className="flex md:hidden items-center gap-1">
               <MobileNavItems pathname={pathname} />
@@ -248,5 +249,33 @@ function MobileSettingsMenuLink({ pathname, setMenuOpen }: { pathname: string | 
       </div>
       <ChevronRight size={16} className="opacity-40" />
     </Link>
+  );
+}
+
+// Kullanıcı bilgi badge'i
+function UserInfoBadge() {
+  const { userRole, userEmail } = useAppData();
+
+  const roleLabel =
+    userRole?.role === "yonetici"
+      ? "Yönetici"
+      : userRole?.role === "antrenor"
+      ? "Antrenör"
+      : userRole?.role === "oyuncu"
+      ? "Oyuncu"
+      : "";
+
+  const displayName = userEmail || "Yükleniyor...";
+
+  return (
+    <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#f1f3f5] text-xs">
+      <User size={14} className="text-[#5a6170] shrink-0" />
+      <div className="flex flex-col leading-tight">
+        <span className="font-medium text-[#1a1a2e] truncate max-w-[140px]">{displayName}</span>
+        {roleLabel && (
+          <span className="text-[10px] text-[#c4111d] font-semibold uppercase">{roleLabel}{userRole?.age_group ? ` · ${userRole.age_group}` : ""}</span>
+        )}
+      </div>
+    </div>
   );
 }

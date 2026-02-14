@@ -229,18 +229,21 @@ export default function SettingsPage() {
         </p>
       </div>
 
-      {/* Sekmeler */}
-      <div className="flex gap-2 border-b border-[#e2e5e9] mb-4">
-        {TABS.map((tabItem) => (
-          <button
-            key={tabItem.key}
-            className={`px-4 py-2 text-sm font-semibold rounded-t-lg border-b-2 transition-colors ${activeTab === tabItem.key ? "border-[#c4111d] text-[#c4111d] bg-white" : "border-transparent text-[#8c919a] bg-[#f8f9fb] hover:text-[#1a1a2e]"}`}
-            onClick={() => setActiveTab(tabItem.key)}
-          >
-            <tabItem.icon size={16} className="inline mr-1 align-text-bottom" />
-            {tabItem.label}
-          </button>
-        ))}
+      {/* Sekmeler - mobilde yatay scroll */}
+      <div className="overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0">
+        <div className="flex gap-1 sm:gap-2 border-b border-[#e2e5e9] mb-4 min-w-max">
+          {TABS.map((tabItem) => (
+            <button
+              key={tabItem.key}
+              className={`px-2.5 sm:px-4 py-2 text-xs sm:text-sm font-semibold rounded-t-lg border-b-2 transition-colors whitespace-nowrap ${activeTab === tabItem.key ? "border-[#c4111d] text-[#c4111d] bg-white" : "border-transparent text-[#8c919a] bg-[#f8f9fb] hover:text-[#1a1a2e]"}`}
+              onClick={() => setActiveTab(tabItem.key)}
+            >
+              <tabItem.icon size={14} className="inline mr-0.5 sm:mr-1 align-text-bottom" />
+              <span className="hidden sm:inline">{tabItem.label}</span>
+              <span className="sm:hidden">{tabItem.label.length > 8 ? tabItem.label.slice(0, 6) + '.' : tabItem.label}</span>
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Lookup Tabları */}
@@ -254,24 +257,84 @@ export default function SettingsPage() {
       )}
       {isLookupTab && (
         <>
-          <div className="flex gap-2 mb-3">
+          <div className="flex flex-col sm:flex-row gap-2 mb-3">
             <input
               type="text"
               value={newValue}
               onChange={(e) => setNewValue(e.target.value)}
               placeholder={tab?.placeholder}
-              className="px-3 py-2 rounded-lg border border-[#e2e5e9] text-sm focus:outline-none focus:ring-2 focus:ring-[#c4111d]/20"
+              className="flex-1 px-3 py-2 rounded-lg border border-[#e2e5e9] text-sm focus:outline-none focus:ring-2 focus:ring-[#c4111d]/20"
               disabled={saving}
             />
             <button
               onClick={handleAdd}
               disabled={saving || !newValue.trim()}
-              className="px-4 py-2 rounded-lg bg-[#c4111d] text-white text-sm font-semibold hover:bg-[#a30e17] transition-colors disabled:opacity-50"
+              className="px-4 py-2 rounded-lg bg-[#c4111d] text-white text-sm font-semibold hover:bg-[#a30e17] transition-colors disabled:opacity-50 shrink-0"
             >
               <Plus size={16} className="inline mr-1 align-text-bottom" /> Ekle
             </button>
           </div>
-          <div className="overflow-x-auto">
+
+          {/* Mobil: Kart görünümü */}
+          <div className="sm:hidden space-y-2">
+            {items.map((item, index) => (
+              <div key={item.id} className="bg-white rounded-xl border border-[#e2e5e9] p-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 flex-1 min-w-0">
+                    <span className="text-[10px] text-[#8c919a] bg-[#f1f3f5] px-2 py-0.5 rounded-full shrink-0">#{index + 1}</span>
+                    {editingId === item.id ? (
+                      <input
+                        autoFocus
+                        type="text"
+                        value={editValue ?? ''}
+                        onChange={(e) => setEditValue(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") handleUpdate(item.id);
+                          if (e.key === "Escape") setEditingId(null);
+                        }}
+                        className="flex-1 px-2 py-1 rounded-lg border border-[#c4111d]/30 bg-white text-sm text-[#1a1a2e] focus:outline-none focus:ring-2 focus:ring-[#c4111d]/20"
+                      />
+                    ) : (
+                      <span
+                        className="text-sm font-medium text-[#1a1a2e] truncate cursor-pointer"
+                        onClick={() => { setEditingId(item.id); setEditValue(item.value); }}
+                      >
+                        {item.value}
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-1 shrink-0 ml-2">
+                    {editingId === item.id ? (
+                      <>
+                        <button onClick={() => handleUpdate(item.id)} disabled={saving} className="p-1.5 rounded-lg text-emerald-600 hover:bg-emerald-50"><Save size={16} /></button>
+                        <button onClick={() => setEditingId(null)} className="p-1.5 rounded-lg text-[#8c919a] hover:bg-[#f1f3f5]"><X size={16} /></button>
+                      </>
+                    ) : (
+                      <>
+                        <button onClick={() => handleMoveUp(index)} disabled={index === 0 || saving} className="p-1 rounded text-[#8c919a] disabled:opacity-20">
+                          <svg width="14" height="14" viewBox="0 0 12 12" fill="none"><path d="M6 3L10 8H2L6 3Z" fill="currentColor" /></svg>
+                        </button>
+                        <button onClick={() => handleMoveDown(index)} disabled={index >= items.length - 1 || saving} className="p-1 rounded text-[#8c919a] disabled:opacity-20">
+                          <svg width="14" height="14" viewBox="0 0 12 12" fill="none"><path d="M6 9L2 4H10L6 9Z" fill="currentColor" /></svg>
+                        </button>
+                        {deleteConfirm === item.id ? (
+                          <div className="flex items-center gap-1">
+                            <button onClick={() => handleDelete(item.id)} disabled={saving} className="px-2 py-1 rounded-lg bg-red-500 text-white text-[10px] font-medium">Sil</button>
+                            <button onClick={() => setDeleteConfirm(null)} className="px-2 py-1 rounded-lg bg-[#f1f3f5] text-[#5a6170] text-[10px] font-medium">İptal</button>
+                          </div>
+                        ) : (
+                          <button onClick={() => setDeleteConfirm(item.id)} className="p-1.5 rounded-lg text-[#8c919a] hover:text-red-500 hover:bg-red-50"><Trash2 size={14} /></button>
+                        )}
+                      </>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Masaüstü: Tablo görünümü */}
+          <div className="hidden sm:block overflow-x-auto">
             <table className="min-w-full text-sm">
               <thead>
                 <tr>
@@ -404,41 +467,41 @@ export default function SettingsPage() {
 
       {/* Kullanıcı Yönetimi Sekmesi */}
       {activeTab === "users" && (
-        <div className="space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-            <h2 className="text-lg font-bold text-[#1a1a2e]">Kullanıcı Yönetimi</h2>
-            <form
-              className="flex flex-col sm:flex-row gap-2 items-center"
-              onSubmit={async (e) => {
-                e.preventDefault();
-                if (!userEmail.trim()) return;
-                setUserSaveLoading("add");
-                setUserError(null);
-                try {
-                  await inviteUserWithRole(userEmail.trim(), userRoleToAdd as UserRole);
-                  setUserEmail("");
-                  setUserRoleToAdd("oyuncu");
-                  await loadUsers();
-                } catch (err: any) {
-                  setUserError(err?.message || "Kullanıcı eklenemedi");
-                } finally {
-                  setUserSaveLoading(null);
-                }
-              }}
-            >
-              <input
-                type="email"
-                value={userEmail}
-                onChange={(e) => setUserEmail(e.target.value)}
-                placeholder="E-posta ile kullanıcı davet et"
-                className="px-3 py-2 rounded-lg border border-[#e2e5e9] text-sm focus:outline-none focus:ring-2 focus:ring-[#c4111d]/20"
-                required
-                disabled={userSaveLoading === "add"}
-              />
+        <div className="space-y-4">
+          <h2 className="text-lg font-bold text-[#1a1a2e]">Kullanıcı Yönetimi</h2>
+          <form
+            className="flex flex-col gap-2"
+            onSubmit={async (e) => {
+              e.preventDefault();
+              if (!userEmail.trim()) return;
+              setUserSaveLoading("add");
+              setUserError(null);
+              try {
+                await inviteUserWithRole(userEmail.trim(), userRoleToAdd as UserRole);
+                setUserEmail("");
+                setUserRoleToAdd("oyuncu");
+                await loadUsers();
+              } catch (err: any) {
+                setUserError(err?.message || "Kullanıcı eklenemedi");
+              } finally {
+                setUserSaveLoading(null);
+              }
+            }}
+          >
+            <input
+              type="email"
+              value={userEmail}
+              onChange={(e) => setUserEmail(e.target.value)}
+              placeholder="E-posta ile kullanıcı davet et"
+              className="w-full px-3 py-2 rounded-lg border border-[#e2e5e9] text-sm focus:outline-none focus:ring-2 focus:ring-[#c4111d]/20"
+              required
+              disabled={userSaveLoading === "add"}
+            />
+            <div className="flex gap-2">
               <select
                 value={userRoleToAdd}
                 onChange={(e) => setUserRoleToAdd(e.target.value)}
-                className="px-3 py-2 rounded-lg border border-[#e2e5e9] text-sm"
+                className="flex-1 px-3 py-2 rounded-lg border border-[#e2e5e9] text-sm"
                 disabled={userSaveLoading === "add"}
               >
                 <option value="oyuncu">Oyuncu</option>
@@ -447,28 +510,59 @@ export default function SettingsPage() {
               </select>
               <button
                 type="submit"
-                className="px-4 py-2 rounded-lg bg-[#c4111d] text-white text-sm font-semibold hover:bg-[#a30e17] transition-colors disabled:opacity-50"
+                className="px-4 py-2 rounded-lg bg-[#c4111d] text-white text-sm font-semibold hover:bg-[#a30e17] transition-colors disabled:opacity-50 shrink-0"
                 disabled={userSaveLoading === "add"}
               >
                 <Plus size={16} className="inline mr-1 align-text-bottom" /> Davet Et
               </button>
-            </form>
-          </div>
+            </div>
+          </form>
           {userError && <div className="text-xs text-red-500">{userError}</div>}
-          <div className="overflow-x-auto">
+
+          {/* Mobil: Kart görünümü */}
+          <div className="sm:hidden space-y-2">
+            {users.map((user) => (
+              <div key={user.id} className="bg-white rounded-xl border border-[#e2e5e9] p-3">
+                <p className="text-sm font-medium text-[#1a1a2e] truncate mb-2">{user.email}</p>
+                <select
+                  value={user.role}
+                  onChange={async (e) => {
+                    setUserSaveLoading(user.id);
+                    setUserError(null);
+                    try {
+                      await updateUserRole(user.id, e.target.value as UserRole);
+                      await loadUsers();
+                    } catch (err: any) {
+                      setUserError(err?.message || "Rol güncellenemedi");
+                    } finally {
+                      setUserSaveLoading(null);
+                    }
+                  }}
+                  className="w-full px-2 py-1.5 rounded-lg border border-[#e2e5e9] text-sm"
+                  disabled={userSaveLoading === user.id}
+                >
+                  <option value="oyuncu">Oyuncu</option>
+                  <option value="antrenor">Antrenör</option>
+                  <option value="yonetici">Yönetici</option>
+                </select>
+              </div>
+            ))}
+          </div>
+
+          {/* Masaüstü: Tablo görünümü */}
+          <div className="hidden sm:block overflow-x-auto">
             <table className="min-w-full text-sm">
               <thead>
                 <tr>
                   <th className="px-4 py-2.5 text-left border-b border-[#e2e5e9]">E-posta</th>
                   <th className="px-4 py-2.5 text-left border-b border-[#e2e5e9]">Rol</th>
-                  <th className="px-4 py-2.5 text-left border-b border-[#e2e5e9]">İşlem</th>
                 </tr>
               </thead>
               <tbody>
                 {users.map((user) => (
-                  <tr key={user.id} className="hover:bg-[#f8f9fb] transition-colors group">
-                    <td className="align-middle">{user.email}</td>
-                    <td className="align-middle">
+                  <tr key={user.id} className="hover:bg-[#f8f9fb] transition-colors">
+                    <td className="px-4 py-2.5 align-middle">{user.email}</td>
+                    <td className="px-4 py-2.5 align-middle">
                       <select
                         value={user.role}
                         onChange={async (e) => {
@@ -490,9 +584,6 @@ export default function SettingsPage() {
                         <option value="antrenor">Antrenör</option>
                         <option value="yonetici">Yönetici</option>
                       </select>
-                    </td>
-                    <td className="align-middle">
-                      {/* Kullanıcı silme veya diğer işlemler eklenebilir */}
                     </td>
                   </tr>
                 ))}
