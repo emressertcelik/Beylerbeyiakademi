@@ -90,7 +90,9 @@ export default function DashboardLayout({
 
           {/* Right: User Info + Settings + Logout */}
           <div className="flex items-center gap-1">
-            <UserInfoBadge />
+            <div className="hidden md:block">
+              <UserInfoBadge />
+            </div>
             <SettingsMenuButton pathname={pathname} />
             <nav className="flex md:hidden items-center gap-1">
               <MobileNavItems pathname={pathname} />
@@ -117,6 +119,10 @@ export default function DashboardLayout({
         {menuOpen && (
           <div className="md:hidden border-t border-[#e2e5e9] bg-white animate-slide-up">
             <nav className="p-3 space-y-1">
+              {/* Kullanıcı bilgisi */}
+              <div className="px-4 py-2 mb-1">
+                <UserInfoBadge />
+              </div>
               {NAV_ITEMS.map((item) => {
                 const isActive =
                   item.href === "/dashboard"
