@@ -69,7 +69,7 @@ export default function DashboardLayout({
                 const isActive =
                   item.href === "/dashboard"
                     ? pathname === "/dashboard"
-                    : pathname.startsWith(item.href);
+                    : pathname?.startsWith(item.href);
                 return (
                   <Link
                     key={item.href}
@@ -120,7 +120,7 @@ export default function DashboardLayout({
                 const isActive =
                   item.href === "/dashboard"
                     ? pathname === "/dashboard"
-                    : pathname.startsWith(item.href);
+                    : pathname?.startsWith(item.href);
                 return (
                   <Link
                     key={item.href}
@@ -169,14 +169,14 @@ export default function DashboardLayout({
 }
 
 // Ayarlar butonunu context ile kontrol eden ayrı bir component
-function SettingsMenuButton({ pathname }: { pathname: string }) {
+function SettingsMenuButton({ pathname }: { pathname: string | null }) {
   const { userRole } = useAppData();
   if (userRole?.role === "oyuncu") return null;
   return (
     <Link
       href="/dashboard/settings"
       className={`hidden md:flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-        pathname.startsWith("/dashboard/settings")
+        pathname?.startsWith("/dashboard/settings")
           ? "text-[#c4111d] bg-red-50"
           : "text-[#5a6170] hover:text-[#1a1a2e] hover:bg-[#f1f3f5]"
       }`}
@@ -188,7 +188,7 @@ function SettingsMenuButton({ pathname }: { pathname: string }) {
 }
 
 // Mobile nav items contextli component
-function MobileNavItems({ pathname }: { pathname: string }) {
+function MobileNavItems({ pathname }: { pathname: string | null }) {
   const { userRole } = useAppData();
   return (
     <>
@@ -196,7 +196,7 @@ function MobileNavItems({ pathname }: { pathname: string }) {
         const isActive =
           item.href === "/dashboard"
             ? pathname === "/dashboard"
-            : pathname.startsWith(item.href);
+            : pathname?.startsWith(item.href);
         return (
           <Link
             key={item.href}
@@ -216,7 +216,7 @@ function MobileNavItems({ pathname }: { pathname: string }) {
         <Link
           href="/dashboard/settings"
           className={`flex items-center justify-center w-9 h-9 rounded-lg transition-all duration-200 ${
-            pathname.startsWith("/dashboard/settings")
+            pathname?.startsWith("/dashboard/settings")
               ? "bg-[#c4111d] text-white shadow-sm shadow-[#c4111d]/25"
               : "text-[#5a6170] hover:text-[#1a1a2e] hover:bg-[#f1f3f5]"
           }`}
@@ -229,14 +229,14 @@ function MobileNavItems({ pathname }: { pathname: string }) {
 }
 
 // Mobile settings menu link contextli component
-function MobileSettingsMenuLink({ pathname, setMenuOpen }: { pathname: string, setMenuOpen: (v: boolean) => void }) {
+function MobileSettingsMenuLink({ pathname, setMenuOpen }: { pathname: string | null, setMenuOpen: (v: boolean) => void }) {
   const { userRole } = useAppData();
   if (userRole?.role === "oyuncu") return null;
   return (
     <Link
       href="/dashboard/settings"
       className={`flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 ${
-        pathname.startsWith("/dashboard/settings")
+        pathname?.startsWith("/dashboard/settings")
           ? "bg-[#c4111d] text-white"
           : "text-[#5a6170] hover:bg-[#f1f3f5]"
       }`}

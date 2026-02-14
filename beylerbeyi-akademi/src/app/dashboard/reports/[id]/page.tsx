@@ -113,7 +113,7 @@ function RadialRing({ value, max = 10, size = 64, label, color }: {
 export default function PlayerReportPage() {
   const params = useParams();
   const router = useRouter();
-  const playerId = params.id as string;
+  const playerId = params?.id as string;
   const { players, matches, loading, userRole } = useAppData();
 
   const [skillLogs, setSkillLogs] = useState<SkillLog[]>([]);

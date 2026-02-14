@@ -15,8 +15,19 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Beylerbeyi Akademi",
   description: "Beylerbeyi Akademi Yönetim Sistemi",
+  manifest: "/manifest.json",
+  themeColor: "#c4111d",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "BB Akademi",
+  },
   icons: {
     icon: "/Logo_S.png",
+    apple: [
+      { url: "/icons/icon-152x152.png", sizes: "152x152" },
+      { url: "/icons/icon-192x192.png", sizes: "192x192" },
+    ],
   },
 };
 
@@ -26,11 +37,29 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="tr">
+      <head>
+        <meta name="mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="apple-mobile-web-app-title" content="BB Akademi" />
+        <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         {children}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              if ('serviceWorker' in navigator) {
+                window.addEventListener('load', function() {
+                  navigator.serviceWorker.register('/sw.js');
+                });
+              }
+            `,
+          }}
+        />
       </body>
     </html>
   );
