@@ -155,15 +155,15 @@ export default function TanitimPage() {
             <div>
               <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm text-white/80 text-[11px] font-semibold px-3 py-1.5 rounded-full border border-white/10 mb-6">
                 <Zap size={12} className="text-[#c4111d]" />
-                Altyapı Yönetim Platformu
+                Geleceğin Yıldızlarını Yetiştiriyoruz
               </div>
               <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white leading-tight mb-5">
-                <span className="text-[#c4111d]">Beylerbeyi</span> Futbol
-                <br />Akademi Sistemi
+                <span className="text-[#c4111d]">Beylerbeyi</span> Spor
+                <br />Akademi Ailesi
               </h1>
               <p className="text-white/60 text-sm sm:text-base leading-relaxed max-w-lg mb-8">
-                Oyuncu gelişimini takip edin, maç istatistiklerini yönetin, performans analizleri yapın.
-                Kulüp yönetimi, antrenörler ve sporcular için tasarlanmış dijital platform.
+                Sporcularımızın gelişimini yakından takip edin, maç performanslarını inceleyin, antrenör değerlendirmelerini görün.
+                Beylerbeyi ailesi olarak yöneticiler, antrenörler ve sporcular için özel olarak tasarlandı.
               </p>
               <div className="flex flex-wrap items-center gap-3">
                 <Link
@@ -303,47 +303,47 @@ export default function TanitimPage() {
             <span className="inline-block text-[11px] font-bold tracking-[0.2em] uppercase text-[#c4111d] bg-[#c4111d]/5 px-3 py-1.5 rounded-full mb-3">
               Özellikler
             </span>
-            <h2 className="text-2xl sm:text-3xl font-black text-[#1a1a2e] mb-3">Her Şey Tek Platformda</h2>
+            <h2 className="text-2xl sm:text-3xl font-black text-[#1a1a2e] mb-3">Akademimizin Dijital Kalbi</h2>
             <p className="text-[#5a6170] text-sm sm:text-base max-w-xl mx-auto">
-              Akademi yönetiminde ihtiyacınız olan tüm araçlar, kolay kullanılabilir tek bir sistemde.
+              Beylerbeyi Spor altyapısında her şey şeffaf ve takip edilebilir. Sporcularımızın gelişimini, antrenörler kadro performansını, yöneticiler tüm akademiyi bu sistemden yönetir.
             </p>
           </div>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             <FeatureCard
               icon={Users}
-              title="Oyuncu Yönetimi"
-              description="Tüm oyuncuların bilgileri, boy-kilo takibi, pozisyon ve beceri değerlendirmesi tek ekranda."
+              title="Oyuncu Takibi"
+              description="Sporcunuzun boy-kilo gelişimi, pozisyon bilgisi, beceri değerlendirmesi ve geçmiş takım bilgileri tek ekranda."
               color="bg-blue-500"
             />
             <FeatureCard
               icon={Shield}
-              title="Maç & Kadro Yönetimi"
-              description="Maç planı oluşturma, kadro seçimi, gol-asist-süre girişi ve detaylı maç istatistikleri."
+              title="Maç & Kadro"
+              description="Haftalık maç planları, İlk 11 kadrosu, gol-asist-süre kayıtları ve detaylı maç raporları."
               color="bg-emerald-500"
             />
             <FeatureCard
               icon={BarChart3}
-              title="Performans Raporları"
-              description="Gol-asist krallığı, en yüksek puan, maç bazlı analiz ve sıralama tabloları."
+              title="Performans Raporu"
+              description="Gol ve asist krallığı, oyuncu karşılaştırmaları, sezon bazlı gelişim grafikleri."
               color="bg-purple-500"
             />
             <FeatureCard
               icon={Trophy}
-              title="Puan Durumu"
-              description="Her yaş grubu için canlı lig puan tablosu. Beylerbeyi satırı kırmızıyla vurgulanır."
+              title="Canlı Puan Durumu"
+              description="Beylerbeyi'nin her yaş grubundaki lig sıralamasını canlı olarak takip edin."
               color="bg-amber-500"
             />
             <FeatureCard
               icon={Star}
               title="Beceri Değerlendirmesi"
-              description="9 taktik ve 7 atletik beceri parametresiyle 1-10 arası oyuncu değerlendirme sistemi."
+              description="Antrenörlerimiz 16 farklı taktik ve atletik parametreyle her sporcuyu düzenli olarak değerlendirir."
               color="bg-rose-500"
             />
             <FeatureCard
               icon={Smartphone}
-              title="Mobil Uygulama (PWA)"
-              description="Telefonunuza kurabileceğiniz uygulama. Saha kenarından anında veri girişi yapın."
+              title="Cebinizde Taşıyın"
+              description="Telefonunuza kurun, saha kenarından maç bilgilerine ve istatistiklere anında ulaşın."
               color="bg-cyan-500"
             />
           </div>
@@ -359,7 +359,7 @@ export default function TanitimPage() {
             </span>
             <h2 className="text-2xl sm:text-3xl font-black text-[#1a1a2e] mb-3">Sistemin İçinden</h2>
             <p className="text-[#5a6170] text-sm sm:text-base max-w-xl mx-auto">
-              5 ana sayfa ile akademinizi baştan sona yönetin.
+              Beylerbeyi akademisinin günlük işleyişini kolaylaştıran 5 ana ekran.
             </p>
           </div>
 
@@ -432,9 +432,9 @@ export default function TanitimPage() {
             <span className="inline-block text-[11px] font-bold tracking-[0.2em] uppercase text-[#c4111d] bg-[#c4111d]/5 px-3 py-1.5 rounded-full mb-3">
               Roller
             </span>
-            <h2 className="text-2xl sm:text-3xl font-black text-[#1a1a2e] mb-3">Herkese Özel Erişim</h2>
+            <h2 className="text-2xl sm:text-3xl font-black text-[#1a1a2e] mb-3">Herkes İçin Ayrı Deneyim</h2>
             <p className="text-[#5a6170] text-sm sm:text-base max-w-xl mx-auto">
-              Üç farklı rol ile herkes ihtiyacı olan bilgiye güvenle erişir.
+              Yöneticiler, antrenörler ve sporcular kendi rollerine özel ekranları görür. Herkes sadece ihtiyacı olan bilgiye erişir.
             </p>
           </div>
 
@@ -445,12 +445,12 @@ export default function TanitimPage() {
               color="bg-purple-600"
               colorBg="bg-purple-50 border-purple-200"
               features={[
-                "Tüm yaş gruplarına tam erişim",
-                "Oyuncu ekleme, düzenleme ve silme",
-                "Maç oluşturma ve kadro yönetimi",
-                "Raporlar ve istatistik analizi",
-                "Sistem ayarları ve lookup yönetimi",
+                "Tüm yaş gruplarının tam kontrolü",
+                "Oyuncu ve maç ekleme, düzenleme, silme",
                 "Kullanıcı daveti ve rol atama",
+                "Detaylı performans raporları",
+                "Sistem ayarları ve lookup yönetimi",
+                "Sezon ve grup rakipleri tanımlama",
               ]}
             />
             <RoleCard
@@ -459,11 +459,11 @@ export default function TanitimPage() {
               color="bg-blue-600"
               colorBg="bg-blue-50 border-blue-200"
               features={[
-                "Kendi yaş grubunda düzenleme",
-                "Oyuncu ekleme ve bilgi güncelleme",
-                "Maç oluşturma ve istatistik girişi",
-                "Performans raporlarını görüntüleme",
-                "Diğer yaş gruplarını sadece okuma",
+                "Kendi yaş grubunda tam düzenleme yetkisi",
+                "Oyuncu bilgileri ve beceri değerlendirmesi",
+                "Maç kadrosu oluşturma ve istatistik girişi",
+                "Performans raporlarını inceleme",
+                "Diğer yaş gruplarını görüntüleme",
               ]}
             />
             <RoleCard
@@ -472,11 +472,11 @@ export default function TanitimPage() {
               color="bg-emerald-600"
               colorBg="bg-emerald-50 border-emerald-200"
               features={[
-                "Kendi yaş grubunu görüntüleme",
-                "Maç sonuçları ve istatistikler",
-                "Dashboard ve puan durumu",
-                "Maç takvimi ve sonuçlar",
-                "Düzenleme yetkisi yok",
+                "Kendi yaş grubunun maç sonuçları",
+                "Oyuncu kartları ve profil bilgileri",
+                "Puan durumu ve maç takvimi",
+                "Gol-asist krallığı sıralamaları",
+                "Haftalık panorama ve istatistikler",
               ]}
             />
           </div>
@@ -492,17 +492,17 @@ export default function TanitimPage() {
               <span className="inline-block text-[11px] font-bold tracking-[0.2em] uppercase text-[#c4111d] bg-[#c4111d]/10 px-3 py-1.5 rounded-full mb-4">
                 Teknoloji
               </span>
-              <h2 className="text-2xl sm:text-3xl font-black mb-4">Her Cihazda, Her Yerde</h2>
+              <h2 className="text-2xl sm:text-3xl font-black mb-4">Sahada ve Evde, Her An Yanınızda</h2>
               <p className="text-white/60 text-sm leading-relaxed mb-8">
-                Modern web teknolojileriyle geliştirilmiş sistem, telefonunuza uygulama olarak kurulabilir.
-                Saha kenarından maç kadrosu oluşturun, istatistik girin, rapor inceleyin.
+                Telefonunuza uygulama olarak kurun. Saha kenarından antrenörler kadro girişi yapsın,
+                sporcular maç performanslarını takip etsin.
               </p>
               <div className="space-y-4">
                 {[
-                  { icon: Smartphone, label: "PWA", desc: "Telefonunuza kurabileceğiniz Progressive Web App" },
-                  { icon: Monitor, label: "Responsive", desc: "Masaüstü, tablet ve telefonda mükemmel görünüm" },
-                  { icon: Lock, label: "Güvenli", desc: "Rol bazlı kimlik doğrulama ve erişim kontrolü" },
-                  { icon: Zap, label: "Hızlı", desc: "Next.js ile sunucu taraflı render ve anlık sayfa geçişleri" },
+                  { icon: Smartphone, label: "PWA", desc: "Telefonunuza kurun, normal uygulama gibi kullanın" },
+                  { icon: Monitor, label: "Responsive", desc: "Bilgisayar, tablet ve telefonda sorunsuz çalışır" },
+                  { icon: Lock, label: "Güvenli", desc: "Herkes sadece kendi yetkisi dahilindeki bilgilere erişir" },
+                  { icon: Zap, label: "Anlık", desc: "Maç sonuçları ve istatistikler anında güncellenir" },
                 ].map((item) => (
                   <div key={item.label} className="flex items-start gap-3">
                     <div className="w-9 h-9 rounded-lg bg-white/10 flex items-center justify-center shrink-0">
@@ -599,9 +599,9 @@ export default function TanitimPage() {
       <section className="py-16 sm:py-20 bg-white">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 text-center">
           <Image src="/Logo_S.png" alt="Beylerbeyi" width={64} height={64} className="mx-auto mb-6 rounded-xl" />
-          <h2 className="text-2xl sm:text-3xl font-black text-[#1a1a2e] mb-3">Hemen Başlayın</h2>
+          <h2 className="text-2xl sm:text-3xl font-black text-[#1a1a2e] mb-3">Beylerbeyi Ailesine Katılın</h2>
           <p className="text-[#5a6170] text-sm sm:text-base mb-8 max-w-md mx-auto">
-            Beylerbeyi Futbol Akademi Yönetim Sistemi&apos;ne giriş yaparak akademinizi dijital olarak yönetmeye başlayın.
+            Hesabınızla giriş yaparak sporcularımızın gelişimini takip edin, maç programlarını görün ve akademimizin dijital dünyasına adım atın.
           </p>
           <div className="flex flex-wrap items-center justify-center gap-3">
             <Link
