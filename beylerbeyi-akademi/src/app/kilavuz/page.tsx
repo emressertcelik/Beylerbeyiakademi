@@ -216,6 +216,28 @@ export default function KilavuzPage() {
           </div>
         </Section>
 
+          {/* Telefona Uygulama Kurulumu (PWA) */}
+          <Section title="Telefona Uygulama Kurulumu (PWA)" icon={MapPin} defaultOpen={false}>
+            <div className="space-y-3 mt-3">
+              <h3 className="text-xs font-bold text-[#1a1a2e] uppercase tracking-wider mb-2">Android</h3>
+              <ol className="text-xs text-[#5a6170] space-y-1.5 list-decimal list-inside">
+                <li>Chrome tarayıcıda siteyi açın ve giriş yapın</li>
+                <li>Tarayıcı adres çubuğunda veya menüde <strong>&quot;Ana Ekrana Ekle&quot;</strong> veya <strong>&quot;Uygulamayı Yükle&quot;</strong> seçeneğine tıklayın</li>
+                <li>Onaylayın — uygulama ana ekranınıza eklenecektir</li>
+                <li>Artık normal bir uygulama gibi açabilirsiniz</li>
+              </ol>
+
+              <h3 className="text-xs font-bold text-[#1a1a2e] uppercase tracking-wider mt-4 mb-2">iPhone / iPad</h3>
+              <ol className="text-xs text-[#5a6170] space-y-1.5 list-decimal list-inside">
+                <li>Safari tarayıcıda siteyi açın ve giriş yapın</li>
+                <li>Alt kısımdaki <strong>Paylaş</strong> (kutu + ok) butonuna dokunun</li>
+                <li><strong>&quot;Ana Ekrana Ekle&quot;</strong> seçeneğini bulun ve dokunun</li>
+                <li><strong>&quot;Ekle&quot;</strong> butonuna dokunarak onaylayın</li>
+                <li>Uygulama ana ekranınızda görünecektir</li>
+              </ol>
+            </div>
+          </Section>
+
         {/* Ana Sayfa */}
         <Section title="Ana Sayfa (Dashboard)" icon={Home}>
           <div className="space-y-3 mt-3">
