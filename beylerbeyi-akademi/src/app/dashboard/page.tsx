@@ -111,7 +111,7 @@ export default function DashboardPage() {
       .map(([id, d]) => ({ id, ...d }))
       .filter((p) => p.goals > 0)
       .sort((a, b) => b.goals - a.goals || a.matches - b.matches)
-      .slice(0, 10);
+      .slice(0, 5);
   }, [playedMatches]);
 
   // ── Asist Krallığı (Top 10) ──
@@ -130,7 +130,7 @@ export default function DashboardPage() {
       .map(([id, d]) => ({ id, ...d }))
       .filter((p) => p.assists > 0)
       .sort((a, b) => b.assists - a.assists || a.matches - b.matches)
-      .slice(0, 10);
+      .slice(0, 5);
   }, [playedMatches]);
 
   // ── Haftalık istatistikler ──
@@ -629,7 +629,7 @@ export default function DashboardPage() {
             </div>
             <div>
               <h2 className="text-base font-semibold text-emerald-800">Gol Krallığı</h2>
-              <p className="text-[11px] text-emerald-500">Tüm maçlar · Top 10</p>
+              <p className="text-[11px] text-emerald-500">Tüm maçlar · Top 5</p>
             </div>
           </div>
 
@@ -654,7 +654,7 @@ export default function DashboardPage() {
             </div>
             <div>
               <h2 className="text-base font-semibold text-blue-800">Asist Krallığı</h2>
-              <p className="text-[11px] text-blue-500">Tüm maçlar · Top 10</p>
+              <p className="text-[11px] text-blue-500">Tüm maçlar · Top 5</p>
             </div>
           </div>
 
