@@ -243,26 +243,27 @@ export default function MatchDetailModal({ match, onClose, onEdit, onDelete }: M
                   .map((ps, i) => (
                     <div
                       key={ps.playerId}
-                      className={`flex items-center gap-3 px-4 sm:px-6 py-3 ${i % 2 === 0 ? "bg-white" : "bg-[#fafbfc]"}`}
+                      className={`px-4 sm:px-6 py-3 ${i % 2 === 0 ? "bg-white" : "bg-[#fafbfc]"}`}
                     >
-                      {/* Jersey */}
-                      <span className="w-8 h-8 rounded-lg bg-[#c4111d] text-white flex items-center justify-center text-xs font-black shrink-0">
-                        {ps.jerseyNumber}
-                      </span>
-                      {/* Name & Position */}
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-semibold text-[#1a1a2e] truncate">{ps.playerName}</p>
-                        <div className="flex items-center gap-1.5 mt-0.5">
-                          <p className="text-[10px] text-[#8c919a]">{ps.position}</p>
-                          {ps.participationStatus && (
-                            <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded ${getStatusColorClasses(ps.participationStatus)}`}>
-                              {ps.participationStatus}
-                            </span>
-                          )}
+                      {/* Top row: Jersey + Name + Position */}
+                      <div className="flex items-center gap-3">
+                        <span className="w-8 h-8 rounded-lg bg-[#c4111d] text-white flex items-center justify-center text-xs font-black shrink-0">
+                          {ps.jerseyNumber}
+                        </span>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-semibold text-[#1a1a2e] truncate">{ps.playerName}</p>
+                          <div className="flex items-center gap-1.5 mt-0.5">
+                            <p className="text-[10px] text-[#8c919a]">{ps.position}</p>
+                            {ps.participationStatus && (
+                              <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded ${getStatusColorClasses(ps.participationStatus)}`}>
+                                {ps.participationStatus}
+                              </span>
+                            )}
+                          </div>
                         </div>
                       </div>
-                      {/* Stats on the right */}
-                      <div className="flex items-center gap-1.5 shrink-0 flex-wrap justify-end">
+                      {/* Stats row below */}
+                      <div className="flex items-center gap-1.5 mt-2 ml-11 flex-wrap">
                         <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 bg-[#f1f3f5] text-[#5a6170] rounded text-[10px] font-semibold">
                           🕐 {ps.minutesPlayed}&apos;
                         </span>
