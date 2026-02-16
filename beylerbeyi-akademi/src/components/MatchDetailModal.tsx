@@ -17,14 +17,21 @@ const resultLabel: Record<string, { text: string; color: string; bg: string }> =
 };
 
 function getStatusColorClasses(status: string): string {
+  const s = status.toLowerCase();
+  if (s === "ilk 11" || s === "ana kadro") return "bg-emerald-100 text-emerald-700";
   const colors: { [key: string]: string } = {
-    "İlk 11": "bg-emerald-100 text-emerald-700",
     "Sonradan Girdi": "bg-blue-100 text-blue-700",
     "Sakat": "bg-red-100 text-red-700",
     "Cezalı": "bg-orange-100 text-orange-700",
     "Kadroda Yok": "bg-gray-100 text-gray-700",
   };
   return colors[status] || "bg-gray-100 text-gray-700";
+}
+
+function getStatusLabel(status: string): string {
+  const s = status.toLowerCase();
+  if (s === "ana kadro") return "İlk 11";
+  return status;
 }
 
 export default function MatchDetailModal({ match, onClose, onEdit, onDelete }: MatchDetailModalProps) {
@@ -233,9 +240,11 @@ export default function MatchDetailModal({ match, onClose, onEdit, onDelete }: M
                 {match.playerStats
                   .slice()
                   .sort((a, b) => {
-                    // Önce İlk 11, sonra Sonradan Girdi, sonra diğerleri
-                    const statusOrder = (s: string | undefined) =>
-                      s === "İlk 11" ? 0 : s === "Sonradan Girdi" ? 1 : 2;
+                    // Önce İlk 11/Ana Kadro, sonra Sonradan Girdi, sonra diğerleri
+                    const statusOrder = (s: string | undefined) => {
+                      const sl = (s || "").toLowerCase();
+                      return sl === "ilk 11" || sl === "ana kadro" ? 0 : sl === "sonradan girdi" ? 1 : 2;
+                    };
                     const cmp = statusOrder(a.participationStatus) - statusOrder(b.participationStatus);
                     if (cmp !== 0) return cmp;
                     return a.jerseyNumber - b.jerseyNumber;
@@ -256,7 +265,7 @@ export default function MatchDetailModal({ match, onClose, onEdit, onDelete }: M
                             <p className="text-[10px] text-[#8c919a]">{ps.position}</p>
                             {ps.participationStatus && (
                               <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded ${getStatusColorClasses(ps.participationStatus)}`}>
-                                {ps.participationStatus}
+                                {getStatusLabel(ps.participationStatus)}
                               </span>
                             )}
                           </div>
