@@ -1,96 +1,41 @@
-const CACHE_NAME = "bb-akademi-v2";
+const CACHE_NAME = "bb-akademi-v3";
 
-// Sadece gerçek statik dosyalar cache'lenir - sayfalar ve API asla cache'lenmez
-const STATIC_ASSETS = [
-  "/manifest.json",
-  "/Logo_S.png",
-  "/icons/icon-72x72.png",
-  "/icons/icon-96x96.png",
-  "/icons/icon-128x128.png",
-  "/icons/icon-144x144.png",
-  "/icons/icon-152x152.png",
-  "/icons/icon-192x192.png",
-  "/icons/icon-384x384.png",
-  "/icons/icon-512x512.png",
-];
-
-// Cache'lenmemesi gereken yollar
-const NO_CACHE_PATTERNS = [
-  "/api/",
-  "/dashboard",
-  "/login",
-  "/supabase",
-  "/_next/data/", // Next.js data fetches (kullanıcıya özel olabilir)
-];
-
-function shouldCache(url) {
-  const path = new URL(url).pathname;
-  // HTML sayfaları cache'lenmesin
-  if (path === "/" || !path.includes(".")) return false;
-  // Belirli yollar cache'lenmesin
-  for (const pattern of NO_CACHE_PATTERNS) {
-    if (path.startsWith(pattern)) return false;
-  }
-  return true;
-}
-
-// Install: cache static assets
+// Install: Hiçbir şey cache'leme, sadece eski cache'leri temizle
 self.addEventListener("install", (event) => {
+  // Eski tüm cache'leri sil
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(STATIC_ASSETS);
-    })
+    caches.keys().then((keys) =>
+      Promise.all(keys.map((key) => caches.delete(key)))
+    )
   );
   self.skipWaiting();
 });
 
-// Activate: clean old caches
+// Activate: Eski cache'leri temizle ve hemen devral
 self.addEventListener("activate", (event) => {
   event.waitUntil(
     caches.keys().then((keys) =>
-      Promise.all(
-        keys
-          .filter((key) => key !== CACHE_NAME)
-          .map((key) => caches.delete(key))
-      )
-    )
+      Promise.all(keys.map((key) => caches.delete(key)))
+    ).then(() => self.clients.claim())
   );
-  self.clients.claim();
 });
 
-// Fetch: network-first for everything, cache only static assets
+// Fetch: Her şey network'den gelsin, hiçbir şey cache'lenmesin
 self.addEventListener("fetch", (event) => {
-  const { request } = event;
+  // Sadece GET isteklerini yakala
+  if (event.request.method !== "GET") return;
 
-  // Skip non-GET requests
-  if (request.method !== "GET") return;
-
-  // Navigation requests (HTML pages): always network, never cache
-  if (request.mode === "navigate") {
-    event.respondWith(
-      fetch(request).catch(() => caches.match("/"))
-    );
-    return;
-  }
-
-  const url = request.url;
-
-  // API and dynamic content: always network, no cache
-  if (!shouldCache(url)) {
-    return; // Let browser handle normally
-  }
-
-  // Static assets only: cache-first
+  // Her şeyi network'den al, cache kullanma
   event.respondWith(
-    caches.match(request).then((cached) => {
-      if (cached) return cached;
-      return fetch(request).then((response) => {
-        if (response.status === 200 && shouldCache(url)) {
-          const clone = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
-        }
-        return response;
-      });
+    fetch(event.request).catch(() => {
+      // Offline ise basit bir hata sayfası göster
+      if (event.request.mode === "navigate") {
+        return new Response(
+          "<html><body><h2>Çevrimdışısınız</h2><p>Lütfen internet bağlantınızı kontrol edin.</p></body></html>",
+          { headers: { "Content-Type": "text/html; charset=utf-8" } }
+        );
+      }
+      return new Response("", { status: 408 });
     })
   );
 });
