@@ -434,12 +434,21 @@ export default function ReportsPage() {
 
       {/* Data Table */}
       <div className="bg-white rounded-xl border border-[#e2e5e9] shadow-sm overflow-hidden">
-        <div className="px-4 py-2.5 border-b border-[#e2e5e9] bg-[#fafbfc] flex items-center justify-between">
-          <h3 className="text-xs font-semibold text-[#1a1a2e] flex items-center gap-2">
-            <Users size={14} className="text-[#c4111d]" />
-            Oyuncu İstatistikleri
-            <span className="text-[10px] font-normal text-[#8c919a] bg-[#e2e5e9] px-1.5 py-0.5 rounded-md">{sortedReports.length} oyuncu</span>
-          </h3>
+        <div className="px-5 py-4 border-b border-[#e2e5e9] bg-[#1a1a2e]">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center">
+                <Users size={18} className="text-white" />
+              </div>
+              <div>
+                <h3 className="text-sm font-bold text-white tracking-tight">Oyuncu İstatistikleri</h3>
+                <p className="text-[10px] text-white/50 mt-0.5">Detaylı performans verileri</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-[11px] font-bold text-white bg-[#c4111d] px-3 py-1.5 rounded-full shadow-sm">{sortedReports.length} oyuncu</span>
+            </div>
+          </div>
         </div>
 
         {sortedReports.length === 0 ? (

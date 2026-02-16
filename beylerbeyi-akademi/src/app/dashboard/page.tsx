@@ -6,6 +6,8 @@ import Image from "next/image";
 import { useAppData } from "@/lib/app-data";
 import { Match } from "@/types/match";
 import MatchDetailModal from "@/components/MatchDetailModal";
+import MatchFormModal from "@/components/MatchFormModal";
+import { useToast } from "@/components/Toast";
 
 export default function DashboardPage() {
     // Yaş grubu renkleri
@@ -17,9 +19,46 @@ export default function DashboardPage() {
       U19: 'bg-red-500',
       default: 'bg-gray-400',
     };
-    const { players, matches, loading } = useAppData();
+    const { players, matches, loading, saveMatch, removeMatch, userRole } = useAppData();
+    const { showToast } = useToast();
 
     const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
+    const [editingMatch, setEditingMatch] = useState<Match | null | undefined>(undefined);
+    const [saving, setSaving] = useState(false);
+
+    const canEdit = userRole?.role === "yonetici" || userRole?.role === "antrenor";
+
+    const handleSaveMatch = async (saved: Match) => {
+      try {
+        setSaving(true);
+        const isEdit = matches.some((m) => m.id === saved.id);
+        await saveMatch(saved, isEdit);
+        setEditingMatch(undefined);
+        setSelectedMatch(null);
+        showToast("success", isEdit ? "Maç başarıyla güncellendi" : "Maç başarıyla kaydedildi");
+      } catch (err) {
+        console.error("Maç kaydedilemedi:", err);
+        showToast("error", "Maç kaydedilemedi. Lütfen tekrar deneyin.");
+      } finally {
+        setSaving(false);
+      }
+    };
+
+    const handleEditFromDetail = (match: Match) => {
+      setSelectedMatch(null);
+      setEditingMatch(match);
+    };
+
+    const handleDeleteMatch = async (matchId: string) => {
+      try {
+        await removeMatch(matchId);
+        setSelectedMatch(null);
+        showToast("success", "Maç başarıyla silindi");
+      } catch (err) {
+        console.error("Maç silinemedi:", err);
+        showToast("error", "Maç silinemedi. Lütfen tekrar deneyin.");
+      }
+    };
 
     // Dynamic puan durumu state
     const [selectedAge, setSelectedAge] = useState('U15');
@@ -80,17 +119,19 @@ export default function DashboardPage() {
   // ── Sadece oynanan maçlar (istatistikler için) ──
   const playedMatches = useMemo(() => matches.filter((m) => m.status === "played"), [matches]);
 
-  // ── Bugünden itibaren 7 gün içindeki maçlar ──
+  // ── Son 3 gün + önümüzdeki 7 gün içindeki maçlar ──
   const upcomingMatches = useMemo(() => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
+    const threeDaysAgo = new Date(today);
+    threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
     const weekLater = new Date(today);
     weekLater.setDate(weekLater.getDate() + 7);
 
     return matches
       .filter((m) => {
         const d = new Date(m.date);
-        return d >= today && d <= weekLater;
+        return d >= threeDaysAgo && d <= weekLater;
       })
       .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
   }, [matches]);
@@ -492,7 +533,7 @@ export default function DashboardPage() {
             </div>
             <div>
               <h2 className="text-sm md:text-base font-bold text-[#1a1a2e]">Haftalık Maç Takvimi</h2>
-              <p className="text-[10px] md:text-xs text-[#8c919a]">Önümüzdeki 7 gün</p>
+              <p className="text-[10px] md:text-xs text-[#8c919a]">Son 3 gün + Önümüzdeki 7 gün</p>
             </div>
           </div>
           {!loading && upcomingMatches.length > 0 && (
@@ -509,7 +550,7 @@ export default function DashboardPage() {
             <div className="text-center py-8">
               <Calendar size={28} className="mx-auto mb-2 text-[#e2e5e9]" />
               <p className="text-xs font-medium text-[#5a6170]">Planlanmış maç yok</p>
-              <p className="text-[10px] text-[#8c919a] mt-1">Önümüzdeki 7 gün içinde maç bulunmuyor.</p>
+              <p className="text-[10px] text-[#8c919a] mt-1">Son 3 gün ve önümüzdeki 7 gün içinde maç bulunmuyor.</p>
             </div>
           ) : (
             <div className="space-y-2">
@@ -519,7 +560,10 @@ export default function DashboardPage() {
                 const dayNum = d.getDate();
                 const monthStr = d.toLocaleDateString("tr-TR", { month: "long" });
                 const isHome = m.homeAway === "home";
-                const isToday = d.toDateString() === new Date().toDateString();
+                const now = new Date();
+                now.setHours(0, 0, 0, 0);
+                const isToday = d.toDateString() === now.toDateString();
+                const isPast = d < now && !isToday;
 
                 return (
                   <button
@@ -528,17 +572,19 @@ export default function DashboardPage() {
                     className={`w-full flex items-stretch rounded-lg md:rounded-xl border transition-all duration-200 text-left group hover:shadow-md ${
                       isToday
                         ? "border-[#c4111d]/30 bg-[#fef8f8] hover:border-[#c4111d]/50 hover:shadow-[#c4111d]/10"
-                        : "border-[#e2e5e9] bg-white hover:border-[#c4111d]/25 hover:shadow-[#c4111d]/5"
+                        : isPast
+                          ? "border-[#e2e5e9] bg-[#f8f9fb] opacity-75 hover:opacity-100 hover:border-[#c4111d]/25 hover:shadow-[#c4111d]/5"
+                          : "border-[#e2e5e9] bg-white hover:border-[#c4111d]/25 hover:shadow-[#c4111d]/5"
                     }`}
                   >
                     {/* Tarih bloğu */}
                     <div className={`w-14 md:w-20 shrink-0 flex flex-col items-center justify-center py-2.5 md:py-4 rounded-l-lg md:rounded-l-xl ${
-                      isToday ? "bg-[#c4111d]" : "bg-[#f8f9fb]"
+                      isToday ? "bg-[#c4111d]" : isPast ? "bg-[#e8eaed]" : "bg-[#f8f9fb]"
                     }`}>
                       <span className={`text-[8px] md:text-[10px] font-semibold uppercase ${isToday ? "text-white/70" : "text-[#8c919a]"}`}>
                         {isToday ? "BUGÜN" : dayName.slice(0, 3)}
                       </span>
-                      <span className={`text-lg md:text-2xl font-black leading-none ${isToday ? "text-white" : "text-[#1a1a2e]"}`}>
+                      <span className={`text-lg md:text-2xl font-black leading-none ${isToday ? "text-white" : isPast ? "text-[#5a6170]" : "text-[#1a1a2e]"}`}>
                         {dayNum}
                       </span>
                       <span className={`text-[8px] md:text-[10px] font-medium ${isToday ? "text-white/60" : "text-[#8c919a]"}`}>
@@ -721,7 +767,19 @@ export default function DashboardPage() {
         <MatchDetailModal
           match={selectedMatch}
           onClose={() => setSelectedMatch(null)}
-          onEdit={() => setSelectedMatch(null)}
+          {...(canEdit ? { onEdit: handleEditFromDetail } : {})}
+          {...(userRole?.role === "yonetici" ? { onDelete: handleDeleteMatch } : {})}
+        />
+      )}
+
+      {/* Match Form Modal */}
+      {editingMatch !== undefined && canEdit && (
+        <MatchFormModal
+          match={editingMatch}
+          players={players}
+          saving={saving}
+          onClose={() => setEditingMatch(undefined)}
+          onSave={handleSaveMatch}
         />
       )}
     </div>
