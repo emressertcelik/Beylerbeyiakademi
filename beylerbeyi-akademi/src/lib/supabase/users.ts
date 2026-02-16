@@ -29,15 +29,17 @@ export async function fetchAllUsersWithRoles(ageGroup?: string): Promise<Supabas
 }
 
 // Yeni kullanıcı oluştur ve role ata
-export async function inviteUserWithRole(email: string, role: UserRole): Promise<{ success: boolean; error?: string }> {
+export async function inviteUserWithRole(email: string, role: UserRole, age_group?: string | null): Promise<{ success: boolean; error?: string }> {
   const supabase = createClient();
   // Kullanıcıyı davet et
   const { data, error } = await supabase.auth.admin.inviteUserByEmail(email);
   if (error || !data?.user) return { success: false, error: error?.message };
   // user_roles tablosuna ekle
+  const insertData: { user_id: string; role: UserRole; age_group?: string } = { user_id: data.user.id, role };
+  if (age_group) insertData.age_group = age_group;
   const { error: roleError } = await supabase
     .from("user_roles")
-    .insert([{ user_id: data.user.id, role }]);
+    .insert([insertData]);
   if (roleError) return { success: false, error: roleError.message };
   return { success: true };
 }
@@ -48,6 +50,17 @@ export async function updateUserRole(user_id: string, role: UserRole): Promise<{
   const { error } = await supabase
     .from("user_roles")
     .update({ role })
+    .eq("user_id", user_id);
+  if (error) return { success: false, error: error.message };
+  return { success: true };
+}
+
+// Kullanıcı yaş grubunu güncelle
+export async function updateUserAgeGroup(user_id: string, age_group: string | null): Promise<{ success: boolean; error?: string }> {
+  const supabase = createClient();
+  const { error } = await supabase
+    .from("user_roles")
+    .update({ age_group })
     .eq("user_id", user_id);
   if (error) return { success: false, error: error.message };
   return { success: true };

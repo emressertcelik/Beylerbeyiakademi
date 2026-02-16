@@ -9,7 +9,7 @@ import {
   deleteLookupItem,
   LookupItem,
 } from "@/lib/supabase/lookups";
-import { fetchAllUsersWithRoles, inviteUserWithRole, updateUserRole, SupabaseUser } from "@/lib/supabase/users";
+import { fetchAllUsersWithRoles, inviteUserWithRole, updateUserRole, updateUserAgeGroup, SupabaseUser } from "@/lib/supabase/users";
 import { UserRole } from "@/types/userRole";
 import { createClient } from "@/lib/supabase/client";
 import {
@@ -74,6 +74,7 @@ export default function SettingsPage() {
   const [users, setUsers] = useState<SupabaseUser[]>([]);
   const [userEmail, setUserEmail] = useState("");
   const [userRoleToAdd, setUserRoleToAdd] = useState("oyuncu");
+  const [userAgeGroupToAdd, setUserAgeGroupToAdd] = useState("");
   const [userSaveLoading, setUserSaveLoading] = useState<string | null>(null);
   const [userError, setUserError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
@@ -477,9 +478,10 @@ export default function SettingsPage() {
               setUserSaveLoading("add");
               setUserError(null);
               try {
-                await inviteUserWithRole(userEmail.trim(), userRoleToAdd as UserRole);
+                await inviteUserWithRole(userEmail.trim(), userRoleToAdd as UserRole, userAgeGroupToAdd || null);
                 setUserEmail("");
                 setUserRoleToAdd("oyuncu");
+                setUserAgeGroupToAdd("");
                 await loadUsers();
               } catch (err: any) {
                 setUserError(err?.message || "Kullanıcı eklenemedi");
@@ -508,6 +510,17 @@ export default function SettingsPage() {
                 <option value="antrenor">Antrenör</option>
                 <option value="yonetici">Yönetici</option>
               </select>
+              <select
+                value={userAgeGroupToAdd}
+                onChange={(e) => setUserAgeGroupToAdd(e.target.value)}
+                className="flex-1 px-3 py-2 rounded-lg border border-[#e2e5e9] text-sm"
+                disabled={userSaveLoading === "add"}
+              >
+                <option value="">Yaş Grubu Yok</option>
+                {(lookups.ageGroups ?? []).filter(ag => ag.isActive).map(ag => (
+                  <option key={ag.id} value={ag.value}>{ag.value}</option>
+                ))}
+              </select>
               <button
                 type="submit"
                 className="px-4 py-2 rounded-lg bg-[#c4111d] text-white text-sm font-semibold hover:bg-[#a30e17] transition-colors disabled:opacity-50 shrink-0"
@@ -524,27 +537,51 @@ export default function SettingsPage() {
             {users.map((user) => (
               <div key={user.id} className="bg-white rounded-xl border border-[#e2e5e9] p-3">
                 <p className="text-sm font-medium text-[#1a1a2e] truncate mb-2">{user.email}</p>
-                <select
-                  value={user.role}
-                  onChange={async (e) => {
-                    setUserSaveLoading(user.id);
-                    setUserError(null);
-                    try {
-                      await updateUserRole(user.id, e.target.value as UserRole);
-                      await loadUsers();
-                    } catch (err: any) {
-                      setUserError(err?.message || "Rol güncellenemedi");
-                    } finally {
-                      setUserSaveLoading(null);
-                    }
-                  }}
-                  className="w-full px-2 py-1.5 rounded-lg border border-[#e2e5e9] text-sm"
-                  disabled={userSaveLoading === user.id}
-                >
-                  <option value="oyuncu">Oyuncu</option>
-                  <option value="antrenor">Antrenör</option>
-                  <option value="yonetici">Yönetici</option>
-                </select>
+                <div className="flex gap-2">
+                  <select
+                    value={user.role}
+                    onChange={async (e) => {
+                      setUserSaveLoading(user.id);
+                      setUserError(null);
+                      try {
+                        await updateUserRole(user.id, e.target.value as UserRole);
+                        await loadUsers();
+                      } catch (err: any) {
+                        setUserError(err?.message || "Rol güncellenemedi");
+                      } finally {
+                        setUserSaveLoading(null);
+                      }
+                    }}
+                    className="flex-1 px-2 py-1.5 rounded-lg border border-[#e2e5e9] text-sm"
+                    disabled={userSaveLoading === user.id}
+                  >
+                    <option value="oyuncu">Oyuncu</option>
+                    <option value="antrenor">Antrenör</option>
+                    <option value="yonetici">Yönetici</option>
+                  </select>
+                  <select
+                    value={user.age_group || ""}
+                    onChange={async (e) => {
+                      setUserSaveLoading(user.id);
+                      setUserError(null);
+                      try {
+                        await updateUserAgeGroup(user.id, e.target.value || null);
+                        await loadUsers();
+                      } catch (err: any) {
+                        setUserError(err?.message || "Yaş grubu güncellenemedi");
+                      } finally {
+                        setUserSaveLoading(null);
+                      }
+                    }}
+                    className="flex-1 px-2 py-1.5 rounded-lg border border-[#e2e5e9] text-sm"
+                    disabled={userSaveLoading === user.id}
+                  >
+                    <option value="">Yaş Grubu Yok</option>
+                    {(lookups.ageGroups ?? []).filter(ag => ag.isActive).map(ag => (
+                      <option key={ag.id} value={ag.value}>{ag.value}</option>
+                    ))}
+                  </select>
+                </div>
               </div>
             ))}
           </div>
@@ -556,6 +593,7 @@ export default function SettingsPage() {
                 <tr>
                   <th className="px-4 py-2.5 text-left border-b border-[#e2e5e9]">E-posta</th>
                   <th className="px-4 py-2.5 text-left border-b border-[#e2e5e9]">Rol</th>
+                  <th className="px-4 py-2.5 text-left border-b border-[#e2e5e9]">Yaş Grubu</th>
                 </tr>
               </thead>
               <tbody>
@@ -583,6 +621,30 @@ export default function SettingsPage() {
                         <option value="oyuncu">Oyuncu</option>
                         <option value="antrenor">Antrenör</option>
                         <option value="yonetici">Yönetici</option>
+                      </select>
+                    </td>
+                    <td className="px-4 py-2.5 align-middle">
+                      <select
+                        value={user.age_group || ""}
+                        onChange={async (e) => {
+                          setUserSaveLoading(user.id);
+                          setUserError(null);
+                          try {
+                            await updateUserAgeGroup(user.id, e.target.value || null);
+                            await loadUsers();
+                          } catch (err: any) {
+                            setUserError(err?.message || "Yaş grubu güncellenemedi");
+                          } finally {
+                            setUserSaveLoading(null);
+                          }
+                        }}
+                        className="px-2 py-1 rounded border border-[#e2e5e9] text-sm"
+                        disabled={userSaveLoading === user.id}
+                      >
+                        <option value="">—</option>
+                        {(lookups.ageGroups ?? []).filter(ag => ag.isActive).map(ag => (
+                          <option key={ag.id} value={ag.value}>{ag.value}</option>
+                        ))}
                       </select>
                     </td>
                   </tr>

@@ -118,7 +118,10 @@ export default function TanitimPage() {
 
   useEffect(() => {
     fetchAgeGroups()
-      .then((groups) => setAgeGroupCount(groups.filter((g) => g.isActive).length))
+      .then((groups) => {
+        const count = groups.filter((g) => g.isActive).length;
+        if (count > 0) setAgeGroupCount(count);
+      })
       .catch(() => {});
   }, []);
 
