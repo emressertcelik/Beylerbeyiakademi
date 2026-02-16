@@ -3,8 +3,14 @@ import { NextResponse, type NextRequest } from "next/server";
 
 export async function middleware(request: NextRequest) {
   try {
-    // Public API routes - skip auth
-    if (request.nextUrl.pathname.startsWith("/api/puan-durumu")) {
+    // PWA dosyaları ve public API - auth atla
+    const path = request.nextUrl.pathname;
+    if (
+      path === "/manifest.json" ||
+      path === "/sw.js" ||
+      path.startsWith("/icons/") ||
+      path.startsWith("/api/puan-durumu")
+    ) {
       return NextResponse.next();
     }
 
@@ -26,6 +32,6 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    "/((?!_next/static|_next/image|favicon.ico|sw\\.js|manifest\\.json|.*\\.(?:svg|png|jpg|jpeg|gif|webp|json|js)$).*)",
   ],
 };
