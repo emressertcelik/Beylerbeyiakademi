@@ -32,6 +32,11 @@ export default function DashboardPage() {
       try {
         setSaving(true);
         const isEdit = matches.some((m) => m.id === saved.id);
+        if (userRole?.role === "antrenor" && userRole.age_group && saved.ageGroup !== userRole.age_group) {
+          showToast("error", "Sadece kendi yaş grubunuz için maç düzenleyebilirsiniz.");
+          setSaving(false);
+          return;
+        }
         await saveMatch(saved, isEdit);
         setEditingMatch(undefined);
         setSelectedMatch(null);
@@ -767,7 +772,7 @@ export default function DashboardPage() {
         <MatchDetailModal
           match={selectedMatch}
           onClose={() => setSelectedMatch(null)}
-          {...(canEdit ? { onEdit: handleEditFromDetail } : {})}
+          {...(canEdit && (userRole?.role === "yonetici" || (userRole?.role === "antrenor" && selectedMatch.ageGroup === userRole.age_group)) ? { onEdit: handleEditFromDetail } : {})}
           {...(userRole?.role === "yonetici" ? { onDelete: handleDeleteMatch } : {})}
         />
       )}

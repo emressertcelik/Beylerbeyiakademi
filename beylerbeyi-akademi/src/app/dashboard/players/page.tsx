@@ -55,10 +55,10 @@ export default function PlayersPage() {
   const selectedSeasonLabel = SEASON_FILTERS.find((f) => f.value === selectedSeason)?.label || "Tüm Sezonlar";
 
   // Enrich players with match-based stats
-  // Filter by userRole (antrenor: only own age group)
+  // Filter by userRole (antrenor/oyuncu: only own age group)
   const filteredPlayers = useMemo(() => {
     let filtered = players;
-    if (userRole?.role === "antrenor" && userRole.age_group) {
+    if ((userRole?.role === "antrenor" || userRole?.role === "oyuncu") && userRole.age_group) {
       filtered = filtered.filter((p) => p.ageGroup === userRole.age_group);
     }
     // Apply UI filters

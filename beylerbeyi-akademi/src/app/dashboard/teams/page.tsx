@@ -101,10 +101,10 @@ export default function TeamsPage() {
 
   const selectedSeasonLabel = SEASON_FILTERS.find((f) => f.value === selectedSeason)?.label || "Tüm Sezonlar";
 
-  // Filter by userRole (antrenor: only own age group)
+  // Filter by userRole (antrenor/oyuncu: only own age group)
   const filteredMatches = useMemo(() => {
     let filtered = matches;
-    if (userRole?.role === "antrenor" && userRole.age_group) {
+    if ((userRole?.role === "antrenor" || userRole?.role === "oyuncu") && userRole.age_group) {
       filtered = filtered.filter((m) => m.ageGroup === userRole.age_group);
     }
     filtered = filtered.filter((m) => {
