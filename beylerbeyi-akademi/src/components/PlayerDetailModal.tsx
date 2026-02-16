@@ -5,7 +5,7 @@ import { Player, SkillLog, BodyLog } from "@/types/player";
 import { Match } from "@/types/match";
 import { fetchSkillLogs, fetchBodyLogs } from "@/lib/supabase/players";
 import { fetchMatchesByPlayer } from "@/lib/supabase/matches";
-import { X, Edit3, Trash2, TrendingUp, TrendingDown, ArrowUp, ArrowDown, Ruler, Weight, ChevronDown, UserCheck, ArrowRightLeft, Cross, ShieldBan, UserX, Clock, Star, AlertTriangle, Ban, Users } from "lucide-react";
+import { X, Edit3, Trash2, TrendingUp, TrendingDown, ArrowUp, ArrowDown, Ruler, Weight, ChevronDown, Clock, Star, AlertTriangle, Ban, Users } from "lucide-react";
 
 interface PlayerDetailModalProps {
   player: Player;
@@ -63,6 +63,7 @@ export default function PlayerDetailModal({ player, onClose, onEdit, onDelete, u
   const [physicalOpen, setPhysicalOpen] = useState(false);
   const [historyOpen, setHistoryOpen] = useState(false);
   const [playerMatches, setPlayerMatches] = useState<Match[]>([]);
+  const [selectedSeason, setSelectedSeason] = useState<string>("ALL");
 
   // Position-based header gradient colors (matching PlayerCard)
   const positionGradient: Record<string, string> = {
@@ -100,11 +101,26 @@ export default function PlayerDetailModal({ player, onClose, onEdit, onDelete, u
     return () => { cancelled = true; };
   }, [player.id]);
 
-  // Katılım istatistiklerini hesapla
+  // Sezon listesi (maçlardan türet)
+  const availableSeasons = useMemo(() => {
+    const seasons = new Set<string>();
+    playerMatches.forEach(m => { if (m.season) seasons.add(m.season); });
+    return Array.from(seasons).sort().reverse();
+  }, [playerMatches]);
+
+  // Sezona göre filtrelenmiş maçlar
+  const filteredMatches = useMemo(() => {
+    return playerMatches.filter(m => {
+      if (m.status !== "played") return false;
+      if (selectedSeason !== "ALL" && m.season !== selectedSeason) return false;
+      return true;
+    });
+  }, [playerMatches, selectedSeason]);
+
+  // Katılım istatistiklerini hesapla (sezon bazlı)
   const participationStats = useMemo(() => {
     const stats = { ilk11: 0, yedek: 0, sureAlmadi: 0, kadroYok: 0, sakat: 0, cezali: 0 };
-    playerMatches.forEach(match => {
-      if (match.status !== "played") return;
+    filteredMatches.forEach(match => {
       const ps = match.playerStats.find(p => p.playerId === player.id);
       if (!ps) return;
       const s = (ps.participationStatus || "").toLowerCase();
@@ -116,16 +132,36 @@ export default function PlayerDetailModal({ player, onClose, onEdit, onDelete, u
       else if (s.includes("ceza")) stats.cezali++;
     });
     return stats;
-  }, [playerMatches, player.id]);
+  }, [filteredMatches, player.id]);
+
+  // Sezon bazlı maç istatistikleri
+  const seasonStats = useMemo(() => {
+    const s = { matches: 0, minutesPlayed: 0, goals: 0, assists: 0, yellowCards: 0, redCards: 0, goalsConceded: 0, cleanSheets: 0 };
+    filteredMatches.forEach(match => {
+      const ps = match.playerStats.find(p => p.playerId === player.id);
+      if (!ps) return;
+      const status = (ps.participationStatus || "").toLowerCase();
+      if (status === "ana kadro" || status === "sonradan girdi") {
+        s.matches++;
+        s.minutesPlayed += ps.minutesPlayed || 0;
+        s.goals += ps.goals || 0;
+        s.assists += ps.assists || 0;
+        s.yellowCards += ps.yellowCards || 0;
+        s.redCards += ps.redCards || 0;
+        s.goalsConceded += ps.goalsConceded || 0;
+        if (ps.cleanSheet) s.cleanSheets++;
+      }
+    });
+    return s;
+  }, [filteredMatches, player.id]);
 
   const playerAllMatches = useMemo(() => {
-    return playerMatches
-      .filter(m => m.status === "played")
+    return filteredMatches
       .map(match => ({
         match,
         playerStat: match.playerStats.find(ps => ps.playerId === player.id),
       }));
-  }, [playerMatches, player.id]);
+  }, [filteredMatches, player.id]);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-fade-in">
@@ -161,14 +197,6 @@ export default function PlayerDetailModal({ player, onClose, onEdit, onDelete, u
 
         {/* Aksiyon butonları */}
         <div className="flex items-center gap-2 px-4 sm:px-6 py-2.5 border-b border-[#e2e5e9] bg-[#f8f9fb]">
-          <a
-            href={`/dashboard/reports/${player.id}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-[#c4111d] hover:bg-[#9b0d16] text-white text-[11px] font-semibold rounded-lg transition-all shadow-sm"
-          >
-            Rapor
-          </a>
           {onEdit && (
             <button
               onClick={() => onEdit(player)}
@@ -296,19 +324,48 @@ export default function PlayerDetailModal({ player, onClose, onEdit, onDelete, u
           </CollapsibleSection>
 
           {/* İstatistikler */}
-          <Section title="Maç İstatistikleri">
+          <section>
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-xs font-semibold text-[#8c919a] uppercase tracking-wider">Maç İstatistikleri</h3>
+              {/* Sezon Filtresi */}
+              <div className="flex items-center gap-1 overflow-x-auto">
+                <button
+                  onClick={() => setSelectedSeason("ALL")}
+                  className={`px-2.5 py-1 text-[10px] font-semibold rounded-md transition-all whitespace-nowrap ${
+                    selectedSeason === "ALL"
+                      ? "bg-[#c4111d] text-white shadow-sm"
+                      : "text-[#5a6170] bg-[#f1f3f5] hover:text-[#1a1a2e]"
+                  }`}
+                >
+                  Tümü
+                </button>
+                {availableSeasons.map(s => (
+                  <button
+                    key={s}
+                    onClick={() => setSelectedSeason(s)}
+                    className={`px-2.5 py-1 text-[10px] font-semibold rounded-md transition-all whitespace-nowrap ${
+                      selectedSeason === s
+                        ? "bg-[#c4111d] text-white shadow-sm"
+                        : "text-[#5a6170] bg-[#f1f3f5] hover:text-[#1a1a2e]"
+                    }`}
+                  >
+                    {s}
+                  </button>
+                ))}
+              </div>
+            </div>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-              <StatBox label="Maç" value={player.stats.matches} />
-              <StatBox label="Dk. Oynanan" value={player.stats.minutesPlayed} />
+              <StatBox label="Maç" value={seasonStats.matches} />
+              <StatBox label="Dk. Oynanan" value={seasonStats.minutesPlayed} />
               {isGoalkeeper ? (
                 <>
-                  <StatBox label="Yenilen Gol" value={player.stats.goalsConceded} color="text-orange-500" />
-                  <StatBox label="Clean Sheet" value={player.stats.cleanSheets} color="text-emerald-500" />
+                  <StatBox label="Yenilen Gol" value={seasonStats.goalsConceded} color="text-orange-500" />
+                  <StatBox label="Clean Sheet" value={seasonStats.cleanSheets} color="text-emerald-500" />
                 </>
               ) : (
                 <>
-                  <StatBox label="Gol" value={player.stats.goals} color="text-emerald-500" />
-                  <StatBox label="Asist" value={player.stats.assists} color="text-blue-500" />
+                  <StatBox label="Gol" value={seasonStats.goals} color="text-emerald-500" />
+                  <StatBox label="Asist" value={seasonStats.assists} color="text-blue-500" />
                 </>
               )}
             </div>
@@ -316,14 +373,14 @@ export default function PlayerDetailModal({ player, onClose, onEdit, onDelete, u
               <div className="bg-[#f8f9fb] rounded-xl p-4 flex items-center gap-3 border border-[#e2e5e9]">
                 <span className="inline-block w-4 h-5 rounded-[3px] bg-yellow-400" />
                 <div>
-                  <p className="text-base font-bold text-[#1a1a2e]">{player.stats.yellowCards}</p>
+                  <p className="text-base font-bold text-[#1a1a2e]">{seasonStats.yellowCards}</p>
                   <p className="text-[11px] text-[#8c919a]">Sarı Kart</p>
                 </div>
               </div>
               <div className="bg-[#f8f9fb] rounded-xl p-4 flex items-center gap-3 border border-[#e2e5e9]">
                 <span className="inline-block w-4 h-5 rounded-[3px] bg-red-500" />
                 <div>
-                  <p className="text-base font-bold text-[#1a1a2e]">{player.stats.redCards}</p>
+                  <p className="text-base font-bold text-[#1a1a2e]">{seasonStats.redCards}</p>
                   <p className="text-[11px] text-[#8c919a]">Kırmızı Kart</p>
                 </div>
               </div>
@@ -337,7 +394,7 @@ export default function PlayerDetailModal({ player, onClose, onEdit, onDelete, u
               <StatBox label="Sakat" value={participationStats.sakat} color="text-orange-500" />
               <StatBox label="Cezalı" value={participationStats.cezali} color="text-red-500" />
             </div>
-            {/* Oyuncunun Maçları */}
+            {/* Oyuncunun Maçları - Mini Fikstür */}
             <div className="mt-4">
               <p className="text-[11px] text-[#8c919a] font-medium uppercase tracking-wider mb-2">Oynadığı Maçlar</p>
               {logsLoading ? (
@@ -347,78 +404,121 @@ export default function PlayerDetailModal({ player, onClose, onEdit, onDelete, u
               ) : playerAllMatches.length === 0 ? (
                 <p className="text-xs text-[#8c919a] text-center py-3">Henüz oynanan maç bulunmuyor.</p>
               ) : (
-                <div className="space-y-2.5 max-h-[400px] overflow-y-auto pr-1">
+                <div className="bg-[#f8f9fb] rounded-xl border border-[#e2e5e9] divide-y divide-[#e2e5e9] max-h-[400px] overflow-y-auto">
                   {playerAllMatches.map(({ match, playerStat }) => {
-                    const played = match.status === "played";
                     const status = playerStat?.participationStatus || "";
-                    let StatusIcon = null;
-                    let statusObj = null;
-                    // Modern badge/tag for 'İlk 11'
+                    let StatusIcon: typeof Star | null = null;
+                    let statusObj: { text: string; bg: string; tag: string; border: string } | null = null;
                     if (status.toLowerCase() === "ana kadro" || status === "İlk 11") {
                       StatusIcon = Star;
-                      statusObj = { text: "text-emerald-600", bg: "bg-emerald-50", tag: "İlk 11" };
+                      statusObj = { text: "text-emerald-600", bg: "bg-emerald-50", tag: "İlk 11", border: "border-l-emerald-400" };
                     } else if (status === "Sonradan Girdi") {
                       StatusIcon = Clock;
-                      statusObj = { text: "text-blue-600", bg: "bg-blue-50", tag: "Yedek" };
+                      statusObj = { text: "text-blue-600", bg: "bg-blue-50", tag: "Yedek", border: "border-l-blue-400" };
                     } else if (status === "Sakat") {
                       StatusIcon = AlertTriangle;
-                      statusObj = { text: "text-orange-600", bg: "bg-orange-50", tag: "Sakat" };
+                      statusObj = { text: "text-orange-600", bg: "bg-orange-50", tag: "Sakat", border: "border-l-orange-400" };
                     } else if (status === "Cezalı") {
                       StatusIcon = Ban;
-                      statusObj = { text: "text-red-600", bg: "bg-red-50", tag: "Cezalı" };
+                      statusObj = { text: "text-red-600", bg: "bg-red-50", tag: "Cezalı", border: "border-l-red-400" };
                     } else if (status === "Kadroda Yok") {
                       StatusIcon = Users;
-                      statusObj = { text: "text-gray-600", bg: "bg-gray-50", tag: "Kadroda Yok" };
+                      statusObj = { text: "text-gray-500", bg: "bg-gray-50", tag: "Kadroda Yok", border: "border-l-gray-300" };
                     } else if (status === "Süre Almadı") {
                       StatusIcon = Clock;
-                      statusObj = { text: "text-yellow-600", bg: "bg-yellow-50", tag: "Süre Almadı" };
+                      statusObj = { text: "text-yellow-600", bg: "bg-yellow-50", tag: "Süre Almadı", border: "border-l-yellow-400" };
                     }
-                    // Modern card layout
+
+                    const matchDate = new Date(match.date);
+                    const day = matchDate.getDate();
+                    const month = matchDate.toLocaleDateString("tr-TR", { month: "short" }).toUpperCase();
+                    const isActive = statusObj && (statusObj.tag === "İlk 11" || statusObj.tag === "Yedek");
+                    const resultBg = match.scoreHome > match.scoreAway ? "bg-emerald-500" :
+                                     match.scoreHome < match.scoreAway ? "bg-red-500" : "bg-amber-400";
+
+                    const ageGroupColor: Record<string, string> = {
+                      U14: "bg-blue-100 text-blue-700",
+                      U15: "bg-green-100 text-green-700",
+                      U16: "bg-yellow-100 text-yellow-700",
+                      U17: "bg-purple-100 text-purple-700",
+                      U19: "bg-red-100 text-red-700",
+                    };
+
                     return (
-                      <div key={match.id} className="bg-[#f8f9fb] rounded-xl border border-[#e2e5e9] px-3 py-3 flex flex-col gap-1.5">
-                        <div className="flex items-center gap-3">
-                          <span className="text-xs font-semibold text-[#1a1a2e]">
-                            {match.week ? `${match.week}.Hafta` : "Hafta Bilgisi Yok"}
-                          </span>
-                          <span className="text-xs text-[#8c919a]">{match.opponent}</span>
-                          {/* Yaş grubu badge'i */}
-                          {match.ageGroup && (
-                            <span
-                              className={
-                                `px-2 py-0.5 rounded text-xs font-semibold ` +
-                                (match.ageGroup === "U15" ? "bg-blue-50 text-blue-700" :
-                                 match.ageGroup === "U16" ? "bg-emerald-50 text-emerald-700" :
-                                 match.ageGroup === "U17" ? "bg-amber-50 text-amber-700" :
-                                 match.ageGroup === "U18" ? "bg-red-50 text-red-700" :
-                                 "bg-slate-50 text-slate-600")
-                              }
-                            >{match.ageGroup}</span>
-                          )}
-                          {status && StatusIcon && statusObj ? (
-                            <div className={`flex items-center gap-1 px-2 py-1 rounded-lg shrink-0 ${statusObj.bg}`}> 
-                              <StatusIcon size={14} className={statusObj.text} />
-                              <span className={`text-[11px] font-bold ${statusObj.text}`}>{statusObj.tag}</span>
+                      <div key={match.id} className={`bg-white border-l-[3px] ${statusObj?.border || "border-l-gray-200"}`}>
+                        {/* Fikstür satırı */}
+                        <div className="flex items-center px-2.5 py-2 gap-2">
+                          {/* Tarih bloğu */}
+                          <div className="w-8 shrink-0 text-center">
+                            <p className="text-sm font-black text-[#1a1a2e] leading-none">{day}</p>
+                            <p className="text-[7px] font-bold text-[#8c919a] tracking-wider mt-0.5">{month}</p>
+                          </div>
+
+                          {/* Beylerbeyi logo + skor + rakip */}
+                          <div className="flex items-center gap-1.5 flex-1 min-w-0">
+                            <img src="/Logo_S.png" alt="BB" className="w-5 h-5 object-contain shrink-0" />
+                            <div className={`flex items-center gap-0.5 px-1.5 py-0.5 rounded ${resultBg} shrink-0`}>
+                              <span className="text-[11px] font-black text-white leading-none">{match.scoreHome}</span>
+                              <span className="text-[9px] text-white/60 font-medium">-</span>
+                              <span className="text-[11px] font-black text-white leading-none">{match.scoreAway}</span>
                             </div>
-                          ) : (
-                            <div className="flex items-center gap-1 px-2 py-1 rounded-lg shrink-0 bg-gray-50">
-                              <span className="text-[9px] text-gray-300">—</span>
+                            <span className="text-[11px] font-semibold text-[#1a1a2e] truncate">{match.opponent}</span>
+                          </div>
+
+                          {/* Yaş grubu badge */}
+                          {match.ageGroup && (
+                            <span className={`text-[8px] font-bold px-1.5 py-0.5 rounded shrink-0 ${ageGroupColor[match.ageGroup] || "bg-gray-100 text-gray-600"}`}>
+                              {match.ageGroup}
+                            </span>
+                          )}
+
+                          {/* Katılım badge - tam yazılı + ikonlu */}
+                          {statusObj && StatusIcon && (
+                            <div className={`flex items-center gap-1 px-1.5 py-0.5 rounded shrink-0 ${statusObj.bg}`}>
+                              <StatusIcon size={10} className={statusObj.text} />
+                              <span className={`text-[9px] font-bold ${statusObj.text}`}>{statusObj.tag}</span>
                             </div>
                           )}
                         </div>
-                        {playerStat && (
-                          <div className="flex flex-wrap items-center gap-3 border-t border-[#f0f1f3] bg-white/50 mt-1.5 pt-1.5 rounded-b-lg">
-                            {(statusObj && (statusObj.tag === "İlk 11" || statusObj.tag === "Yedek")) ? (
-                              <>
-                                <MatchMiniStat label="DK" value={String(playerStat.minutesPlayed)} />
-                                <MatchMiniStat label="GOL" value={String(playerStat.goals)} highlight={playerStat.goals > 0} color="emerald" />
-                                <MatchMiniStat label="AST" value={String(playerStat.assists)} highlight={playerStat.assists > 0} color="blue" />
-                                <MatchMiniStat label="SK" value={String(playerStat.yellowCards)} highlight={playerStat.yellowCards > 0} color="yellow" />
-                                <MatchMiniStat label="KK" value={String(playerStat.redCards)} highlight={playerStat.redCards > 0} color="red" />
-                                <MatchMiniStat label="YG" value={String(playerStat.goalsConceded)} highlight={playerStat.goalsConceded > 0} color="orange" />
-                                <MatchMiniStat label="CS" value={playerStat.cleanSheet ? "✓" : "—"} highlight={playerStat.cleanSheet} color="emerald" />
-                              </>
-                            ) : (
-                              <MatchMiniStat label="Katılım" value={statusObj?.tag || status} />
+
+                        {/* İstatistik ikonları (sadece oynadıysa) */}
+                        {isActive && playerStat && (
+                          <div className="flex items-center gap-3 px-2.5 pb-2 ml-10">
+                            {playerStat.minutesPlayed > 0 && (
+                              <span className="flex items-center gap-1 text-[10px] text-[#5a6170]">
+                                <Clock size={10} className="text-[#8c919a]" />
+                                <span className="font-semibold">{playerStat.minutesPlayed}&apos;</span>
+                              </span>
+                            )}
+                            {playerStat.goals > 0 && (
+                              <span className="flex items-center gap-1 text-[10px] text-emerald-600 font-bold" title="Gol">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/><path d="M12 2 L14 8 L20 8 L15 12 L17 18 L12 14 L7 18 L9 12 L4 8 L10 8 Z" fill="currentColor" opacity="0.3"/><circle cx="12" cy="12" r="3.5" fill="currentColor"/></svg>
+                                {playerStat.goals}
+                              </span>
+                            )}
+                            {playerStat.assists > 0 && (
+                              <span className="flex items-center gap-1 text-[10px] text-blue-600 font-bold" title="Asist">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/><circle cx="12" cy="12" r="6" stroke="currentColor" strokeWidth="1.5"/><circle cx="12" cy="12" r="2" fill="currentColor"/><line x1="12" y1="2" x2="12" y2="6" stroke="currentColor" strokeWidth="1.5"/><line x1="12" y1="18" x2="12" y2="22" stroke="currentColor" strokeWidth="1.5"/><line x1="2" y1="12" x2="6" y2="12" stroke="currentColor" strokeWidth="1.5"/><line x1="18" y1="12" x2="22" y2="12" stroke="currentColor" strokeWidth="1.5"/></svg>
+                                {playerStat.assists}
+                              </span>
+                            )}
+                            {isGoalkeeper && playerStat.goalsConceded > 0 && (
+                              <span className="flex items-center gap-1 text-[10px] text-orange-500 font-bold" title="Yenilen Gol">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="4" width="20" height="16" rx="1" stroke="currentColor" strokeWidth="2"/><line x1="12" y1="4" x2="12" y2="20" stroke="currentColor" strokeWidth="1" opacity="0.4"/><line x1="2" y1="12" x2="22" y2="12" stroke="currentColor" strokeWidth="1" opacity="0.4"/><circle cx="12" cy="12" r="3" fill="currentColor" opacity="0.5"/></svg>
+                                {playerStat.goalsConceded}
+                              </span>
+                            )}
+                            {playerStat.yellowCards > 0 && (
+                              <span className="flex items-center gap-1 text-[10px] text-yellow-600 font-bold" title="Sarı Kart">
+                                <span className="inline-block w-2.5 h-3.5 rounded-[2px] bg-yellow-400 shadow-sm" />
+                                {playerStat.yellowCards}
+                              </span>
+                            )}
+                            {playerStat.redCards > 0 && (
+                              <span className="flex items-center gap-1 text-[10px] text-red-600 font-bold" title="Kırmızı Kart">
+                                <span className="inline-block w-2.5 h-3.5 rounded-[2px] bg-red-500 shadow-sm" />
+                                {playerStat.redCards}
+                              </span>
                             )}
                           </div>
                         )}
@@ -428,7 +528,7 @@ export default function PlayerDetailModal({ player, onClose, onEdit, onDelete, u
                 </div>
               )}
             </div>
-          </Section>
+          </section>
 
           {/* Taktik Değerler */}
           {userRole?.role !== "oyuncu" && (
@@ -592,34 +692,3 @@ function StatBox({ label, value, color }: { label: string; value: number; color?
   );
 }
 
-function MiniStat({ label, value, color }: { label: string; value: number; color?: string }) {
-  return (
-    <span className="flex items-center gap-1">
-      <span className="text-[9px] text-[#8c919a]">{label}</span>
-      <span className={`text-[10px] font-bold ${color || "text-[#1a1a2e]"}`}>{value}</span>
-    </span>
-  );
-}
-
-function MatchMiniStat({ label, value, highlight, color }: {
-  label: string;
-  value: string;
-  highlight?: boolean;
-  color?: "emerald" | "blue" | "yellow" | "red" | "orange";
-}) {
-  const colorMap = {
-    emerald: "text-emerald-600",
-    blue: "text-blue-600",
-    yellow: "text-yellow-600",
-    red: "text-red-600",
-    orange: "text-orange-500",
-  };
-  return (
-    <div className="flex-1 flex flex-col items-center py-1.5 border-r border-[#f0f1f3] last:border-r-0">
-      <span className={`text-[11px] font-bold leading-none ${highlight && color ? colorMap[color] : "text-[#1a1a2e]"}`}>
-        {value}
-      </span>
-      <span className="text-[8px] text-[#8c919a] mt-0.5 uppercase tracking-wider">{label}</span>
-    </div>
-  );
-}
