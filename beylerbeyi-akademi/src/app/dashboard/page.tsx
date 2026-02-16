@@ -767,22 +767,6 @@ function LeaderRow({
         {rank}
       </div>
       <div className="flex-1 min-w-0">
-        U19: [
-          [1, "ARNAVUTKÖY BELEDİYESPOR", 18, 15, 2, 1, 54, 13, 41, 47],
-          [2, "K.ÇEKMECE SİNOPSPOR", 18, 13, 2, 3, 44, 18, 26, 41],
-          [3, "İSTANBUL BEYLİKDÜZÜ", 18, 12, 2, 4, 44, 22, 22, 38],
-          [4, "FERİKÖYSPOR", 18, 11, 3, 4, 38, 19, 19, 36],
-          [5, "AYAZAĞASPOR", 18, 10, 3, 5, 38, 23, 15, 33],
-          [6, "K.ÇEKMECESPOR", 18, 9, 4, 5, 36, 25, 11, 31],
-          [7, "BEYLERBEYİ 1911 FK.", 18, 8, 3, 7, 32, 28, 4, 27],
-          [8, "İST. GENÇLERBİRLİĞİ", 18, 7, 4, 7, 29, 29, 0, 25],
-          [9, "BAŞAKŞEHİRSPOR", 18, 6, 3, 9, 27, 34, -7, 21],
-          [10, "TUNÇSPOR", 18, 5, 4, 9, 24, 36, -12, 19],
-          [11, "GÜNGÖREN BELEDİYESPOR", 18, 4, 3, 11, 19, 38, -19, 15],
-          [12, "İNKİLAPSPOR", 18, 3, 2, 13, 18, 44, -26, 11],
-          [13, "KAVACIKSPOR", 18, 2, 2, 14, 14, 54, -40, 8],
-          [14, "ZARA EKİNLİSPOR", 18, 1, 1, 16, 10, 60, -50, 4],
-        ],
         <p className="text-sm font-medium text-[#1a1a2e] truncate">{name}</p>
         <p className="text-xs text-[#8c919a]">{matchCount} maç</p>
       </div>
