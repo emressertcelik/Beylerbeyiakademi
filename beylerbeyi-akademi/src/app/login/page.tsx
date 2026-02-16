@@ -176,9 +176,13 @@ export default function LoginPage() {
               </button>
             </div>
 
-            <div className="mt-8">
+            <div className="mt-8 flex items-center gap-4">
               <a href="/kilavuz" className="text-[#1b6e2a] hover:text-[#145220] text-xs font-medium transition-colors">
                 📖 Kullanım Kılavuzu
+              </a>
+              <span className="text-[#d0d7de]">|</span>
+              <a href="/tanitim" className="text-[#c4111d] hover:text-[#a50e18] text-xs font-medium transition-colors">
+                🏟️ Tanıtım
               </a>
             </div>
 

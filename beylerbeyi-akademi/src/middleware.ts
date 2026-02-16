@@ -10,7 +10,8 @@ export async function middleware(request: NextRequest) {
       path === "/sw.js" ||
       path.startsWith("/icons/") ||
       path.startsWith("/api/puan-durumu") ||
-      path === "/kilavuz"
+      path === "/kilavuz" ||
+      path === "/tanitim"
     ) {
       return NextResponse.next();
     }
