@@ -623,13 +623,13 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Gol Krallığı */}
         <div className="bg-white border border-[#e2e5e9] rounded-2xl overflow-hidden">
-          <div className="flex items-center gap-3 px-6 py-4 border-b border-[#e2e5e9]">
-            <div className="w-9 h-9 rounded-lg bg-emerald-50 flex items-center justify-center">
+          <div className="flex items-center gap-3 px-6 py-4 bg-emerald-50 border-b border-emerald-100">
+            <div className="w-9 h-9 rounded-lg bg-emerald-100 flex items-center justify-center">
               <Trophy size={18} className="text-emerald-600" />
             </div>
             <div>
-              <h2 className="text-base font-semibold text-[#1a1a2e]">Gol Krallığı</h2>
-              <p className="text-xs text-[#8c919a]">Tüm maçlar · Top 10</p>
+              <h2 className="text-base font-semibold text-emerald-800">Gol Krallığı</h2>
+              <p className="text-[11px] text-emerald-500">Tüm maçlar · Top 10</p>
             </div>
           </div>
 
@@ -640,7 +640,7 @@ export default function DashboardPage() {
           ) : (
             <div className="divide-y divide-[#e2e5e9]">
               {goalLeaders.map((p, i) => (
-                <LeaderRow key={p.id} rank={i + 1} name={p.name} stat={p.goals} matchCount={p.matches} statLabel="gol" />
+                <LeaderRow key={p.id} rank={i + 1} name={p.name} stat={p.goals} matchCount={p.matches} statLabel="gol" accentColor="emerald" />
               ))}
             </div>
           )}
@@ -648,13 +648,13 @@ export default function DashboardPage() {
 
         {/* Asist Krallığı */}
         <div className="bg-white border border-[#e2e5e9] rounded-2xl overflow-hidden">
-          <div className="flex items-center gap-3 px-6 py-4 border-b border-[#e2e5e9]">
-            <div className="w-9 h-9 rounded-lg bg-amber-50 flex items-center justify-center">
-              <Award size={18} className="text-amber-600" />
+          <div className="flex items-center gap-3 px-6 py-4 bg-blue-50 border-b border-blue-100">
+            <div className="w-9 h-9 rounded-lg bg-blue-100 flex items-center justify-center">
+              <Award size={18} className="text-blue-600" />
             </div>
             <div>
-              <h2 className="text-base font-semibold text-[#1a1a2e]">Asist Krallığı</h2>
-              <p className="text-xs text-[#8c919a]">Tüm maçlar · Top 10</p>
+              <h2 className="text-base font-semibold text-blue-800">Asist Krallığı</h2>
+              <p className="text-[11px] text-blue-500">Tüm maçlar · Top 10</p>
             </div>
           </div>
 
@@ -665,7 +665,7 @@ export default function DashboardPage() {
           ) : (
             <div className="divide-y divide-[#e2e5e9]">
               {assistLeaders.map((p, i) => (
-                <LeaderRow key={p.id} rank={i + 1} name={p.name} stat={p.assists} matchCount={p.matches} statLabel="asist" />
+                <LeaderRow key={p.id} rank={i + 1} name={p.name} stat={p.assists} matchCount={p.matches} statLabel="asist" accentColor="blue" />
               ))}
             </div>
           )}
@@ -745,12 +745,14 @@ function LeaderRow({
   stat,
   matchCount,
   statLabel,
+  accentColor,
 }: {
   rank: number;
   name: string;
   stat: number;
   matchCount: number;
   statLabel: string;
+  accentColor: "emerald" | "blue";
 }) {
   const rankColors =
     rank === 1
@@ -761,17 +763,20 @@ function LeaderRow({
           ? "bg-amber-600 text-white"
           : "bg-[#f1f3f5] text-[#5a6170]";
 
+  const statColor = accentColor === "emerald" ? "text-emerald-600" : "text-blue-600";
+  const rowBg = rank % 2 === 0 ? "bg-[#fafbfc]" : "bg-white";
+
   return (
-    <div className="flex items-center gap-4 px-6 py-3 hover:bg-[#f8f9fb] transition-colors">
-      <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${rankColors}`}>
+    <div className={`flex items-center gap-4 px-6 py-3 hover:bg-[#f4f5f7] transition-colors ${rowBg}`}>
+      <div className={`w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-bold shrink-0 ${rankColors}`}>
         {rank}
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium text-[#1a1a2e] truncate">{name}</p>
-        <p className="text-xs text-[#8c919a]">{matchCount} maç</p>
+        <p className={`text-sm truncate ${rank <= 3 ? "font-semibold text-[#1a1a2e]" : "font-medium text-[#3a3f4b]"}`}>{name}</p>
+        <p className="text-[11px] text-[#8c919a]">{matchCount} maç</p>
       </div>
       <div className="text-right shrink-0">
-        <p className="text-lg font-bold text-[#1a1a2e]">{stat}</p>
+        <p className={`text-lg font-bold ${statColor}`}>{stat}</p>
         <p className="text-[10px] text-[#8c919a] uppercase tracking-wider">{statLabel}</p>
       </div>
     </div>
