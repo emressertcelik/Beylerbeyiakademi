@@ -9,6 +9,10 @@
   "theme_color": "#c4111d",
   "orientation": "portrait",
   "scope": "/",
+  "prefer_related_applications": false,
+  "categories": ["sports", "utilities"],
+  "lang": "tr",
+  "dir": "ltr",
   "icons": [
     {
       "src": "/icons/icon-72x72.png",
