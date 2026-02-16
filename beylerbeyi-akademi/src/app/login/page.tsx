@@ -176,7 +176,13 @@ export default function LoginPage() {
               </button>
             </div>
 
-            <div className="mt-12 flex items-center justify-center gap-2">
+            <div className="mt-8">
+              <a href="/kilavuz" className="text-[#1b6e2a] hover:text-[#145220] text-xs font-medium transition-colors">
+                📖 Kullanım Kılavuzu
+              </a>
+            </div>
+
+            <div className="mt-6 flex items-center justify-center gap-2">
               <div className="w-2 h-2 rounded-full bg-[#c4111d]/30" />
               <p className="text-[#8b949e] text-[11px]">
                 &copy; {new Date().getFullYear()} Beylerbeyi Futbol Akademi

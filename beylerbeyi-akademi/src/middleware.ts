@@ -3,13 +3,14 @@ import { NextResponse, type NextRequest } from "next/server";
 
 export async function middleware(request: NextRequest) {
   try {
-    // PWA dosyaları ve public API - auth atla
+    // PWA dosyaları, public API ve kılavuz - auth atla
     const path = request.nextUrl.pathname;
     if (
       path === "/manifest.json" ||
       path === "/sw.js" ||
       path.startsWith("/icons/") ||
-      path.startsWith("/api/puan-durumu")
+      path.startsWith("/api/puan-durumu") ||
+      path === "/kilavuz"
     ) {
       return NextResponse.next();
     }
