@@ -149,12 +149,12 @@ export default function PlayersPage() {
       {/* Filtreler ve arama (Takımlar sayfası gibi) */}
       <div className="flex flex-col sm:flex-row gap-3 bg-white border border-[#e2e5e9] rounded-xl p-3 overflow-visible relative">
         {/* Yaş grubu sekmeleri */}
-        <div className="flex gap-1 bg-[#f1f3f5] rounded-lg p-1 min-w-[260px]">
+        <div className="flex gap-1 bg-[#f1f3f5] rounded-lg p-1 overflow-x-auto sm:overflow-visible">
           {AGE_FILTERS.map((f) => (
             <button
               key={f.value}
               onClick={() => setSelectedAge(f.value)}
-              className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-all duration-200 ${
+              className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-all duration-200 whitespace-nowrap shrink-0 ${
                 selectedAge === f.value
                   ? "bg-white text-[#c4111d] shadow-sm"
                   : "text-[#5a6170] hover:text-[#1a1a2e]"

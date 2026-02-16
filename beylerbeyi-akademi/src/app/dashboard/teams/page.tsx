@@ -182,27 +182,27 @@ export default function TeamsPage() {
       {/* Filters Bar */}
       <div className="flex flex-col sm:flex-row gap-3 bg-white border border-[#e2e5e9] rounded-xl p-3 overflow-visible relative">
         {/* Maç Durumu Filtresi */}
-        <div className="flex gap-1">
+        <div className="flex gap-1 overflow-x-auto sm:overflow-visible">
           <button
             onClick={() => setStatusFilter('all')}
-            className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-all duration-200 ${statusFilter === 'all' ? 'bg-[#c4111d] text-white shadow-sm' : 'text-[#5a6170] hover:text-[#1a1a2e] bg-[#f1f3f5]'}`}
+            className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-all duration-200 whitespace-nowrap ${statusFilter === 'all' ? 'bg-[#c4111d] text-white shadow-sm' : 'text-[#5a6170] hover:text-[#1a1a2e] bg-[#f1f3f5]'}`}
           >Tüm Maçlar</button>
           <button
             onClick={() => setStatusFilter('played')}
-            className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-all duration-200 ${statusFilter === 'played' ? 'bg-[#c4111d] text-white shadow-sm' : 'text-[#5a6170] hover:text-[#1a1a2e] bg-[#f1f3f5]'}`}
+            className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-all duration-200 whitespace-nowrap ${statusFilter === 'played' ? 'bg-[#c4111d] text-white shadow-sm' : 'text-[#5a6170] hover:text-[#1a1a2e] bg-[#f1f3f5]'}`}
           >Oynanmış</button>
           <button
             onClick={() => setStatusFilter('scheduled')}
-            className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-all duration-200 ${statusFilter === 'scheduled' ? 'bg-[#c4111d] text-white shadow-sm' : 'text-[#5a6170] hover:text-[#1a1a2e] bg-[#f1f3f5]'}`}
+            className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-all duration-200 whitespace-nowrap ${statusFilter === 'scheduled' ? 'bg-[#c4111d] text-white shadow-sm' : 'text-[#5a6170] hover:text-[#1a1a2e] bg-[#f1f3f5]'}`}
           >Planlanmış</button>
         </div>
         {/* Age group tabs */}
-        <div className="flex gap-1 bg-[#f1f3f5] rounded-lg p-1 min-w-[260px]">
+        <div className="flex gap-1 bg-[#f1f3f5] rounded-lg p-1 overflow-x-auto sm:overflow-visible">
           {AGE_FILTERS.map((f) => (
             <button
               key={f.value}
               onClick={() => setSelectedAge(f.value)}
-              className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-all duration-200 ${
+              className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-all duration-200 whitespace-nowrap shrink-0 ${
                 selectedAge === f.value
                   ? "bg-white text-[#c4111d] shadow-sm"
                   : "text-[#5a6170] hover:text-[#1a1a2e]"
