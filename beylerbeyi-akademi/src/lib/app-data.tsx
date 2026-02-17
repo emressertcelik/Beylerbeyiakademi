@@ -196,17 +196,21 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
         if (match.status !== "played") continue;
         const ps = match.playerStats.find((p) => p.playerId === playerId);
         if (ps) {
-          stats.matches += 1;
-          stats.goals += ps.goals;
-          stats.assists += ps.assists;
-          stats.yellowCards += ps.yellowCards;
-          stats.redCards += ps.redCards;
-          stats.goalsConceded += ps.goalsConceded;
-          if (ps.cleanSheet) stats.cleanSheets += 1;
-          stats.minutesPlayed += ps.minutesPlayed;
           const status = (ps.participationStatus || "").toLowerCase();
-          if (status === "ana kadro") stats.anaKadro += 1;
-          else if (status === "sonradan girdi" || status === "yedek") stats.yedek += 1;
+          const isPlayed = status === "ana kadro" || status === "sonradan girdi" || (!status && ps.minutesPlayed > 0);
+          if (isPlayed) {
+            stats.matches += 1;
+            stats.goals += ps.goals;
+            stats.assists += ps.assists;
+            stats.yellowCards += ps.yellowCards;
+            stats.redCards += ps.redCards;
+            stats.goalsConceded += ps.goalsConceded;
+            if (ps.cleanSheet) stats.cleanSheets += 1;
+            stats.minutesPlayed += ps.minutesPlayed;
+            if (status === "ana kadro") stats.anaKadro += 1;
+            else if (status === "sonradan girdi" || status === "yedek") stats.yedek += 1;
+            else if (!status && ps.minutesPlayed > 0) stats.anaKadro += 1;
+          }
         }
       }
 

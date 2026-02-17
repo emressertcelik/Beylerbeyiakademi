@@ -130,6 +130,12 @@ export default function PlayerDetailModal({ player, onClose, onEdit, onDelete, u
       else if (s === "kadroda yok") stats.kadroYok++;
       else if (s === "sakat") stats.sakat++;
       else if (s.includes("ceza")) stats.cezali++;
+      else if (!s && ps.minutesPlayed > 0) {
+        // participationStatus boş ama dakikası varsa oynamış demektir
+        stats.ilk11++;
+      } else if (!s && ps.minutesPlayed === 0) {
+        stats.sureAlmadi++;
+      }
     });
     return stats;
   }, [filteredMatches, player.id]);
@@ -141,7 +147,9 @@ export default function PlayerDetailModal({ player, onClose, onEdit, onDelete, u
       const ps = match.playerStats.find(p => p.playerId === player.id);
       if (!ps) return;
       const status = (ps.participationStatus || "").toLowerCase();
-      if (status === "ana kadro" || status === "sonradan girdi") {
+      // Oyuncunun maça katıldığı durumlar: ana kadro, sonradan girdi, veya status boş ama dakika > 0
+      const isPlayed = status === "ana kadro" || status === "sonradan girdi" || (!status && ps.minutesPlayed > 0);
+      if (isPlayed) {
         s.matches++;
         s.minutesPlayed += ps.minutesPlayed || 0;
         s.goals += ps.goals || 0;
@@ -150,6 +158,11 @@ export default function PlayerDetailModal({ player, onClose, onEdit, onDelete, u
         s.redCards += ps.redCards || 0;
         s.goalsConceded += ps.goalsConceded || 0;
         if (ps.cleanSheet) s.cleanSheets++;
+      }
+      // Sakat/cezalı oyuncuların da kart bilgilerini sayalım (maç dışı kırmızı kart gibi)
+      if (status === "sakat" || status === "cezali" || status === "cezalı") {
+        s.yellowCards += ps.yellowCards || 0;
+        s.redCards += ps.redCards || 0;
       }
     });
     return s;
@@ -427,12 +440,19 @@ export default function PlayerDetailModal({ player, onClose, onEdit, onDelete, u
                     } else if (status === "Süre Almadı") {
                       StatusIcon = Clock;
                       statusObj = { text: "text-yellow-600", bg: "bg-yellow-50", tag: "Süre Almadı", border: "border-l-yellow-400" };
+                    } else if (!status && playerStat && playerStat.minutesPlayed > 0) {
+                      // participationStatus boş ama dakikası var - oynadı
+                      StatusIcon = Star;
+                      statusObj = { text: "text-emerald-600", bg: "bg-emerald-50", tag: "Oynadı", border: "border-l-emerald-400" };
+                    } else if (!status && playerStat && playerStat.minutesPlayed === 0) {
+                      StatusIcon = Clock;
+                      statusObj = { text: "text-yellow-600", bg: "bg-yellow-50", tag: "Süre Almadı", border: "border-l-yellow-400" };
                     }
 
                     const matchDate = new Date(match.date);
                     const day = matchDate.getDate();
                     const month = matchDate.toLocaleDateString("tr-TR", { month: "short" }).toUpperCase();
-                    const isActive = statusObj && (statusObj.tag === "İlk 11" || statusObj.tag === "Yedek");
+                    const isActive = statusObj && (statusObj.tag === "İlk 11" || statusObj.tag === "Yedek" || statusObj.tag === "Oynadı");
                     const resultBg = match.scoreHome > match.scoreAway ? "bg-emerald-500" :
                                      match.scoreHome < match.scoreAway ? "bg-red-500" : "bg-amber-400";
 

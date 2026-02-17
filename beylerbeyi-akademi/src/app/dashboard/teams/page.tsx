@@ -67,6 +67,14 @@ export default function TeamsPage() {
       U19: 'bg-red-500 text-white',
       default: 'bg-gray-400 text-white',
     };
+    const ageGroupCardColors: Record<string, { border: string; headerBg: string }> = {
+      U14: { border: 'border-l-blue-500', headerBg: 'bg-blue-50' },
+      U15: { border: 'border-l-green-500', headerBg: 'bg-green-50' },
+      U16: { border: 'border-l-yellow-500', headerBg: 'bg-yellow-50' },
+      U17: { border: 'border-l-purple-500', headerBg: 'bg-purple-50' },
+      U19: { border: 'border-l-red-500', headerBg: 'bg-red-50' },
+      default: { border: 'border-l-gray-400', headerBg: 'bg-gray-50' },
+    };
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<'all' | 'played' | 'scheduled'>('all');
   const { players, matches, lookups, saveMatch, removeMatch, userRole } = useAppData();
@@ -300,14 +308,16 @@ export default function TeamsPage() {
             const dayMonth = matchDate.toLocaleDateString("tr-TR", { day: "numeric", month: "short" });
             const year = matchDate.getFullYear();
 
+            const cardColor = ageGroupCardColors[match.ageGroup] || ageGroupCardColors.default;
+
             return (
               <button
                 key={match.id}
                 onClick={() => setSelectedMatch(match)}
-                className="bg-white border border-[#e2e5e9] rounded-xl overflow-hidden text-left hover:border-[#c4111d]/30 hover:shadow-lg hover:shadow-[#c4111d]/5 transition-all duration-200 group w-full"
+                className={`bg-white border border-[#e2e5e9] border-l-4 ${cardColor.border} rounded-xl overflow-hidden text-left hover:shadow-lg hover:shadow-[#c4111d]/5 transition-all duration-200 group w-full`}
               >
                 {/* Üst bar: tarih & yaş grubu & sonuç */}
-                <div className="flex items-center justify-between px-3 py-2 bg-[#f8f9fb] border-b border-[#e2e5e9]">
+                <div className={`flex items-center justify-between px-3 py-2 ${cardColor.headerBg} border-b border-[#e2e5e9]`}>
                   <div className="flex items-center gap-1.5">
                     {match.week && (
                       <span className="text-[9px] font-bold text-[#c4111d] bg-[#fef2f2] px-1.5 py-0.5 rounded">{match.week}. Hafta</span>
