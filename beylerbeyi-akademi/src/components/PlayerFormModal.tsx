@@ -182,8 +182,8 @@ export default function PlayerFormModal({ player, saving, onClose, onSave }: Pla
                 <NumberField label="Forma No" value={form.jerseyNumber} onChange={(v) => updateField("jerseyNumber", v)} min={1} max={99} />
               </div>
               <div className="grid grid-cols-2 gap-4">
-                <NumberField label="Boy (cm)" value={form.height} onChange={(v) => updateField("height", v)} min={100} max={220} />
-                <NumberField label="Kilo (kg)" value={form.weight} onChange={(v) => updateField("weight", v)} min={30} max={120} />
+                <NumberField label="Boy (cm)" value={form.height} onChange={(v) => updateField("height", v)} min={0} max={250} />
+                <NumberField label="Kilo (kg)" value={form.weight} onChange={(v) => updateField("weight", v)} min={0} max={200} />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <Field label="Telefon" value={form.phone} onChange={(v) => updateField("phone", v)} />
