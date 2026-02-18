@@ -643,107 +643,98 @@ export default function PlayerReportPage() {
         </Section>
       )}
 
-      {/* ═══ Match History (Redesigned) ═══ */}
+      {/* ═══ Match History ═══ */}
       <Section title={`Maç Geçmişi (${playerMatches.length})`} icon={Calendar} iconColor="text-[#c4111d]" defaultOpen={false}>
         {playerMatches.length === 0 ? (
           <p className="text-xs text-[#8c919a] text-center py-8">Henüz oynanmış maç yok.</p>
         ) : (
-          <div className="space-y-3 max-h-[500px] overflow-y-auto mt-2 pr-1">
+          <div className="mt-3 max-h-[560px] overflow-y-auto pr-0.5 space-y-2">
             {playerMatches.map((match) => {
               const ps = match.playerStats.find((p) => p.playerId === playerId);
               if (!ps) return null;
-              const sl = (ps.participationStatus || "").toLowerCase();
-              const isStart = sl.includes("ilk");
-              const isSub = sl.includes("yedek") || sl.includes("sonradan");
 
               const rc = {
-                W: { bg: "bg-emerald-500", text: "G", gradient: "from-emerald-50", border: "border-emerald-200" },
-                D: { bg: "bg-amber-400", text: "B", gradient: "from-amber-50", border: "border-amber-200" },
-                L: { bg: "bg-red-500", text: "M", gradient: "from-red-50", border: "border-red-200" },
-              }[match.result] || { bg: "bg-gray-400", text: "?", gradient: "from-gray-50", border: "border-gray-200" };
+                W: { accent: "border-l-emerald-500", bg: "bg-emerald-500", letter: "G", light: "bg-emerald-50 text-emerald-700" },
+                D: { accent: "border-l-amber-400", bg: "bg-amber-400", letter: "B", light: "bg-amber-50 text-amber-700" },
+                L: { accent: "border-l-red-500", bg: "bg-red-500", letter: "M", light: "bg-red-50 text-red-700" },
+              }[match.result] || { accent: "border-l-gray-300", bg: "bg-gray-400", letter: "?", light: "bg-gray-50 text-gray-600" };
+
+              const status = (ps.participationStatus || "").toLowerCase();
+              const statusInfo = status.includes("ana kadro") || status.includes("ilk")
+                ? { label: "İlk 11", cls: "bg-emerald-100 text-emerald-700" }
+                : status.includes("yedek") || status.includes("sonradan")
+                ? { label: "Yedek", cls: "bg-blue-100 text-blue-700" }
+                : status.includes("süre")
+                ? { label: "Süre Almadı", cls: "bg-gray-100 text-gray-500" }
+                : null;
+
+              const hasGoals = ps.goals > 0;
+              const hasAssists = ps.assists > 0;
+              const hasYellow = ps.yellowCards > 0;
+              const hasRed = ps.redCards > 0;
+              const hasCleanSheet = ps.cleanSheet;
+              const day = new Date(match.date).getDate().toString().padStart(2, "0");
+              const month = new Date(match.date).toLocaleDateString("tr-TR", { month: "short" }).toUpperCase();
 
               return (
-                <div key={match.id} className={`bg-gradient-to-r ${rc.gradient} to-white rounded-xl border ${rc.border} p-4 hover:shadow-md transition-all`}>
-                  {/* Top Row */}
-                  <div className="flex items-center gap-3">
-                    <div className={`w-11 h-11 rounded-xl ${rc.bg} flex flex-col items-center justify-center shadow-sm shrink-0`}>
-                      <span className="text-xs font-black text-white leading-none">{rc.text}</span>
-                      <span className="text-[9px] text-white/80 font-bold leading-none mt-0.5">{match.scoreHome}-{match.scoreAway}</span>
+                <div key={match.id} className={`group relative bg-white rounded-xl border border-[#e8eaed] ${rc.accent} border-l-[3px] hover:shadow-md hover:border-[#d0d3d8] transition-all duration-200`}>
+                  <div className="flex items-center gap-2.5 px-3 py-2.5">
+                    {/* Tarih bloğu */}
+                    <div className="w-9 shrink-0 text-center">
+                      <p className="text-sm font-black text-[#1a1a2e] leading-none">{day}</p>
+                      <p className="text-[7px] font-bold text-[#8c919a] tracking-wider mt-0.5">{month}</p>
                     </div>
+
+                    {/* Dikey ayırıcı */}
+                    <div className="w-px h-8 bg-[#e8eaed] shrink-0" />
+
+                    {/* Maç bilgisi */}
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <p className="text-sm font-bold text-[#1a1a2e] truncate">
-                          {match.homeAway === "home" ? "vs" : "@"} {match.opponent}
-                        </p>
-                        <span className="text-[8px] bg-[#1a1a2e]/5 text-[#5a6170] px-1.5 py-0.5 rounded font-semibold shrink-0">{match.ageGroup}</span>
+                      <div className="flex items-center gap-1.5">
+                        <p className="text-[11px] font-bold text-[#1a1a2e] truncate">{match.opponent}</p>
                         {match.week && (
-                          <span className="text-[8px] bg-[#c4111d]/10 text-[#c4111d] px-1.5 py-0.5 rounded font-bold ml-2">Hafta {match.week}</span>
+                          <span className="text-[7px] font-bold text-[#8c919a] bg-[#f0f1f3] px-1.5 py-0.5 rounded shrink-0">H{match.week}</span>
                         )}
                       </div>
-                      <div className="flex items-center gap-2 mt-0.5 flex-wrap">
-                        <span className="text-[10px] text-[#8c919a]">
-                          {new Date(match.date).toLocaleDateString("tr-TR", { day: "2-digit", month: "long", year: "numeric" })}
-                        </span>
-                        {/* Participation Status Badge */}
-                        {(() => {
-                          const status = (ps.participationStatus || "").toLowerCase();
-                          if (status.includes("ana kadro")) return <span className="text-[8px] bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded-md font-bold">İlk 11</span>;
-                          if (status.includes("ilk")) return <span className="text-[8px] bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded-md font-bold">İlk 11</span>;
-                          if (status.includes("yedek") || status.includes("sonradan")) return <span className="text-[8px] bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded-md font-bold">Yedek</span>;
-                          if (status.includes("ceza")) return <span className="text-[8px] bg-red-100 text-red-600 px-1.5 py-0.5 rounded-md font-bold">Cezalı</span>;
-                          if (status.includes("sakat")) return <span className="text-[8px] bg-orange-100 text-orange-600 px-1.5 py-0.5 rounded-md font-bold">Sakat</span>;
-                          if (status.includes("kadroda yok")) return <span className="text-[8px] bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded-md font-bold">Kadroda Yok</span>;
-                          if (status.includes("süre")) return <span className="text-[8px] bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded-md font-bold">Süre Almadı</span>;
-                          return null;
-                        })()}
+                      {/* İstatistik pilleri */}
+                      <div className="flex items-center gap-1 mt-1 flex-wrap">
+                        {statusInfo && (
+                          <span className={`text-[7px] font-bold px-1.5 py-0.5 rounded-full ${statusInfo.cls}`}>{statusInfo.label}</span>
+                        )}
+                        <span className="text-[8px] font-semibold text-[#5a6170] bg-[#f0f1f3] px-1.5 py-0.5 rounded-full">{ps.minutesPlayed}&apos;</span>
+                        {hasGoals && (
+                          <span className="text-[8px] font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded-full">⚽ {ps.goals}</span>
+                        )}
+                        {hasAssists && (
+                          <span className="text-[8px] font-bold text-blue-700 bg-blue-50 px-1.5 py-0.5 rounded-full">🅰️ {ps.assists}</span>
+                        )}
+                        {hasYellow && (
+                          <span className="inline-flex items-center gap-0.5 text-[8px] font-bold text-yellow-700 bg-yellow-50 px-1.5 py-0.5 rounded-full">
+                            <span className="w-1.5 h-2 rounded-[1px] bg-yellow-400" />{ps.yellowCards}
+                          </span>
+                        )}
+                        {hasRed && (
+                          <span className="inline-flex items-center gap-0.5 text-[8px] font-bold text-red-700 bg-red-50 px-1.5 py-0.5 rounded-full">
+                            <span className="w-1.5 h-2 rounded-[1px] bg-red-500" />{ps.redCards}
+                          </span>
+                        )}
+                        {hasCleanSheet && (
+                          <span className="text-[8px] font-bold text-cyan-700 bg-cyan-50 px-1.5 py-0.5 rounded-full">🧤 GK</span>
+                        )}
                       </div>
                     </div>
+
+                    {/* Skor badge */}
+                    <div className={`${rc.bg} rounded-lg px-2 py-1.5 shrink-0 min-w-[2.8rem] text-center shadow-sm`}>
+                      <span className="text-[9px] font-black text-white/80 leading-none block">{rc.letter}</span>
+                      <span className="text-xs font-black text-white leading-none">{match.scoreHome}-{match.scoreAway}</span>
+                    </div>
+
+                    {/* Rating */}
                     {ps.rating && (
-                      <div className="flex items-center gap-0.5 bg-purple-50 px-2 py-1 rounded-lg shrink-0 border border-purple-100">
-                        <Star size={12} className="text-purple-500" fill="currentColor" />
-                        <span className="text-xs font-black text-purple-600">{ps.rating}</span>
-                      </div>
-                    )}
-                  </div>
-                  {/* Stats Chips */}
-                  <div className="flex items-center gap-2 mt-3 flex-wrap">
-                    <div className="flex items-center gap-1 bg-white rounded-lg px-2.5 py-1 border border-[#e2e5e9] shadow-sm">
-                      <Clock size={11} className="text-[#8c919a]" />
-                      <span className="text-[10px] font-bold text-[#1a1a2e]">{ps.minutesPlayed}&apos;</span>
-                    </div>
-                    {ps.goals > 0 && (
-                      <div className="flex items-center gap-1 bg-emerald-100 rounded-lg px-2.5 py-1 border border-emerald-200">
-                        <Trophy size={11} className="text-emerald-600" />
-                        <span className="text-[10px] font-bold text-emerald-700">{ps.goals} gol</span>
-                      </div>
-                    )}
-                    {ps.assists > 0 && (
-                      <div className="flex items-center gap-1 bg-blue-100 rounded-lg px-2.5 py-1 border border-blue-200">
-                        <Target size={11} className="text-blue-600" />
-                        <span className="text-[10px] font-bold text-blue-700">{ps.assists} asist</span>
-                      </div>
-                    )}
-                    {ps.yellowCards > 0 && (
-                      <div className="flex items-center gap-1 bg-yellow-100 rounded-lg px-2.5 py-1 border border-yellow-200">
-                        <span className="w-2.5 h-3 rounded-[1px] bg-yellow-400" />
-                        <span className="text-[10px] font-bold text-yellow-700">{ps.yellowCards}</span>
-                      </div>
-                    )}
-                    {ps.redCards > 0 && (
-                      <div className="flex items-center gap-1 bg-red-100 rounded-lg px-2.5 py-1 border border-red-200">
-                        <span className="w-2.5 h-3 rounded-[1px] bg-red-500" />
-                        <span className="text-[10px] font-bold text-red-700">{ps.redCards}</span>
-                      </div>
-                    )}
-                    {ps.cleanSheet && (
-                      <div className="flex items-center gap-1 bg-cyan-100 rounded-lg px-2.5 py-1 border border-cyan-200">
-                        <Shield size={11} className="text-cyan-600" />
-                        <span className="text-[10px] font-bold text-cyan-700">GK</span>
-                      </div>
-                    )}
-                    {ps.goalsConceded > 0 && (
-                      <div className="flex items-center gap-1 bg-orange-100 rounded-lg px-2.5 py-1 border border-orange-200">
-                        <span className="text-[10px] font-bold text-orange-700">{ps.goalsConceded} YG</span>
+                      <div className="flex items-center gap-0.5 bg-purple-50 px-1.5 py-1 rounded-lg shrink-0 border border-purple-100">
+                        <Star size={10} className="text-purple-500" fill="currentColor" />
+                        <span className="text-[10px] font-black text-purple-600">{ps.rating}</span>
                       </div>
                     )}
                   </div>
