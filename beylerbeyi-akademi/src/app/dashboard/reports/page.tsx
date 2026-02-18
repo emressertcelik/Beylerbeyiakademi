@@ -6,7 +6,7 @@ import { useAppData } from "@/lib/app-data";
 import {
   Trophy, Target, Clock, Shield, AlertTriangle,
   ChevronDown, Star, TrendingUp, Users, Filter,
-  Award, Zap, BarChart3, Handshake, ShieldCheck,
+  Award, Zap, BarChart3, Handshake, ShieldCheck, Search,
 } from "lucide-react";
 
 type SortField =
@@ -67,6 +67,7 @@ export default function ReportsPage() {
   const [sortField, setSortField] = useState<SortField>("goals");
   const [sortAsc, setSortAsc] = useState(false);
   const [positionFilter, setPositionFilter] = useState<string>("all");
+  const [playerSearch, setPlayerSearch] = useState<string>("");
 
   // En güncel maçlar önce olacak şekilde sıralama
   const sortedMatches = useMemo(() => {
@@ -176,11 +177,18 @@ export default function ReportsPage() {
     return [...map.values()];
   }, [matches, players, selectedAgeGroup, selectedSeason]);
 
-  // Filter by position
+  // Filter by position and player search
   const filteredReports = useMemo(() => {
-    if (positionFilter === "all") return playerReports;
-    return playerReports.filter((r) => r.position === positionFilter);
-  }, [playerReports, positionFilter]);
+    let filtered = playerReports;
+    if (positionFilter !== "all") {
+      filtered = filtered.filter((r) => r.position === positionFilter);
+    }
+    if (playerSearch.trim()) {
+      const q = playerSearch.trim().toLowerCase();
+      filtered = filtered.filter((r) => r.name.toLowerCase().includes(q));
+    }
+    return filtered;
+  }, [playerReports, positionFilter, playerSearch]);
 
   // Sort
   const sortedReports = useMemo(() => {
@@ -272,7 +280,20 @@ export default function ReportsPage() {
             <span className="text-[9px] font-semibold text-[#8c919a] uppercase tracking-wider">Filtreler</span>
           </div>
         </div>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+          <div className="col-span-2 sm:col-span-1">
+            <label className="block text-[10px] font-medium text-[#8c919a] mb-1">Oyuncu Ara</label>
+            <div className="relative">
+              <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[#8c919a]" />
+              <input
+                type="text"
+                value={playerSearch}
+                onChange={(e) => setPlayerSearch(e.target.value)}
+                placeholder="İsim yazın..."
+                className="w-full pl-8 pr-3 py-2 bg-[#f8f9fb] border border-[#e2e5e9] rounded-lg text-sm text-[#1a1a2e] focus:outline-none focus:ring-2 focus:ring-[#c4111d]/20 placeholder:text-[#b0b5be]"
+              />
+            </div>
+          </div>
           <div>
             <label className="block text-[10px] font-medium text-[#8c919a] mb-1">Yaş Grubu</label>
             <select
@@ -390,19 +411,7 @@ export default function ReportsPage() {
               sub={`İ11: ${topMinutes.starts} · Y: ${topMinutes.sub} · ${topMinutes.matches} maç`}
             />
           )}
-          {topRated && (
-            <TopCard
-              icon={Star}
-              iconColor="text-purple-500"
-              iconBg="bg-purple-50"
-              title="En İyi Puan"
-              name={topRated.name}
-              jersey={topRated.jerseyNumber}
-              value={`${topRated.avgRating.toFixed(1)}`}
-              unit="★"
-              sub={`${topRated.ratingCount} değerlendirme`}
-            />
-          )}
+
           {topCleanSheet && (
             <TopCard
               icon={ShieldCheck}
