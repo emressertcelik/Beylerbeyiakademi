@@ -124,19 +124,22 @@ export default function DashboardPage() {
   // ── Sadece oynanan maçlar (istatistikler için) ──
   const playedMatches = useMemo(() => matches.filter((m) => m.status === "played"), [matches]);
 
-  // ── Son 3 gün + önümüzdeki 7 gün içindeki maçlar ──
+  // ── Perşembe: sadece 7 gün ileri / Diğer günler: 3 gün geri + 7 gün ileri ──
   const upcomingMatches = useMemo(() => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    const threeDaysAgo = new Date(today);
-    threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
-    const weekLater = new Date(today);
-    weekLater.setDate(weekLater.getDate() + 7);
+    const isThursday = today.getDay() === 4; // 4 = Perşembe
+    const startDate = new Date(today);
+    if (!isThursday) {
+      startDate.setDate(startDate.getDate() - 3);
+    }
+    const endDate = new Date(today);
+    endDate.setDate(endDate.getDate() + 7);
 
     return matches
       .filter((m) => {
         const d = new Date(m.date);
-        return d >= threeDaysAgo && d <= weekLater;
+        return d >= startDate && d <= endDate;
       })
       .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
   }, [matches]);
