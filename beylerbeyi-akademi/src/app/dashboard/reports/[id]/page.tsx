@@ -326,92 +326,162 @@ export default function PlayerReportPage() {
         </div>
       </div>
 
-      {/* ═══ Big Stat Cards ═══ */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <div className="bg-white rounded-xl border border-[#e2e5e9] p-4 shadow-sm flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-[#c4111d]/10 flex items-center justify-center shrink-0">
-            <Swords size={18} className="text-[#c4111d]" />
-          </div>
-          <div>
-            <p className="text-[9px] font-semibold text-[#8c919a] uppercase tracking-wider">Maç</p>
-            <p className="text-2xl font-black text-[#c4111d] leading-none">{matchStats.total}</p>
-            <div className="flex gap-1.5 mt-1">
-              <span className="text-[8px] bg-emerald-50 text-emerald-700 px-1 py-0.5 rounded font-semibold">{matchStats.anaKadro} İlk11</span>
-              <span className="text-[8px] bg-blue-50 text-blue-700 px-1 py-0.5 rounded font-semibold">{matchStats.yedek} Y</span>
+      {/* ═══ Player Stats ═══ */}
+      {/* Hero stat — Maç sayısı */}
+      <div className="bg-gradient-to-r from-[#1a1a2e] via-[#2a2a48] to-[#1a1a2e] rounded-2xl p-5 relative overflow-hidden">
+        <div className="absolute inset-0 opacity-[0.04]" style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E\")" }} />
+        <div className="relative flex items-center justify-between">
+          {/* Sol — Maç bilgisi */}
+          <div className="flex items-center gap-4">
+            <div className="w-16 h-16 rounded-2xl bg-white/10 backdrop-blur flex items-center justify-center border border-white/10">
+              <span className="text-3xl font-black text-white">{matchStats.total}</span>
             </div>
+            <div>
+              <p className="text-[10px] font-bold text-white/40 uppercase tracking-[0.2em]">Toplam Maç</p>
+              <div className="flex items-center gap-3 mt-1.5">
+                <div className="flex items-center gap-1.5">
+                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                  <span className="text-xs font-bold text-emerald-400">{matchStats.anaKadro}</span>
+                  <span className="text-[9px] text-white/40">İlk 11</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <div className="w-1.5 h-1.5 rounded-full bg-blue-400" />
+                  <span className="text-xs font-bold text-blue-400">{matchStats.yedek}</span>
+                  <span className="text-[9px] text-white/40">Yedek</span>
+                </div>
+              </div>
+              <div className="flex items-center gap-1 mt-2">
+                <Clock size={10} className="text-white/30" />
+                <span className="text-[10px] font-semibold text-white/50">{matchStats.totalMin}&apos;</span>
+                {matchStats.total > 0 && (
+                  <span className="text-[9px] text-white/30 ml-1">({Math.round(matchStats.totalMin / matchStats.total)} dk/maç)</span>
+                )}
+              </div>
+            </div>
+          </div>
+          {/* Sağ — Sonuç barı */}
+          <div className="flex flex-col items-end gap-1.5">
+            {matchStats.total > 0 && (
+              <>
+                <div className="flex items-center gap-1 h-5">
+                  <div className="flex h-full rounded-full overflow-hidden" style={{ width: 100 }}>
+                    <div className="bg-emerald-500 h-full" style={{ width: `${(resultBreakdown.w / matchStats.total) * 100}%` }} />
+                    <div className="bg-amber-400 h-full" style={{ width: `${(resultBreakdown.d / matchStats.total) * 100}%` }} />
+                    <div className="bg-red-500 h-full" style={{ width: `${(resultBreakdown.l / matchStats.total) * 100}%` }} />
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-[9px] font-black text-emerald-400">{resultBreakdown.w}G</span>
+                  <span className="text-[9px] font-black text-amber-400">{resultBreakdown.d}B</span>
+                  <span className="text-[9px] font-black text-red-400">{resultBreakdown.l}M</span>
+                </div>
+              </>
+            )}
           </div>
         </div>
-        {player.position === "Kaleci" ? (
-          <>
-            <div className="bg-white rounded-xl border border-[#e2e5e9] p-4 shadow-sm flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-orange-50 flex items-center justify-center shrink-0"><Trophy size={18} className="text-orange-600" /></div>
-              <div>
-                <p className="text-[9px] font-semibold text-[#8c919a] uppercase tracking-wider">Yediği Gol</p>
-                <p className="text-2xl font-black text-orange-600 leading-none">{matchStats.goalsConceded}</p>
-                <p className="text-[9px] text-[#8c919a] mt-0.5">{matchStats.total > 0 ? (matchStats.goalsConceded / matchStats.total).toFixed(2) : "0"} / maç</p>
-              </div>
-            </div>
-            <div className="bg-white rounded-xl border border-[#e2e5e9] p-4 shadow-sm flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-cyan-50 flex items-center justify-center shrink-0"><Shield size={18} className="text-cyan-600" /></div>
-              <div>
-                <p className="text-[9px] font-semibold text-[#8c919a] uppercase tracking-wider">Gole Kapatan</p>
-                <p className="text-2xl font-black text-cyan-600 leading-none">{matchStats.cleanSheets}</p>
-                <p className="text-[9px] text-[#8c919a] mt-0.5">{matchStats.total > 0 ? (matchStats.cleanSheets / matchStats.total * 100).toFixed(0) : "0"}%</p>
-              </div>
-            </div>
-            <div className="bg-white rounded-xl border border-[#e2e5e9] p-4 shadow-sm flex items-center justify-center">
-              <span className="text-[10px] text-[#8c919a]">Kaleci için gol/asist gösterilmez.</span>
-            </div>
-          </>
-        ) : (
-          <>
-            <div className="bg-white rounded-xl border border-[#e2e5e9] p-4 shadow-sm flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center shrink-0"><Trophy size={18} className="text-emerald-600" /></div>
-              <div>
-                <p className="text-[9px] font-semibold text-[#8c919a] uppercase tracking-wider">Gol</p>
-                <p className="text-2xl font-black text-emerald-600 leading-none">{matchStats.goals}</p>
-                <p className="text-[9px] text-[#8c919a] mt-0.5">{matchStats.goalsPerMatch.toFixed(2)} / maç</p>
-              </div>
-            </div>
-            <div className="bg-white rounded-xl border border-[#e2e5e9] p-4 shadow-sm flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center shrink-0"><Target size={18} className="text-blue-600" /></div>
-              <div>
-                <p className="text-[9px] font-semibold text-[#8c919a] uppercase tracking-wider">Asist</p>
-                <p className="text-2xl font-black text-blue-600 leading-none">{matchStats.assists}</p>
-                <p className="text-[9px] text-[#8c919a] mt-0.5">{matchStats.assistsPerMatch.toFixed(2)} / maç</p>
-              </div>
-            </div>
-            <div className="bg-white rounded-xl border border-[#e2e5e9] p-4 shadow-sm flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-teal-50 flex items-center justify-center shrink-0"><Flame size={18} className="text-teal-600" /></div>
-              <div>
-                <p className="text-[9px] font-semibold text-[#8c919a] uppercase tracking-wider">Gol Katkısı</p>
-                <p className="text-2xl font-black text-teal-600 leading-none">{matchStats.goals + matchStats.assists}</p>
-                <p className="text-[9px] text-[#8c919a] mt-0.5">{matchStats.total > 0 ? ((matchStats.goals + matchStats.assists) / matchStats.total).toFixed(2) : "0"} / maç</p>
-              </div>
-            </div>
-          </>
-        )}
       </div>
 
-      {/* ═══ Extended Stats Row ═══ */}
-      <div className="bg-white rounded-xl border border-[#e2e5e9] shadow-sm overflow-hidden">
-        <div className="grid grid-cols-3 sm:grid-cols-7 divide-x divide-[#f0f1f3]">
-          {[
-            { l: "Dakika", v: matchStats.totalMin, c: "text-[#1a1a2e]", s: matchStats.total > 0 ? `${Math.round(matchStats.totalMin / matchStats.total)}dk/m` : "" },
-            { l: "Galibiyet", v: resultBreakdown.w, c: "text-emerald-600", s: matchStats.total > 0 ? `%${Math.round((resultBreakdown.w / matchStats.total) * 100)}` : "" },
-            { l: "Beraberlik", v: resultBreakdown.d, c: "text-amber-600", s: "" },
-            { l: "Mağlubiyet", v: resultBreakdown.l, c: "text-red-500", s: "" },
-            { l: "Sarı Kart", v: matchStats.yellowCards, c: "text-yellow-600", s: "" },
-            { l: "Kırmızı", v: matchStats.redCards, c: "text-red-600", s: "" },
-            { l: "Gole Kapatan", v: matchStats.cleanSheets, c: "text-cyan-600", s: "" },
-          ].map((st) => (
-            <div key={st.l} className="p-2.5 text-center">
-              <p className="text-[8px] font-semibold text-[#8c919a] uppercase tracking-wider">{st.l}</p>
-              <p className={`text-base font-black mt-0.5 ${st.c}`}>{st.v}</p>
-              {st.s && <p className="text-[8px] text-[#8c919a]">{st.s}</p>}
+      {/* Performans kartları */}
+      {player.position === "Kaleci" ? (
+        <div className="grid grid-cols-2 gap-3">
+          <div className="bg-white rounded-2xl border border-[#e2e5e9] shadow-sm p-4">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-[9px] font-bold text-[#8c919a] uppercase tracking-wider">Yenen Gol</span>
+              <div className="w-7 h-7 rounded-lg bg-orange-50 flex items-center justify-center">
+                <Trophy size={13} className="text-orange-500" />
+              </div>
             </div>
-          ))}
+            <p className="text-4xl font-black text-orange-600 leading-none">{matchStats.goalsConceded}</p>
+            <div className="mt-2 h-1 bg-orange-100 rounded-full overflow-hidden">
+              <div className="h-full bg-orange-500 rounded-full" style={{ width: `${Math.min((matchStats.goalsConceded / Math.max(matchStats.total * 3, 1)) * 100, 100)}%` }} />
+            </div>
+            <p className="text-[9px] text-[#8c919a] mt-1.5">{matchStats.total > 0 ? (matchStats.goalsConceded / matchStats.total).toFixed(2) : "0"} gol / maç</p>
+          </div>
+          <div className="bg-white rounded-2xl border border-[#e2e5e9] shadow-sm p-4">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-[9px] font-bold text-[#8c919a] uppercase tracking-wider">Clean Sheet</span>
+              <div className="w-7 h-7 rounded-lg bg-cyan-50 flex items-center justify-center">
+                <Shield size={13} className="text-cyan-500" />
+              </div>
+            </div>
+            <p className="text-4xl font-black text-cyan-600 leading-none">{matchStats.cleanSheets}</p>
+            <div className="mt-2 h-1 bg-cyan-100 rounded-full overflow-hidden">
+              <div className="h-full bg-cyan-500 rounded-full" style={{ width: `${matchStats.total > 0 ? (matchStats.cleanSheets / matchStats.total) * 100 : 0}%` }} />
+            </div>
+            <p className="text-[9px] text-[#8c919a] mt-1.5">{matchStats.total > 0 ? (matchStats.cleanSheets / matchStats.total * 100).toFixed(0) : "0"}% oran</p>
+          </div>
         </div>
+      ) : (
+        <div className="grid grid-cols-3 gap-3">
+          {/* Gol */}
+          <div className="bg-white rounded-2xl border border-[#e2e5e9] shadow-sm p-4">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-[9px] font-bold text-[#8c919a] uppercase tracking-wider">Gol</span>
+              <div className="w-7 h-7 rounded-lg bg-emerald-50 flex items-center justify-center">
+                <span className="text-sm">⚽</span>
+              </div>
+            </div>
+            <p className="text-4xl font-black text-[#1a1a2e] leading-none">{matchStats.goals}</p>
+            <div className="mt-2 h-1 bg-emerald-100 rounded-full overflow-hidden">
+              <div className="h-full bg-emerald-500 rounded-full transition-all" style={{ width: `${Math.min((matchStats.goals / Math.max(matchStats.total, 1)) * 100, 100)}%` }} />
+            </div>
+            <p className="text-[9px] text-[#8c919a] mt-1.5">{matchStats.goalsPerMatch.toFixed(2)} / maç</p>
+          </div>
+          {/* Asist */}
+          <div className="bg-white rounded-2xl border border-[#e2e5e9] shadow-sm p-4">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-[9px] font-bold text-[#8c919a] uppercase tracking-wider">Asist</span>
+              <div className="w-7 h-7 rounded-lg bg-blue-50 flex items-center justify-center">
+                <span className="text-sm">🅰️</span>
+              </div>
+            </div>
+            <p className="text-4xl font-black text-[#1a1a2e] leading-none">{matchStats.assists}</p>
+            <div className="mt-2 h-1 bg-blue-100 rounded-full overflow-hidden">
+              <div className="h-full bg-blue-500 rounded-full transition-all" style={{ width: `${Math.min((matchStats.assists / Math.max(matchStats.total, 1)) * 100, 100)}%` }} />
+            </div>
+            <p className="text-[9px] text-[#8c919a] mt-1.5">{matchStats.assistsPerMatch.toFixed(2)} / maç</p>
+          </div>
+          {/* Gol Katkısı */}
+          <div className="bg-white rounded-2xl border border-[#e2e5e9] shadow-sm p-4">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-[9px] font-bold text-[#8c919a] uppercase tracking-wider">G+A</span>
+              <div className="w-7 h-7 rounded-lg bg-purple-50 flex items-center justify-center">
+                <Flame size={13} className="text-purple-500" />
+              </div>
+            </div>
+            <p className="text-4xl font-black text-[#1a1a2e] leading-none">{matchStats.goals + matchStats.assists}</p>
+            <div className="mt-2 h-1 bg-purple-100 rounded-full overflow-hidden">
+              <div className="h-full bg-purple-500 rounded-full transition-all" style={{ width: `${Math.min(((matchStats.goals + matchStats.assists) / Math.max(matchStats.total, 1)) * 100, 100)}%` }} />
+            </div>
+            <p className="text-[9px] text-[#8c919a] mt-1.5">{matchStats.total > 0 ? ((matchStats.goals + matchStats.assists) / matchStats.total).toFixed(2) : "0"} / maç</p>
+          </div>
+        </div>
+      )}
+
+      {/* Kartlar & Ekstra */}
+      <div className="flex items-center gap-3">
+        <div className="flex items-center gap-1.5 bg-yellow-50 border border-yellow-200 rounded-xl px-3 py-2">
+          <span className="w-3 h-4 rounded-[2px] bg-yellow-400 shadow-sm" />
+          <span className="text-sm font-black text-yellow-700">{matchStats.yellowCards}</span>
+        </div>
+        <div className="flex items-center gap-1.5 bg-red-50 border border-red-200 rounded-xl px-3 py-2">
+          <span className="w-3 h-4 rounded-[2px] bg-red-500 shadow-sm" />
+          <span className="text-sm font-black text-red-700">{matchStats.redCards}</span>
+        </div>
+        {matchStats.cleanSheets > 0 && player.position !== "Kaleci" && (
+          <div className="flex items-center gap-1.5 bg-cyan-50 border border-cyan-200 rounded-xl px-3 py-2">
+            <Shield size={12} className="text-cyan-500" />
+            <span className="text-sm font-black text-cyan-700">{matchStats.cleanSheets}</span>
+            <span className="text-[8px] text-cyan-500 font-semibold">CS</span>
+          </div>
+        )}
+        {matchStats.avgRating > 0 && (
+          <div className="flex items-center gap-1.5 bg-purple-50 border border-purple-200 rounded-xl px-3 py-2 ml-auto">
+            <Star size={12} className="text-purple-500" fill="currentColor" />
+            <span className="text-sm font-black text-purple-700">{matchStats.avgRating.toFixed(1)}</span>
+            <span className="text-[8px] text-purple-400 font-semibold">ORT</span>
+          </div>
+        )}
       </div>
 
       {/* ═══ Development Summary Banner ═══ */}
