@@ -464,16 +464,34 @@ export default function DashboardPage() {
                           </div>
                           {/* Skor */}
                           <div className="flex items-center gap-1 mx-3 shrink-0">
-                            {hasScore ? (
-                              <>
-                                <span className="w-7 h-7 rounded-md flex items-center justify-center text-[12px] font-bold text-white bg-[#1a1a2e] shadow-sm">
-                                  {homeScore}
-                                </span>
-                                <span className="w-7 h-7 rounded-md flex items-center justify-center text-[12px] font-bold text-white bg-[#1a1a2e] shadow-sm">
-                                  {awayScore}
-                                </span>
-                              </>
-                            ) : (
+                            {hasScore ? (() => {
+                              // Skor kutusu rengi: galibiyet/beraberlik/mağlubiyet
+                              let resultType = null;
+                              if (isBBMatch && homeScore !== "" && awayScore !== "") {
+                                const h = parseInt(homeScore, 10);
+                                const a = parseInt(awayScore, 10);
+                                if (isBBHome) {
+                                  if (h > a) resultType = "win";
+                                  else if (h < a) resultType = "lose";
+                                  else resultType = "draw";
+                                } else if (isBBAway) {
+                                  if (a > h) resultType = "win";
+                                  else if (a < h) resultType = "lose";
+                                  else resultType = "draw";
+                                }
+                              }
+                              const baseClass = "w-8 h-8 rounded-lg flex items-center justify-center text-[13px] font-extrabold shadow-sm border border-[#e8eaed]";
+                              let colorClass = "bg-[#f1f3f5] text-[#1a1a2e]";
+                              if (isBBMatch) {
+                                if (resultType === "win") colorClass = "bg-emerald-500 text-white";
+                                else if (resultType === "lose") colorClass = "bg-red-500 text-white";
+                                else if (resultType === "draw") colorClass = "bg-amber-400 text-white";
+                              }
+                              return <>
+                                <span className={`${baseClass} ${colorClass}`}>{homeScore}</span>
+                                <span className={`${baseClass} ${colorClass}`}>{awayScore}</span>
+                              </>;
+                            })() : (
                               <span className="text-[10px] font-semibold text-[#b0b5be] px-2">vs</span>
                             )}
                           </div>
@@ -600,16 +618,17 @@ export default function DashboardPage() {
                           {m.status === "played" ? (
                             <>
                               <div className="flex items-center gap-0.5 mx-1">
-                                <span className={`w-6 h-6 md:w-7 md:h-7 rounded-md flex items-center justify-center text-[11px] md:text-[13px] font-bold text-white shadow-sm ${
-                                  m.scoreHome > m.scoreAway ? 'bg-emerald-600' : m.scoreHome === m.scoreAway ? 'bg-amber-500' : 'bg-[#c4111d]'
-                                }`}>
-                                  {m.scoreHome}
-                                </span>
-                                <span className={`w-6 h-6 md:w-7 md:h-7 rounded-md flex items-center justify-center text-[11px] md:text-[13px] font-bold text-white shadow-sm ${
-                                  m.scoreAway > m.scoreHome ? 'bg-emerald-600' : m.scoreAway === m.scoreHome ? 'bg-amber-500' : 'bg-[#c4111d]'
-                                }`}>
-                                  {m.scoreAway}
-                                </span>
+                                {(() => {
+                                  const scoreColor = m.result === 'W' ? 'bg-emerald-600' : m.result === 'D' ? 'bg-amber-500' : 'bg-[#c4111d]';
+                                  return <>
+                                    <span className={`w-6 h-6 md:w-7 md:h-7 rounded-md flex items-center justify-center text-[11px] md:text-[13px] font-bold text-white shadow-sm ${scoreColor}`}>
+                                      {m.scoreHome}
+                                    </span>
+                                    <span className={`w-6 h-6 md:w-7 md:h-7 rounded-md flex items-center justify-center text-[11px] md:text-[13px] font-bold text-white shadow-sm ${scoreColor}`}>
+                                      {m.scoreAway}
+                                    </span>
+                                  </>;
+                                })()}
                               </div>
                             </>
                           ) : (

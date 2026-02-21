@@ -337,12 +337,17 @@ export default function TeamsPage() {
 
                     {isPlayed ? (
                       <div className="flex items-center gap-1 mx-2 shrink-0">
-                        <span className={`w-7 h-7 rounded flex items-center justify-center text-sm font-black text-white ${match.scoreHome > match.scoreAway ? 'bg-[#c4111d]' : match.scoreHome === match.scoreAway ? 'bg-amber-500' : 'bg-[#1a1a2e]'}`}>
-                          {match.scoreHome}
-                        </span>
-                        <span className={`w-7 h-7 rounded flex items-center justify-center text-sm font-black text-white ${match.scoreAway > match.scoreHome ? 'bg-[#c4111d]' : match.scoreAway === match.scoreHome ? 'bg-amber-500' : 'bg-[#1a1a2e]'}`}>
-                          {match.scoreAway}
-                        </span>
+                        {(() => {
+                          const scoreColor = match.result === 'W' ? 'bg-emerald-600' : match.result === 'D' ? 'bg-amber-500' : 'bg-[#c4111d]';
+                          return <>
+                            <span className={`w-7 h-7 rounded flex items-center justify-center text-sm font-black text-white ${scoreColor}`}>
+                              {match.scoreHome}
+                            </span>
+                            <span className={`w-7 h-7 rounded flex items-center justify-center text-sm font-black text-white ${scoreColor}`}>
+                              {match.scoreAway}
+                            </span>
+                          </>;
+                        })()}
                       </div>
                     ) : (
                       <div className="mx-2 shrink-0">
