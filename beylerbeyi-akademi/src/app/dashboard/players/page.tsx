@@ -133,7 +133,7 @@ export default function PlayersPage() {
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-xl font-bold text-[#1a1a2e]">Oyuncular</h1>
-          <div className="text-sm text-[#8c919a] font-medium mt-1">{players.length} oyuncu</div>
+          <div className="text-sm text-[#8c919a] font-medium mt-1">{filteredPlayers.length} oyuncu</div>
         </div>
         {canAddPlayer && (
           <button

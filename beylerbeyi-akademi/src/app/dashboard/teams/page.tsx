@@ -330,34 +330,67 @@ export default function TeamsPage() {
                 {/* Maç bilgisi: takımlar ve skor */}
                 <div className="px-3 py-3">
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2 flex-1 min-w-0">
-                      <img src="/Logo_S.png" alt="Beylerbeyi" className="w-6 h-6 object-contain shrink-0" />
-                      <span className="text-[11px] font-bold text-[#1a1a2e] truncate">Beylerbeyi</span>
-                    </div>
-
-                    {isPlayed ? (
-                      <div className="flex items-center gap-1 mx-2 shrink-0">
-                        {(() => {
-                          const scoreColor = match.result === 'W' ? 'bg-emerald-600' : match.result === 'D' ? 'bg-amber-500' : 'bg-[#c4111d]';
-                          return <>
-                            <span className={`w-7 h-7 rounded flex items-center justify-center text-sm font-black text-white ${scoreColor}`}>
-                              {match.scoreHome}
-                            </span>
-                            <span className={`w-7 h-7 rounded flex items-center justify-center text-sm font-black text-white ${scoreColor}`}>
-                              {match.scoreAway}
-                            </span>
-                          </>;
-                        })()}
-                      </div>
+                    {match.homeAway === 'home' ? (
+                      // Ev sahibi: Beylerbeyi sol, Rakip sağ
+                      <>
+                        <div className="flex items-center gap-2 flex-1 min-w-0">
+                          <img src="/Logo_S.png" alt="Beylerbeyi" className="w-6 h-6 object-contain shrink-0" />
+                          <span className="text-[11px] font-bold text-[#1a1a2e] truncate">Beylerbeyi</span>
+                        </div>
+                        {isPlayed ? (
+                          <div className="flex items-center gap-1 mx-2 shrink-0">
+                            {(() => {
+                              const scoreColor = match.result === 'W' ? 'bg-emerald-600' : match.result === 'D' ? 'bg-amber-500' : 'bg-[#c4111d]';
+                              return <>
+                                <span className={`w-7 h-7 rounded flex items-center justify-center text-sm font-black text-white ${scoreColor}`}>
+                                  {match.scoreHome}
+                                </span>
+                                <span className={`w-7 h-7 rounded flex items-center justify-center text-sm font-black text-white ${scoreColor}`}>
+                                  {match.scoreAway}
+                                </span>
+                              </>;
+                            })()}
+                          </div>
+                        ) : (
+                          <div className="mx-2 shrink-0">
+                            <span className="text-[10px] font-semibold text-amber-600 bg-amber-50 px-2 py-1 rounded">VS</span>
+                          </div>
+                        )}
+                        <div className="flex items-center justify-end gap-2 flex-1 min-w-0">
+                          <span className="text-[11px] font-bold text-[#1a1a2e] truncate text-right">{match.opponent}</span>
+                        </div>
+                      </>
                     ) : (
-                      <div className="mx-2 shrink-0">
-                        <span className="text-[10px] font-semibold text-amber-600 bg-amber-50 px-2 py-1 rounded">VS</span>
-                      </div>
+                      // Deplasman: Rakip sol, Beylerbeyi sağ
+                      <>
+                        <div className="flex items-center gap-2 flex-1 min-w-0">
+                          <span className="text-[11px] font-bold text-[#1a1a2e] truncate">{match.opponent}</span>
+                        </div>
+                        {isPlayed ? (
+                          <div className="flex items-center gap-1 mx-2 shrink-0">
+                            {(() => {
+                              const scoreColor = match.result === 'W' ? 'bg-emerald-600' : match.result === 'D' ? 'bg-amber-500' : 'bg-[#c4111d]';
+                              return <>
+                                <span className={`w-7 h-7 rounded flex items-center justify-center text-sm font-black text-white ${scoreColor}`}>
+                                  {match.scoreAway}
+                                </span>
+                                <span className={`w-7 h-7 rounded flex items-center justify-center text-sm font-black text-white ${scoreColor}`}>
+                                  {match.scoreHome}
+                                </span>
+                              </>;
+                            })()}
+                          </div>
+                        ) : (
+                          <div className="mx-2 shrink-0">
+                            <span className="text-[10px] font-semibold text-amber-600 bg-amber-50 px-2 py-1 rounded">VS</span>
+                          </div>
+                        )}
+                        <div className="flex items-center justify-end gap-2 flex-1 min-w-0">
+                          <span className="text-[11px] font-bold text-[#1a1a2e] truncate text-right">Beylerbeyi</span>
+                          <img src="/Logo_S.png" alt="Beylerbeyi" className="w-6 h-6 object-contain shrink-0" />
+                        </div>
+                      </>
                     )}
-
-                    <div className="flex items-center justify-end gap-2 flex-1 min-w-0">
-                      <span className="text-[11px] font-bold text-[#1a1a2e] truncate text-right">{match.opponent}</span>
-                    </div>
                   </div>
                 </div>
 
