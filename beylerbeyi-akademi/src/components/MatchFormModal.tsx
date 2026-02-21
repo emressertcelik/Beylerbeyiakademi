@@ -98,6 +98,7 @@ export default function MatchFormModal({ match, players, saving, onClose, onSave
   const [playerStats, setPlayerStats] = useState<MatchPlayerStat[]>([]);
   const [activeTab, setActiveTab] = useState<"match" | "squad" | "players">("match");
   const [showOtherAgeGroups, setShowOtherAgeGroups] = useState(false);
+  const [showAllUnaddedPlayers, setShowAllUnaddedPlayers] = useState(false);
 
   useEffect(() => {
     if (match) {
@@ -134,6 +135,14 @@ export default function MatchFormModal({ match, players, saving, onClose, onSave
 
   const addedPlayerIds = playerStats.map((ps) => ps.playerId);
   const unaddedPlayers = availablePlayers.filter((p) => !addedPlayerIds.includes(p.id));
+  const filteredUnaddedPlayers = unaddedPlayers.filter((p) =>
+    `${p.firstName} ${p.lastName}`
+      .toLowerCase()
+      .includes(playerSearch.toLowerCase())
+  );
+  const visibleUnaddedPlayers = showAllUnaddedPlayers
+    ? filteredUnaddedPlayers
+    : filteredUnaddedPlayers.slice(0, 20);
 
   // Squad helpers
   const isInSquad = (playerId: string) => squad.some((s) => s.playerId === playerId);
@@ -722,29 +731,36 @@ export default function MatchFormModal({ match, players, saving, onClose, onSave
                 <input
                   type="text"
                   value={playerSearch}
-                  onChange={e => setPlayerSearch(e.target.value)}
+                  onChange={e => {
+                    setPlayerSearch(e.target.value);
+                    setShowAllUnaddedPlayers(false);
+                  }}
                   placeholder="Oyuncu ismiyle ara..."
                   className="w-full px-3 py-2 bg-white border border-[#e2e5e9] rounded-lg text-xs text-[#1a1a2e] placeholder-[#8c919a] focus:outline-none focus:ring-2 focus:ring-[#c4111d]/20 mb-2"
                 />
               </div>
 
               {/* Eklenmemiş oyuncular (filtreli) */}
-              {unaddedPlayers.filter(p =>
-                (p.firstName + " " + p.lastName)
-                  .toLowerCase()
-                  .includes(playerSearch.toLowerCase())
-              ).length > 0 && (
+              {filteredUnaddedPlayers.length > 0 && (
                 <div className="bg-[#f8f9fb] border border-[#e2e5e9] rounded-xl p-3 mb-4">
-                  <p className="text-[10px] font-semibold text-[#8c919a] uppercase tracking-wider mb-2">
-                    Eklenmemiş Oyuncular
-                  </p>
-                  <div className="flex flex-wrap gap-1.5">
-                    {unaddedPlayers
-                      .filter(p =>
-                        (p.firstName + " " + p.lastName)
-                          .toLowerCase()
-                          .includes(playerSearch.toLowerCase())
-                      )
+                  <div className="flex items-center justify-between gap-2 mb-2">
+                    <p className="text-[10px] font-semibold text-[#8c919a] uppercase tracking-wider">
+                      Eklenmemiş Oyuncular ({filteredUnaddedPlayers.length})
+                    </p>
+                    {filteredUnaddedPlayers.length > 20 && (
+                      <button
+                        type="button"
+                        onClick={() => setShowAllUnaddedPlayers((prev) => !prev)}
+                        className="text-[10px] font-semibold text-[#c4111d] hover:text-[#9b0d16]"
+                      >
+                        {showAllUnaddedPlayers
+                          ? "Daha Az Göster"
+                          : `Daha Fazla Göster (+${filteredUnaddedPlayers.length - 20})`}
+                      </button>
+                    )}
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+                    {visibleUnaddedPlayers
                       .sort((a, b) => a.jerseyNumber - b.jerseyNumber)
                       .map((p) => (
                         <button
@@ -889,121 +905,6 @@ export default function MatchFormModal({ match, players, saving, onClose, onSave
                     })}
                 </div>
               )}
-
-              <div className="space-y-3">
-                {playerStats.map((ps) => {
-                  const psPlayer = players.find(p => p.id === ps.playerId);
-                  const isOtherGroup = psPlayer && psPlayer.ageGroup !== form.ageGroup;
-                  return (
-                  <div key={ps.playerId} className={`bg-white border rounded-xl p-4 ${isOtherGroup ? "border-purple-200" : "border-[#e2e5e9]"}`}>
-                    {/* Player Header */}
-                    <div className="flex items-center gap-2 mb-3">
-                      <span className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-black ${isOtherGroup ? "bg-purple-100 text-purple-700" : "bg-[#c4111d]/10 text-[#c4111d]"}`}>
-                          {ps.jerseyNumber}
-                        </span>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-1.5">
-                            <p className="text-sm font-semibold text-[#1a1a2e]">{ps.playerName}</p>
-                            {isOtherGroup && (
-                              <span className="text-[8px] font-bold px-1.5 py-0.5 rounded bg-purple-100 text-purple-700">{psPlayer.ageGroup}</span>
-                            )}
-                          </div>
-                          <p className="text-[10px] text-[#8c919a]">{ps.position}</p>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => removePlayer(ps.playerId)}
-                          className="p-1.5 text-[#8c919a] hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
-                          title="Oyuncuyu çıkar"
-                        >
-                          <Trash2 size={14} />
-                        </button>
-                    </div>
-
-                    {/* Participation Status */}
-                    {PARTICIPATION_STATUSES.length > 0 && (
-                      <div className="mb-3">
-                        <label className="block text-[10px] font-medium text-[#8c919a] mb-1.5">Katılım Durumu</label>
-                        <div className="flex flex-wrap gap-1.5">
-                          {PARTICIPATION_STATUSES.map((status) => {
-                            const active = ps.participationStatus === status;
-                            return (
-                              <button
-                                key={status}
-                                type="button"
-                                onClick={() => updatePlayerStat(ps.playerId, "participationStatus", active ? undefined : status)}
-                                className={`px-2.5 py-1 text-[11px] font-semibold rounded-lg border transition-all ${
-                                  active
-                                    ? statusColor(status)
-                                    : "bg-white text-[#5a6170] border-[#e2e5e9] hover:border-[#c4111d]/30"
-                                }`}
-                              >
-                                {status}
-                              </button>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Star Rating */}
-                    <div className="mb-2">
-                      <label className="block text-[10px] font-medium text-[#8c919a] mb-1">Yıldız Puanı</label>
-                      <div className="flex items-center gap-1">
-                        {[1, 2, 3, 4, 5].map((star) => (
-                          <button
-                            key={star}
-                            type="button"
-                            onClick={() => updatePlayerStat(ps.playerId, "rating", (ps.rating === star ? undefined : star))}
-                            className="p-0.5 transition-transform hover:scale-110"
-                          >
-                            <Star
-                              size={20}
-                              className={`transition-colors ${
-                                ps.rating && star <= ps.rating
-                                  ? "fill-amber-400 text-amber-400"
-                                  : "fill-none text-[#d1d5db]"
-                              }`}
-                            />
-                          </button>
-                        ))}
-                        {ps.rating && (
-                          <span className="ml-1 text-xs font-semibold text-amber-600">{ps.rating}/5</span>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Stats Grid */}
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
-                      <MiniInput label="Dakika" value={ps.minutesPlayed} onChange={(v) => updatePlayerStat(ps.playerId, "minutesPlayed", v)} max={120} />
-                      <MiniInput label="Gol" value={ps.goals} onChange={(v) => updatePlayerStat(ps.playerId, "goals", v)} />
-                      <MiniInput label="Asist" value={ps.assists} onChange={(v) => updatePlayerStat(ps.playerId, "assists", v)} />
-                      <MiniInput label="Sarı Kart" value={ps.yellowCards} onChange={(v) => updatePlayerStat(ps.playerId, "yellowCards", v)} max={2} />
-                      <MiniInput label="Kırmızı Kart" value={ps.redCards} onChange={(v) => updatePlayerStat(ps.playerId, "redCards", v)} max={1} />
-                      {ps.position === "Kaleci" && (
-                        <>
-                          <MiniInput label="Y. Gol" value={ps.goalsConceded} onChange={(v) => updatePlayerStat(ps.playerId, "goalsConceded", v)} />
-                          <div>
-                            <label className="block text-[10px] font-medium text-[#8c919a] mb-1">Clean Sheet</label>
-                            <button
-                              type="button"
-                              onClick={() => updatePlayerStat(ps.playerId, "cleanSheet", !ps.cleanSheet)}
-                              className={`w-full px-2 py-1.5 text-xs font-semibold rounded-lg border transition-all ${
-                                ps.cleanSheet
-                                  ? "bg-emerald-500 text-white border-emerald-500"
-                                  : "bg-white text-[#5a6170] border-[#e2e5e9]"
-                              }`}
-                            >
-                              {ps.cleanSheet ? "Evet" : "Hayır"}
-                            </button>
-                          </div>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                  );
-                })}
-              </div>
             </div>
           )}
         </div>
