@@ -625,6 +625,11 @@ export default function MatchFormModal({ match, players, saving, onClose, onSave
                   {showOtherAgeGroups && (
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2">
                       {otherAgeGroupPlayers
+                        .filter((p) =>
+                          `${p.firstName} ${p.lastName}`
+                            .toLowerCase()
+                            .includes(playerSearch.toLowerCase())
+                        )
                         .sort((a, b) => a.ageGroup.localeCompare(b.ageGroup) || a.jerseyNumber - b.jerseyNumber)
                         .map((p) => {
                           const selected = isInSquad(p.id);
