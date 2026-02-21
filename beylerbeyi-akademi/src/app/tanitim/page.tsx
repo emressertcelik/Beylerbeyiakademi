@@ -108,21 +108,15 @@ function ScreenPreview({ title, description, items }: { title: string; descripti
 /* ───── main ───── */
 export default function TanitimPage() {
   const [scrolled, setScrolled] = useState(false);
-  const [ageGroupCount, setAgeGroupCount] = useState(4);
+  // İstatistikler sabit
+  const ageGroupCount = 8;
+  const playerCount = 100;
+  const matchCount = 100;
 
   useEffect(() => {
     const h = () => setScrolled(window.scrollY > 20);
     window.addEventListener("scroll", h, { passive: true });
     return () => window.removeEventListener("scroll", h);
-  }, []);
-
-  useEffect(() => {
-    fetchAgeGroups()
-      .then((groups) => {
-        const count = groups.filter((g) => g.isActive).length;
-        if (count > 0) setAgeGroupCount(count);
-      })
-      .catch(() => {});
   }, []);
 
   return (
@@ -293,8 +287,8 @@ export default function TanitimPage() {
           {/* Stats bar */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mt-14 sm:mt-20">
             <StatCard icon={Users} value={ageGroupCount} label="Yaş Grubu" />
-            <StatCard icon={Shield} value={87} label="Kayıtlı Oyuncu" suffix="+" />
-            <StatCard icon={Calendar} value={52} label="Maç Kaydı" suffix="+" />
+            <StatCard icon={Shield} value={playerCount} label="Kayıtlı Oyuncu" suffix="+" />
+            <StatCard icon={Calendar} value={matchCount} label="Maç Kaydı" suffix="+" />
             <StatCard icon={BarChart3} value={12} label="İstatistik Kategorisi" />
           </div>
         </div>
