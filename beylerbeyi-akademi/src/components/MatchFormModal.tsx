@@ -99,6 +99,7 @@ export default function MatchFormModal({ match, players, saving, onClose, onSave
   const [activeTab, setActiveTab] = useState<"match" | "squad" | "players">("match");
   const [showOtherAgeGroups, setShowOtherAgeGroups] = useState(false);
   const [showAllUnaddedPlayers, setShowAllUnaddedPlayers] = useState(false);
+  const [showUnaddedPlayers, setShowUnaddedPlayers] = useState(false);
 
   useEffect(() => {
     if (match) {
@@ -142,7 +143,7 @@ export default function MatchFormModal({ match, players, saving, onClose, onSave
   );
   const visibleUnaddedPlayers = showAllUnaddedPlayers
     ? filteredUnaddedPlayers
-    : filteredUnaddedPlayers.slice(0, 20);
+    : filteredUnaddedPlayers.slice(0, 5);
 
   // Squad helpers
   const isInSquad = (playerId: string) => squad.some((s) => s.playerId === playerId);
@@ -741,42 +742,53 @@ export default function MatchFormModal({ match, players, saving, onClose, onSave
               </div>
 
               {/* Eklenmemiş oyuncular (filtreli) */}
-              {filteredUnaddedPlayers.length > 0 && (
-                <div className="bg-[#f8f9fb] border border-[#e2e5e9] rounded-xl p-3 mb-4">
-                  <div className="flex items-center justify-between gap-2 mb-2">
-                    <p className="text-[10px] font-semibold text-[#8c919a] uppercase tracking-wider">
-                      Eklenmemiş Oyuncular ({filteredUnaddedPlayers.length})
-                    </p>
-                    {filteredUnaddedPlayers.length > 20 && (
-                      <button
-                        type="button"
-                        onClick={() => setShowAllUnaddedPlayers((prev) => !prev)}
-                        className="text-[10px] font-semibold text-[#c4111d] hover:text-[#9b0d16]"
-                      >
-                        {showAllUnaddedPlayers
-                          ? "Daha Az Göster"
-                          : `Daha Fazla Göster (+${filteredUnaddedPlayers.length - 20})`}
-                      </button>
-                    )}
-                  </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
-                    {visibleUnaddedPlayers
-                      .sort((a, b) => a.jerseyNumber - b.jerseyNumber)
-                      .map((p) => (
+              <div className="mb-4">
+                <button
+                  type="button"
+                  onClick={() => setShowUnaddedPlayers((prev) => !prev)}
+                  className="w-full text-left text-[10px] font-semibold text-[#c4111d] hover:text-[#9b0d16] bg-[#f8f9fb] border border-[#e2e5e9] rounded-xl px-3 py-2 mb-1 transition-all"
+                >
+                  {showUnaddedPlayers
+                    ? `Eklenmemiş Oyuncuları Gizle`
+                    : `Eklenmemiş Oyuncuları Göster (${filteredUnaddedPlayers.length})`}
+                </button>
+                {showUnaddedPlayers && filteredUnaddedPlayers.length > 0 && (
+                  <div className="bg-[#f8f9fb] border border-[#e2e5e9] rounded-xl p-3">
+                    <div className="flex items-center justify-between gap-2 mb-2">
+                      <p className="text-[10px] font-semibold text-[#8c919a] uppercase tracking-wider">
+                        Eklenmemiş Oyuncular ({filteredUnaddedPlayers.length})
+                      </p>
+                      {filteredUnaddedPlayers.length > 5 && (
                         <button
-                          key={p.id}
                           type="button"
-                          onClick={() => addPlayer(p)}
-                          className="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-white border border-[#e2e5e9] rounded-lg text-xs hover:border-[#c4111d]/40 hover:bg-[#c4111d]/5 transition-all"
+                          onClick={() => setShowAllUnaddedPlayers((prev) => !prev)}
+                          className="text-[10px] font-semibold text-[#c4111d] hover:text-[#9b0d16]"
                         >
-                          <Plus size={12} className="text-[#c4111d]" />
-                          <span className="font-black text-[#c4111d]">#{p.jerseyNumber}</span>
-                          <span className="font-medium text-[#1a1a2e]">{p.firstName} {p.lastName}</span>
+                          {showAllUnaddedPlayers
+                            ? "Daha Az Göster"
+                            : `Daha Fazla Göster (+${filteredUnaddedPlayers.length - 5})`}
                         </button>
-                      ))}
+                      )}
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+                      {visibleUnaddedPlayers
+                        .sort((a, b) => a.jerseyNumber - b.jerseyNumber)
+                        .map((p) => (
+                          <button
+                            key={p.id}
+                            type="button"
+                            onClick={() => addPlayer(p)}
+                            className="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-white border border-[#e2e5e9] rounded-lg text-xs hover:border-[#c4111d]/40 hover:bg-[#c4111d]/5 transition-all"
+                          >
+                            <Plus size={12} className="text-[#c4111d]" />
+                            <span className="font-black text-[#c4111d]">#{p.jerseyNumber}</span>
+                            <span className="font-medium text-[#1a1a2e]">{p.firstName} {p.lastName}</span>
+                          </button>
+                        ))}
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
+              </div>
 
               {/* Eklenmiş oyuncular (filtreli) */}
               {playerStats.filter(ps =>
