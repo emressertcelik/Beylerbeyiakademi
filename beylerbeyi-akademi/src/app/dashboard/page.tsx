@@ -124,13 +124,15 @@ export default function DashboardPage() {
   // ── Sadece oynanan maçlar (istatistikler için) ──
   const playedMatches = useMemo(() => matches.filter((m) => m.status === "played"), [matches]);
 
-  // ── Perşembe: sadece 7 gün ileri / Diğer günler: 3 gün geri + 7 gün ileri ──
+  // ── Perşembe, Cuma, Cumartesi: sadece 7 gün ileri / Diğer günler: 3 gün geri + 7 gün ileri ──
   const upcomingMatches = useMemo(() => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    const isThursday = today.getDay() === 4; // 4 = Perşembe
+    const day = today.getDay();
+    // 4 = Perşembe, 5 = Cuma, 6 = Cumartesi
+    const isSpecialDay = day === 4 || day === 5 || day === 6;
     const startDate = new Date(today);
-    if (!isThursday) {
+    if (!isSpecialDay) {
       startDate.setDate(startDate.getDate() - 3);
     }
     const endDate = new Date(today);
@@ -182,41 +184,23 @@ export default function DashboardPage() {
       .slice(0, 5);
   }, [playedMatches]);
 
-  // ── Haftalık istatistikler ──
+  // ── Haftalık istatistikler (haftalık maç takvimiyle aynı) ──
   const weeklyStats = useMemo(() => {
-    const today = new Date();
-    today.setHours(23, 59, 59, 999);
-    const weekAgo = new Date(today);
-    weekAgo.setDate(weekAgo.getDate() - 7);
-
-    const weekMatches = playedMatches.filter((m) => {
-      const d = new Date(m.date);
-      return d >= weekAgo && d <= today;
-    });
-
+    const weekMatches = upcomingMatches.filter((m) => m.status === "played");
     return {
+      matchCount: weekMatches.length,
       goalsScored: weekMatches.reduce((s, m) => s + m.scoreHome, 0),
       goalsConceded: weekMatches.reduce((s, m) => s + m.scoreAway, 0),
       wins: weekMatches.filter((m) => m.result === "W").length,
       draws: weekMatches.filter((m) => m.result === "D").length,
       losses: weekMatches.filter((m) => m.result === "L").length,
     };
-  }, [playedMatches]);
+  }, [upcomingMatches]);
 
-  // ── Haftanın Oyuncusu (son 7 gündeki maçlarda ortalama yıldız puanı) ──
+  // ── Haftanın Oyuncusu (haftalık maç takvimiyle aynı) ──
   const playerOfTheWeek = useMemo(() => {
-    const today = new Date();
-    today.setHours(23, 59, 59, 999);
-    const weekAgo = new Date(today);
-    weekAgo.setDate(weekAgo.getDate() - 7);
-
-    const weekMatches = playedMatches.filter((m) => {
-      const d = new Date(m.date);
-      return d >= weekAgo && d <= today;
-    });
-
+    const weekMatches = upcomingMatches.filter((m) => m.status === "played");
     if (weekMatches.length === 0) return null;
-
     const map = new Map<string, { name: string; goals: number; assists: number; totalRating: number; ratingCount: number; matchCount: number }>();
     for (const match of weekMatches) {
       for (const ps of match.playerStats) {
@@ -232,7 +216,6 @@ export default function DashboardPage() {
         map.set(ps.playerId, prev);
       }
     }
-
     const sorted = [...map.entries()]
       .map(([id, d]) => ({
         id,
@@ -241,24 +224,13 @@ export default function DashboardPage() {
       }))
       .filter((p) => p.ratingCount > 0)
       .sort((a, b) => b.avgRating - a.avgRating || b.goals - a.goals || b.assists - a.assists);
-
     return sorted[0] ?? null;
-  }, [playedMatches]);
+  }, [upcomingMatches]);
 
-  // ── Haftanın Takımı (son 7 günde galibiyet + averaj bazında) ──
+  // ── Haftanın Takımı (haftalık maç takvimiyle aynı) ──
   const teamOfTheWeek = useMemo(() => {
-    const today = new Date();
-    today.setHours(23, 59, 59, 999);
-    const weekAgo = new Date(today);
-    weekAgo.setDate(weekAgo.getDate() - 7);
-
-    const weekMatches = playedMatches.filter((m) => {
-      const d = new Date(m.date);
-      return d >= weekAgo && d <= today;
-    });
-
+    const weekMatches = upcomingMatches.filter((m) => m.status === "played");
     if (weekMatches.length === 0) return null;
-
     const map = new Map<string, { ageGroup: string; wins: number; goalsFor: number; goalsAgainst: number; matches: number }>();
     for (const m of weekMatches) {
       const prev = map.get(m.ageGroup) || { ageGroup: m.ageGroup, wins: 0, goalsFor: 0, goalsAgainst: 0, matches: 0 };
@@ -268,13 +240,11 @@ export default function DashboardPage() {
       if (m.result === "W") prev.wins += 1;
       map.set(m.ageGroup, prev);
     }
-
     const sorted = [...map.values()]
       .map((t) => ({ ...t, goalDiff: t.goalsFor - t.goalsAgainst }))
       .sort((a, b) => b.wins - a.wins || b.goalDiff - a.goalDiff);
-
     return sorted[0] ?? null;
-  }, [playedMatches]);
+  }, [upcomingMatches]);
 
   // ── Son 7 gün oynanan maçlar ──
   const recentResults = useMemo(() => {
@@ -329,7 +299,9 @@ export default function DashboardPage() {
             </div>
           </div>
           {/* Mini stats */}
-          <div className="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-5 gap-2 sm:flex sm:items-center sm:gap-3 w-full max-w-full overflow-x-auto">
+          <div className="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-6 gap-2 sm:flex sm:items-center sm:gap-3 w-full max-w-full overflow-x-auto">
+            <MiniStat label="Maç Sayısı" value={loading ? "—" : String(weeklyStats.matchCount ?? 0)} color="text-blue-600" />
+            <div className="hidden sm:block w-px h-5 bg-[#e8eaed]" />
             <MiniStat label="Atılan Gol" value={loading ? "—" : String(weeklyStats.goalsScored)} color="text-emerald-600" />
             <div className="hidden sm:block w-px h-5 bg-[#e8eaed]" />
             <MiniStat label="Yenilen Gol" value={loading ? "—" : String(weeklyStats.goalsConceded)} color="text-red-500" />
