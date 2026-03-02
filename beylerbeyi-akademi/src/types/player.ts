@@ -47,7 +47,7 @@ export interface Player {
   ageGroup: AgeGroup;
   position: Position;
   foot: Foot;
-  jerseyNumber: number;
+  jerseyNumber?: number;
   height: number;         // cm
   weight: number;         // kg
   seasons: string[];        // Sezon bilgileri (örn: ["2024-2025", "2025-2026"])

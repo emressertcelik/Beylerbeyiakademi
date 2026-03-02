@@ -7,6 +7,7 @@ import PlayerCard from "@/components/PlayerCard";
 import PlayerDetailModal from "@/components/PlayerDetailModal";
 import PlayerFormModal from "@/components/PlayerFormModal";
 import { Plus, Search, Users, Calendar } from "lucide-react";
+import { comparePositions } from "@/lib/positions";
 import { useToast } from "@/components/Toast";
 
 export default function PlayersPage() {
@@ -68,20 +69,14 @@ export default function PlayersPage() {
       const matchSearch =
         search === "" ||
         `${p.firstName} ${p.lastName}`.toLowerCase().includes(search.toLowerCase()) ||
-        p.position.toLowerCase().includes(search.toLowerCase()) ||
-        String(p.jerseyNumber).includes(search);
+        p.position.toLowerCase().includes(search.toLowerCase());
       return matchAge && matchSeason && matchSearch;
     });
-    // Sıralama: Kaleci, Defans, Orta Saha, Forvet
-    const positionOrder = ["Kaleci", "Defans", "Orta Saha", "Forvet"];
-    filtered = filtered.slice().sort((a, b) => {
-      const aIdx = positionOrder.indexOf(a.position);
-      const bIdx = positionOrder.indexOf(b.position);
-      if (aIdx !== -1 && bIdx !== -1) return aIdx - bIdx;
-      if (aIdx !== -1) return -1;
-      if (bIdx !== -1) return 1;
-      return a.position.localeCompare(b.position);
-    });
+    // Sıralama: mevki sırasına göre, eşitlerde soyadı
+    filtered = filtered.slice().sort((a, b) =>
+      comparePositions(a.position, b.position) ||
+      a.lastName.localeCompare(b.lastName)
+    );
     return filtered.map((p) => {
       const matchStats = getPlayerStatsFromMatches(p.id);
       if (matchStats.matches > 0) {

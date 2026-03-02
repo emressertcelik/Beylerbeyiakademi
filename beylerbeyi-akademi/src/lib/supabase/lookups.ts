@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/client";
 export interface LookupItem {
   id: string;
   value: string;
+  abbreviation?: string;
   sortOrder: number;
   isActive: boolean;
 }
@@ -34,6 +35,7 @@ function mapRow(row: Record<string, unknown>): LookupItem {
   return {
     id: row.id as string,
     value: row.value as string,
+    abbreviation: row.abbreviation as string | undefined,
     sortOrder: (row.sort_order as number) ?? 0,
     isActive: (row.is_active as boolean) ?? true,
   };

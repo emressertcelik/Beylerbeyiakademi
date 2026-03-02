@@ -26,7 +26,7 @@ interface DbPlayer {
   age_group: string;
   position: string;
   foot: string;
-  jersey_number: number;
+  jersey_number?: number;
   height: number;
   weight: number;
   seasons: string[];
@@ -63,7 +63,6 @@ function mapDbToPlayer(db: DbPlayer): Player {
     ageGroup: db.age_group as Player["ageGroup"],
     position: db.position as Player["position"],
     foot: db.foot as Player["foot"],
-    jerseyNumber: db.jersey_number,
     height: db.height,
     weight: db.weight,
     seasons: db.seasons || [],
@@ -117,7 +116,6 @@ export async function createPlayer(player: Player): Promise<Player> {
       age_group: player.ageGroup,
       position: player.position,
       foot: player.foot,
-      jersey_number: player.jerseyNumber,
       height: player.height,
       weight: player.weight,
       seasons: player.seasons,
@@ -200,7 +198,6 @@ export async function updatePlayer(player: Player): Promise<Player> {
       age_group: player.ageGroup,
       position: player.position,
       foot: player.foot,
-      jersey_number: player.jerseyNumber,
       height: player.height,
       weight: player.weight,
       seasons: player.seasons,

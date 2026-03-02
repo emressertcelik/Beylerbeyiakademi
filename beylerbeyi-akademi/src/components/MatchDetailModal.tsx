@@ -2,6 +2,8 @@
 
 import { Match } from "@/types/match";
 import { X, Edit3, Trash2, MapPin, Calendar, Clock, Star, Users, Navigation } from "lucide-react";
+import { getPositionAbbr, getPositionColors, comparePositions } from "@/lib/positions";
+import { useAppData } from "@/lib/app-data";
 
 interface MatchDetailModalProps {
   match: Match;
@@ -35,8 +37,14 @@ function getStatusLabel(status: string): string {
 }
 
 export default function MatchDetailModal({ match, onClose, onEdit, onDelete }: MatchDetailModalProps) {
+  const { players } = useAppData();
   const r = resultLabel[match.result] || resultLabel.D;
   const isPlayed = match.status === "played";
+
+  /** Oyuncunun güncel mevkisini players listesinden döner, bulunamazsa saklanan mevkiyi kullanır. */
+  function livePosition(playerId: string, storedPosition: string): string {
+    return players.find(p => p.id === playerId)?.position ?? storedPosition;
+  }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-fade-in">
@@ -195,29 +203,24 @@ export default function MatchDetailModal({ match, onClose, onEdit, onDelete }: M
               <div className="bg-[#f8f9fb] divide-y divide-[#e2e5e9]">
                 {(match.squad ?? [])
                   .slice()
-                  .sort((a, b) => {
-                    const order = ["Kaleci", "Defans", "Orta Saha", "Forvet"];
-                    const aIdx = order.indexOf(a.position);
-                    const bIdx = order.indexOf(b.position);
-                    if (aIdx !== -1 && bIdx !== -1) return aIdx - bIdx;
-                    if (aIdx !== -1) return -1;
-                    if (bIdx !== -1) return 1;
-                    return a.position.localeCompare(b.position);
-                  })
-                  .map((s, i) => (
-                    <div
-                      key={s.playerId}
-                      className={`flex items-center gap-3 px-4 sm:px-6 py-2.5 ${i % 2 === 0 ? "bg-white" : "bg-[#fafbfc]"}`}
-                    >
-                      <span className="w-8 h-8 rounded-lg bg-[#c4111d] text-white flex items-center justify-center text-xs font-black shrink-0">
-                        {s.jerseyNumber}
-                      </span>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-semibold text-[#1a1a2e] truncate">{s.playerName}</p>
+                  .sort((a, b) => comparePositions(livePosition(a.playerId, a.position), livePosition(b.playerId, b.position)) || a.playerName.localeCompare(b.playerName))
+                  .map((s, i) => {
+                    const pos = livePosition(s.playerId, s.position);
+                    return (
+                      <div
+                        key={s.playerId}
+                        className={`flex items-center gap-3 px-4 sm:px-6 py-2.5 ${i % 2 === 0 ? "bg-white" : "bg-[#fafbfc]"}`}
+                      >
+                        <span className={`w-8 h-8 rounded-lg text-white flex items-center justify-center text-xs font-black shrink-0 ${getPositionColors(pos).bg}`}>
+                          {getPositionAbbr(pos)}
+                        </span>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-semibold text-[#1a1a2e] truncate">{s.playerName}</p>
+                        </div>
+                        <span className="text-[10px] font-medium text-[#8c919a] uppercase tracking-wider shrink-0">{pos}</span>
                       </div>
-                      <span className="text-[10px] font-medium text-[#8c919a] uppercase tracking-wider shrink-0">{s.position}</span>
-                    </div>
-                  ))}
+                    );
+                  })}
               </div>
             </div>
           )}
@@ -239,30 +242,23 @@ export default function MatchDetailModal({ match, onClose, onEdit, onDelete }: M
               <div className="bg-[#f8f9fb] divide-y divide-[#e2e5e9]">
                 {match.playerStats
                   .slice()
-                  .sort((a, b) => {
-                    // Önce İlk 11/Ana Kadro, sonra Sonradan Girdi, sonra diğerleri
-                    const statusOrder = (s: string | undefined) => {
-                      const sl = (s || "").toLowerCase();
-                      return sl === "ilk 11" || sl === "ana kadro" ? 0 : sl === "sonradan girdi" ? 1 : 2;
-                    };
-                    const cmp = statusOrder(a.participationStatus) - statusOrder(b.participationStatus);
-                    if (cmp !== 0) return cmp;
-                    return a.jerseyNumber - b.jerseyNumber;
-                  })
-                  .map((ps, i) => (
+                  .sort((a, b) => comparePositions(livePosition(a.playerId, a.position), livePosition(b.playerId, b.position)) || a.playerName.localeCompare(b.playerName))
+                  .map((ps, i) => {
+                    const pos = livePosition(ps.playerId, ps.position);
+                    return (
                     <div
                       key={ps.playerId}
                       className={`px-4 sm:px-6 py-3 ${i % 2 === 0 ? "bg-white" : "bg-[#fafbfc]"}`}
                     >
                       {/* Top row: Jersey + Name + Position */}
                       <div className="flex items-center gap-3">
-                        <span className="w-8 h-8 rounded-lg bg-[#c4111d] text-white flex items-center justify-center text-xs font-black shrink-0">
-                          {ps.jerseyNumber}
+                        <span className={`w-8 h-8 rounded-lg text-white flex items-center justify-center text-xs font-black shrink-0 ${getPositionColors(pos).bg}`}>
+                          {getPositionAbbr(pos)}
                         </span>
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-semibold text-[#1a1a2e] truncate">{ps.playerName}</p>
                           <div className="flex items-center gap-1.5 mt-0.5">
-                            <p className="text-[10px] text-[#8c919a]">{ps.position}</p>
+                            <p className="text-[10px] text-[#8c919a]">{pos}</p>
                             {ps.participationStatus && (
                               <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded ${getStatusColorClasses(ps.participationStatus)}`}>
                                 {getStatusLabel(ps.participationStatus)}
@@ -304,7 +300,8 @@ export default function MatchDetailModal({ match, onClose, onEdit, onDelete }: M
                         )}
                       </div>
                     </div>
-                  ))}
+                    );
+                  })}
               </div>
             </div>
           )}

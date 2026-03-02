@@ -3,7 +3,7 @@ import { AgeGroup } from "./player";
 export interface MatchPlayerStat {
   playerId: string;
   playerName: string;       // "Ad Soyad" - kolay gösterim için
-  jerseyNumber: number;
+  jerseyNumber?: number;
   position: string;
   participationStatus?: string; // İlk 11, Sonradan Girdi, Sakat, Cezalı, Kadroda Yok
   minutesPlayed: number;
@@ -22,7 +22,7 @@ export type MatchStatus = "scheduled" | "played"; // Planlandı / Oynandı
 export interface SquadPlayer {
   playerId: string;
   playerName: string;
-  jerseyNumber: number;
+  jerseyNumber?: number;
   position: string;
 }
 

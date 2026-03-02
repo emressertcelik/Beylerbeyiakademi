@@ -13,6 +13,7 @@ import {
   Weight, ChevronDown, Shield, Zap,
   Calendar, Swords, Flame,
 } from "lucide-react";
+import { getPositionAbbr, getPositionColors } from "@/lib/positions";
 
 /* ── Beceri Etiketleri ── */
 const TACTICAL_LABELS: Record<string, string> = {
@@ -266,7 +267,7 @@ export default function PlayerReportPage() {
       {/* ═══ Header Card ═══ */}
       <div className="bg-white rounded-2xl border border-[#e2e5e9] shadow-sm overflow-hidden">
         {/* Top gradient bar */}
-        <div className="bg-gradient-to-r from-[#c4111d] to-[#e94a5a] px-4 py-3 flex items-center justify-between">
+        <div className={`bg-gradient-to-r ${getPositionColors(player.position).from} ${getPositionColors(player.position).to} px-4 py-3 flex items-center justify-between`}>
           <button onClick={() => router.push("/dashboard/reports")} className="p-1.5 rounded-lg hover:bg-white/15 transition-colors text-white">
             <ArrowLeft size={16} />
           </button>
@@ -275,15 +276,15 @@ export default function PlayerReportPage() {
         {/* Player info */}
         <div className="px-5 py-4">
           <div className="flex items-center gap-4">
-            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#c4111d] to-[#e94a5a] flex items-center justify-center text-xl font-black text-white shadow-md shrink-0">
-              {player.jerseyNumber}
+            <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${getPositionColors(player.position).from} ${getPositionColors(player.position).to} flex items-center justify-center text-xl font-black text-white shadow-md shrink-0`}>
+              {getPositionAbbr(player.position)}
             </div>
             <div className="flex-1 min-w-0">
               <h1 className="text-lg font-black text-[#1a1a2e] tracking-tight">
                 {player.firstName} {player.lastName}
               </h1>
               <div className="flex items-center gap-1.5 mt-1 flex-wrap">
-                <span className="text-[9px] font-bold bg-[#c4111d]/10 text-[#c4111d] px-2 py-0.5 rounded-md">{player.position}</span>
+                <span className={`text-[9px] font-bold bg-white border px-2 py-0.5 rounded-md ${getPositionColors(player.position).text}`}>{player.position}</span>
                 <span className="text-[9px] font-bold bg-[#1a1a2e]/8 text-[#5a6170] px-2 py-0.5 rounded-md">{player.ageGroup}</span>
                 <span className="text-[10px] text-[#8c919a]">{age} yaş</span>
                 <span className="text-[10px] text-[#d1d5db]">·</span>

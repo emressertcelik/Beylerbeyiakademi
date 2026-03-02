@@ -31,7 +31,6 @@ export default function PlayerFormModal({ player, saving, onClose, onSave }: Pla
     ageGroup: (AGE_GROUPS[0] ?? "U15") as AgeGroup,
     position: (POSITIONS[0] ?? "Kaleci") as Position,
     foot: (FEET[0] ?? "Sağ") as Foot,
-    jerseyNumber: 1,
     height: 165,
     weight: 55,
     phone: "",
@@ -55,7 +54,6 @@ export default function PlayerFormModal({ player, saving, onClose, onSave }: Pla
         ageGroup: player.ageGroup,
         position: player.position,
         foot: player.foot,
-        jerseyNumber: player.jerseyNumber ?? 0,
         height: player.height ?? 0,
         weight: player.weight ?? 0,
         phone: player.phone || "",
@@ -176,10 +174,9 @@ export default function PlayerFormModal({ player, saving, onClose, onSave }: Pla
                   </div>
                 </div>
               </div>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+              <div className="grid grid-cols-2 gap-4">
                 <SelectField label="Pozisyon" value={form.position} onChange={(v) => updateField("position", v)} options={POSITIONS} />
                 <SelectField label="Ayak" value={form.foot} onChange={(v) => updateField("foot", v)} options={FEET} />
-                <NumberField label="Forma No" value={form.jerseyNumber} onChange={(v) => updateField("jerseyNumber", v)} min={1} max={99} />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <NumberField label="Boy (cm)" value={form.height} onChange={(v) => updateField("height", v)} min={0} max={250} />

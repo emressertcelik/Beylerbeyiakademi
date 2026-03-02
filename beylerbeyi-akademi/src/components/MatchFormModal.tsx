@@ -5,6 +5,7 @@ import { Match, MatchPlayerStat, MatchStatus, SquadPlayer } from "@/types/match"
 import { Player, AgeGroup } from "@/types/player";
 import { useAppData } from "@/lib/app-data";
 import { X, Plus, Trash2, UserPlus, Loader2, Star, Users, Check } from "lucide-react";
+import { getPositionAbbr, getPositionColors, comparePositions } from "@/lib/positions";
 
 interface MatchFormModalProps {
   match?: Match | null;
@@ -587,7 +588,7 @@ export default function MatchFormModal({ match, players, saving, onClose, onSave
                       .toLowerCase()
                       .includes(playerSearch.toLowerCase())
                   )
-                  .sort((a, b) => a.jerseyNumber - b.jerseyNumber)
+                  .sort((a, b) => comparePositions(a.position, b.position) || a.lastName.localeCompare(b.lastName))
                   .map((p) => {
                     const selected = isInSquad(p.id);
                     return (
@@ -601,10 +602,8 @@ export default function MatchFormModal({ match, players, saving, onClose, onSave
                             : "bg-white border-[#e2e5e9] hover:border-[#c4111d]/30"
                         }`}
                       >
-                        <span className={`w-9 h-9 rounded-lg flex items-center justify-center text-xs font-black shrink-0 ${
-                          selected ? "bg-[#c4111d] text-white" : "bg-[#f1f3f5] text-[#5a6170]"
-                        }`}>
-                          {p.jerseyNumber}
+                        <span className={`w-9 h-9 rounded-lg flex items-center justify-center text-xs font-black shrink-0 text-white ${getPositionColors(p.position).bg}`}>
+                          {getPositionAbbr(p.position)}
                         </span>
                         <div className="flex-1 min-w-0">
                           <p className={`text-sm font-semibold truncate ${selected ? "text-[#1a1a2e]" : "text-[#5a6170]"}`}>
@@ -640,7 +639,7 @@ export default function MatchFormModal({ match, players, saving, onClose, onSave
                             .toLowerCase()
                             .includes(playerSearch.toLowerCase())
                         )
-                        .sort((a, b) => a.ageGroup.localeCompare(b.ageGroup) || a.jerseyNumber - b.jerseyNumber)
+                        .sort((a, b) => comparePositions(a.position, b.position) || a.ageGroup.localeCompare(b.ageGroup) || a.lastName.localeCompare(b.lastName))
                         .map((p) => {
                           const selected = isInSquad(p.id);
                           return (
@@ -654,10 +653,8 @@ export default function MatchFormModal({ match, players, saving, onClose, onSave
                                   : "bg-white border-[#e2e5e9] hover:border-purple-300"
                               }`}
                             >
-                              <span className={`w-9 h-9 rounded-lg flex items-center justify-center text-xs font-black shrink-0 ${
-                                selected ? "bg-purple-600 text-white" : "bg-[#f1f3f5] text-[#5a6170]"
-                              }`}>
-                                {p.jerseyNumber}
+                              <span className={`w-9 h-9 rounded-lg flex items-center justify-center text-xs font-black shrink-0 text-white ${getPositionColors(p.position).bg}`}>
+                                {getPositionAbbr(p.position)}
                               </span>
                               <div className="flex-1 min-w-0">
                                 <div className="flex items-center gap-1.5">
@@ -689,7 +686,7 @@ export default function MatchFormModal({ match, players, saving, onClose, onSave
                   </p>
                   <div className="flex flex-wrap gap-1.5">
                     {squad
-                      .sort((a, b) => a.jerseyNumber - b.jerseyNumber)
+                      .sort((a, b) => comparePositions(a.position, b.position) || a.playerName.localeCompare(b.playerName))
                       .map((s) => {
                         const isOtherGroup = players.find(p => p.id === s.playerId)?.ageGroup !== form.ageGroup;
                         return (
@@ -699,9 +696,8 @@ export default function MatchFormModal({ match, players, saving, onClose, onSave
                               isOtherGroup ? "border-purple-200" : "border-[#e2e5e9]"
                             }`}
                           >
-                            <span className={`font-black ${isOtherGroup ? "text-purple-600" : "text-[#c4111d]"}`}>#{s.jerseyNumber}</span>
+                            <span className={`font-black ${isOtherGroup ? "text-purple-600" : "text-[#c4111d]"}`}>{getPositionAbbr(s.position)}</span>
                             <span className="font-medium text-[#1a1a2e]">{s.playerName}</span>
-                            <span className="text-[9px] text-[#8c919a] font-normal">({s.position} - {s.jerseyNumber})</span>
                             {isOtherGroup && (
                               <span className="text-[7px] font-bold px-1 py-0.5 rounded bg-purple-100 text-purple-700">
                                 {players.find(p => p.id === s.playerId)?.ageGroup}
@@ -772,7 +768,7 @@ export default function MatchFormModal({ match, players, saving, onClose, onSave
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
                       {visibleUnaddedPlayers
-                        .sort((a, b) => a.jerseyNumber - b.jerseyNumber)
+                        .sort((a, b) => comparePositions(a.position, b.position) || a.lastName.localeCompare(b.lastName))
                         .map((p) => (
                           <button
                             key={p.id}
@@ -781,7 +777,7 @@ export default function MatchFormModal({ match, players, saving, onClose, onSave
                             className="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-white border border-[#e2e5e9] rounded-lg text-xs hover:border-[#c4111d]/40 hover:bg-[#c4111d]/5 transition-all"
                           >
                             <Plus size={12} className="text-[#c4111d]" />
-                            <span className="font-black text-[#c4111d]">#{p.jerseyNumber}</span>
+                            <span className={`font-black ${getPositionColors(p.position).text}`}>{getPositionAbbr(p.position)}</span>
                             <span className="font-medium text-[#1a1a2e]">{p.firstName} {p.lastName}</span>
                           </button>
                         ))}
@@ -803,15 +799,21 @@ export default function MatchFormModal({ match, players, saving, onClose, onSave
                         .toLowerCase()
                         .includes(playerSearch.toLowerCase())
                     )
+                    .sort((a, b) => {
+                      const posA = players.find(p => p.id === a.playerId)?.position ?? a.position;
+                      const posB = players.find(p => p.id === b.playerId)?.position ?? b.position;
+                      return comparePositions(posA, posB) || (a.playerName ?? "").localeCompare(b.playerName ?? "");
+                    })
                     .map((ps) => {
                       const psPlayer = players.find(p => p.id === ps.playerId);
+                      const position = psPlayer?.position ?? ps.position;
                       const isOtherGroup = psPlayer && psPlayer.ageGroup !== form.ageGroup;
                       return (
                         <div key={ps.playerId} className={`bg-white border rounded-xl p-4 ${isOtherGroup ? "border-purple-200" : "border-[#e2e5e9]"}`}>
                           {/* Player Header */}
                           <div className="flex items-center gap-2 mb-3">
-                            <span className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-black ${isOtherGroup ? "bg-purple-100 text-purple-700" : "bg-[#c4111d]/10 text-[#c4111d]"}`}>
-                                {ps.jerseyNumber}
+                            <span className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-black text-white ${getPositionColors(position).bg}`}>
+                                {getPositionAbbr(position)}
                               </span>
                               <div className="flex-1 min-w-0">
                                 <div className="flex items-center gap-1.5">
@@ -820,7 +822,7 @@ export default function MatchFormModal({ match, players, saving, onClose, onSave
                                     <span className="text-[8px] font-bold px-1.5 py-0.5 rounded bg-purple-100 text-purple-700">{psPlayer.ageGroup}</span>
                                   )}
                                 </div>
-                                <p className="text-[10px] text-[#8c919a]">{ps.position}</p>
+                                <p className="text-[10px] text-[#8c919a]">{position}</p>
                               </div>
                               <button
                                 type="button"

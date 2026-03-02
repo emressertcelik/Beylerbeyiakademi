@@ -1,6 +1,7 @@
 "use client";
 
 import { Player } from "@/types/player";
+import { getPositionAbbr, getPositionColors } from "@/lib/positions";
 
 import Link from "next/link";
 
@@ -10,18 +11,8 @@ interface PlayerCardProps {
   userRole?: { role: string };
 }
 
-const positionColor: Record<string, { from: string; to: string }> = {
-  Kaleci: { from: "from-amber-500", to: "to-amber-600" },
-  Defans: { from: "from-[#7a8a9e]", to: "to-[#5a6a80]" },
-  "Orta Saha": { from: "from-[#a0a5b5]", to: "to-[#858a9a]" },
-  Forvet: { from: "from-[#c4111d]", to: "to-[#8b0d15]" },
-  "Kanat Forvet": { from: "from-[#c4111d]", to: "to-[#8b0d15]" },
-};
-
-const defaultColor = { from: "from-[#9a9fb0]", to: "to-[#7b8095]" };
-
 export default function PlayerCard({ player, onClick, userRole }: PlayerCardProps) {
-  const color = positionColor[player.position] || defaultColor;
+  const color = getPositionColors(player.position);
   const initials = `${player.firstName.charAt(0)}${player.lastName.charAt(0)}`;
   const birthYear = player.birthDate ? new Date(player.birthDate).getFullYear() : "";
 
@@ -32,9 +23,10 @@ export default function PlayerCard({ player, onClick, userRole }: PlayerCardProp
     >
       {/* Renkli başlık alanı */}
       <div className={`relative bg-gradient-to-br ${color.from} ${color.to} h-14 sm:h-16 flex items-center px-3 sm:px-4`}>
-        {/* Forma numarası */}
+        <div className="absolute inset-0 bg-white/10" />
+        {/* Mevki kısaltması */}
         <span className="absolute top-1.5 right-3 text-2xl sm:text-3xl font-black text-white/25 italic leading-none">
-          #{player.jerseyNumber}
+          {getPositionAbbr(player.position)}
         </span>
         {/* İsim baş harfleri */}
         <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-white/90 backdrop-blur flex items-center justify-center text-xs sm:text-sm font-black text-[#1a1a2e] shadow-sm shrink-0">

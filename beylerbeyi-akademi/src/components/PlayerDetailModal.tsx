@@ -6,6 +6,7 @@ import { Match } from "@/types/match";
 import { fetchSkillLogs, fetchBodyLogs } from "@/lib/supabase/players";
 import { fetchMatchesByPlayer } from "@/lib/supabase/matches";
 import { X, Edit3, Trash2, TrendingUp, TrendingDown, ArrowUp, ArrowDown, Ruler, Weight, ChevronDown, Clock, Star, AlertTriangle, Ban, Users } from "lucide-react";
+import { getPositionColors } from "@/lib/positions";
 
 interface PlayerDetailModalProps {
   player: Player;
@@ -64,16 +65,9 @@ export default function PlayerDetailModal({ player, onClose, onEdit, onDelete, u
   const [historyOpen, setHistoryOpen] = useState(false);
   const [playerMatches, setPlayerMatches] = useState<Match[]>([]);
   const [selectedSeason, setSelectedSeason] = useState<string>("ALL");
+  const [selectedAgeGroup, setSelectedAgeGroup] = useState<string>("ALL");
 
-  // Position-based header gradient colors (matching PlayerCard)
-  const positionGradient: Record<string, string> = {
-    Kaleci: "from-amber-500 to-amber-600",
-    Defans: "from-[#7a8a9e] to-[#5a6a80]",
-    "Orta Saha": "from-[#a0a5b5] to-[#858a9a]",
-    Forvet: "from-[#c4111d] to-[#8b0d15]",
-    "Kanat Forvet": "from-[#c4111d] to-[#8b0d15]",
-  };
-  const gradient = positionGradient[player.position] || "from-[#a0a5b5] to-[#858a9a]";
+  const { from: gradFrom, to: gradTo } = getPositionColors(player.position);
   const initials = `${player.firstName.charAt(0)}${player.lastName.charAt(0)}`;
   const birthYear = player.birthDate ? new Date(player.birthDate).getFullYear() : "";
 
@@ -108,14 +102,22 @@ export default function PlayerDetailModal({ player, onClose, onEdit, onDelete, u
     return Array.from(seasons).sort().reverse();
   }, [playerMatches]);
 
-  // Sezona göre filtrelenmiş maçlar
+  // Yaş grubu listesi (maçlardan türet — birden fazlaysa göster)
+  const availableAgeGroups = useMemo(() => {
+    const groups = new Set<string>();
+    playerMatches.forEach(m => { if (m.ageGroup) groups.add(m.ageGroup); });
+    return Array.from(groups).sort();
+  }, [playerMatches]);
+
+  // Sezon + yaş grubuna göre filtrelenmiş maçlar
   const filteredMatches = useMemo(() => {
     return playerMatches.filter(m => {
       if (m.status !== "played") return false;
       if (selectedSeason !== "ALL" && m.season !== selectedSeason) return false;
+      if (selectedAgeGroup !== "ALL" && m.ageGroup !== selectedAgeGroup) return false;
       return true;
     });
-  }, [playerMatches, selectedSeason]);
+  }, [playerMatches, selectedSeason, selectedAgeGroup]);
 
   // Katılım istatistiklerini hesapla (sezon bazlı)
   const participationStats = useMemo(() => {
@@ -184,7 +186,7 @@ export default function PlayerDetailModal({ player, onClose, onEdit, onDelete, u
       {/* Modal */}
       <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto border border-[#e2e5e9] animate-slide-in-up">
         {/* Renkli Header */}
-        <div className={`relative bg-gradient-to-br ${gradient} px-4 sm:px-6 py-3 sm:py-4 rounded-t-2xl`}>
+        <div className={`relative bg-gradient-to-br ${gradFrom} ${gradTo} px-4 sm:px-6 py-3 sm:py-4 rounded-t-2xl`}>
           {/* Kapat butonu */}
           <button
             onClick={onClose}
@@ -192,10 +194,6 @@ export default function PlayerDetailModal({ player, onClose, onEdit, onDelete, u
           >
             <X size={16} />
           </button>
-          {/* Forma numarası */}
-          <span className="absolute top-2 right-10 text-2xl sm:text-3xl font-black text-white/15 italic leading-none">
-            #{player.jerseyNumber}
-          </span>
           {/* İsim baş harfleri */}
           <div className="w-10 h-10 rounded-lg bg-white/90 backdrop-blur flex items-center justify-center text-sm font-black text-[#1a1a2e] shadow-sm mb-2">
             {initials}
@@ -239,9 +237,8 @@ export default function PlayerDetailModal({ player, onClose, onEdit, onDelete, u
               <InfoBox label="Kilo" value={`${player.weight} kg`} />
               <InfoBox label="Ayak" value={player.foot} />
             </div>
-            <div className="grid grid-cols-2 gap-2 mt-2">
+            <div className="grid grid-cols-1 gap-2 mt-2">
               <InfoBox label="Sezon" value={player.seasons.join(", ")} />
-              <InfoBox label="Forma No" value={`#${player.jerseyNumber}`} />
             </div>
             {player.previousTeams && player.previousTeams.length > 0 && (
               <div className="mt-3 bg-[#f8f9fb] rounded-xl p-4 border border-[#e2e5e9]">
@@ -338,7 +335,7 @@ export default function PlayerDetailModal({ player, onClose, onEdit, onDelete, u
 
           {/* İstatistikler */}
           <section>
-            <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center justify-between mb-2">
               <h3 className="text-xs font-semibold text-[#8c919a] uppercase tracking-wider">Maç İstatistikleri</h3>
               {/* Sezon Filtresi */}
               <div className="flex items-center gap-1 overflow-x-auto">
@@ -367,6 +364,35 @@ export default function PlayerDetailModal({ player, onClose, onEdit, onDelete, u
                 ))}
               </div>
             </div>
+            {/* Yaş Grubu Filtresi — sadece birden fazla yaş grubu varsa */}
+            {availableAgeGroups.length > 1 && (
+              <div className="flex items-center gap-1 mb-3 overflow-x-auto">
+                <span className="text-[9px] font-semibold text-[#8c919a] uppercase tracking-wider shrink-0 mr-1">Yaş Grubu</span>
+                <button
+                  onClick={() => setSelectedAgeGroup("ALL")}
+                  className={`px-2.5 py-1 text-[10px] font-semibold rounded-md transition-all whitespace-nowrap ${
+                    selectedAgeGroup === "ALL"
+                      ? "bg-[#c4111d] text-white shadow-sm"
+                      : "text-[#5a6170] bg-[#f1f3f5] hover:text-[#1a1a2e]"
+                  }`}
+                >
+                  Tümü
+                </button>
+                {availableAgeGroups.map(ag => (
+                  <button
+                    key={ag}
+                    onClick={() => setSelectedAgeGroup(ag)}
+                    className={`px-2.5 py-1 text-[10px] font-semibold rounded-md transition-all whitespace-nowrap ${
+                      selectedAgeGroup === ag
+                        ? "bg-[#c4111d] text-white shadow-sm"
+                        : "text-[#5a6170] bg-[#f1f3f5] hover:text-[#1a1a2e]"
+                    }`}
+                  >
+                    {ag}
+                  </button>
+                ))}
+              </div>
+            )}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
               <StatBox label="Maç" value={seasonStats.matches} />
               <StatBox label="Dk. Oynanan" value={seasonStats.minutesPlayed} />

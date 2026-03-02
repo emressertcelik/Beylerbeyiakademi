@@ -8,6 +8,7 @@ import {
   ChevronDown, Star, TrendingUp, Users, Filter,
   Award, Zap, BarChart3, Handshake, ShieldCheck, Search,
 } from "lucide-react";
+import { getPositionAbbr } from "@/lib/positions";
 
 type SortField =
   | "matches" | "goals" | "assists" | "minutesPlayed"
@@ -17,7 +18,6 @@ type SortField =
 interface PlayerReport {
   id: string;
   name: string;
-  jerseyNumber: number;
   position: string;
   ageGroup: string;
   matches: number;
@@ -141,7 +141,6 @@ export default function ReportsPage() {
       map.set(playerId, {
         id: playerId,
         name: player?.firstName + " " + player?.lastName,
-        jerseyNumber: player?.jerseyNumber || 0,
         position: player?.position || psList[0].position,
         ageGroup: player?.ageGroup || "",
         matches: matchCount,
@@ -366,7 +365,7 @@ export default function ReportsPage() {
               iconBg="bg-amber-50"
               title="Gol Kralı"
               name={topScorer.name}
-              jersey={topScorer.jerseyNumber}
+              position={topScorer.position}
               value={`${topScorer.goals}`}
               unit="gol"
               sub={`İ11: ${topScorer.starts} · Y: ${topScorer.sub} · ${topScorer.matches} maç`}
@@ -379,7 +378,7 @@ export default function ReportsPage() {
               iconBg="bg-blue-50"
               title="Asist Kralı"
               name={topAssist.name}
-              jersey={topAssist.jerseyNumber}
+              position={topAssist.position}
               value={`${topAssist.assists}`}
               unit="asist"
               sub={`İ11: ${topAssist.starts} · Y: ${topAssist.sub} · ${topAssist.matches} maç`}
@@ -392,7 +391,7 @@ export default function ReportsPage() {
               iconBg="bg-teal-50"
               title="Gol Katkısı"
               name={topContributor.name}
-              jersey={topContributor.jerseyNumber}
+              position={topContributor.position}
               value={`${topContributor.goals + topContributor.assists}`}
               unit="katkı"
               sub={`${topContributor.goals}G + ${topContributor.assists}A`}
@@ -405,7 +404,7 @@ export default function ReportsPage() {
               iconBg="bg-emerald-50"
               title="En Çok Süre"
               name={topMinutes.name}
-              jersey={topMinutes.jerseyNumber}
+              position={topMinutes.position}
               value={`${topMinutes.minutesPlayed}`}
               unit="dk"
               sub={`İ11: ${topMinutes.starts} · Y: ${topMinutes.sub} · ${topMinutes.matches} maç`}
@@ -419,7 +418,7 @@ export default function ReportsPage() {
               iconBg="bg-cyan-50"
               title="Gole Kapatan"
               name={topCleanSheet.name}
-              jersey={topCleanSheet.jerseyNumber}
+              position={topCleanSheet.position}
               value={`${topCleanSheet.cleanSheets}`}
               unit="maç"
               sub={`İ11: ${topCleanSheet.starts} · Y: ${topCleanSheet.sub} · ${topCleanSheet.matches} maç`}
@@ -432,7 +431,7 @@ export default function ReportsPage() {
               iconBg="bg-blue-50"
               title="Taktik Lider"
               name={topRated.name}
-              jersey={topRated.jerseyNumber}
+              position={topRated.position}
               value={`${topRated.tacticalAvg}`}
               unit="TAK"
               sub={`İ11: ${topRated.starts} · Y: ${topRated.sub} · ${topRated.matches} maç`}
@@ -509,7 +508,7 @@ export default function ReportsPage() {
                     <td className="px-3 py-2.5">
                       <div className="flex items-center gap-2">
                         <span className="w-7 h-7 rounded-md bg-[#c4111d]/10 flex items-center justify-center text-[10px] font-black text-[#c4111d] shrink-0">
-                          {r.jerseyNumber}
+                          {getPositionAbbr(r.position)}
                         </span>
                         <div className="min-w-0">
                           <Link href={`/dashboard/reports/${r.id}`} className="text-xs font-semibold text-[#1a1a2e] truncate hover:text-[#c4111d] transition-colors cursor-pointer block">
@@ -598,7 +597,7 @@ export default function ReportsPage() {
                 .map((r) => (
                   <div key={r.id} className="flex items-center justify-between bg-[#f8f9fb] rounded-lg px-3 py-2">
                     <div className="flex items-center gap-2">
-                      <span className="text-[10px] font-black text-[#c4111d]">#{r.jerseyNumber}</span>
+                      <span className="text-[10px] font-black text-[#c4111d]">{getPositionAbbr(r.position)}</span>
                       <span className="text-xs font-medium text-[#1a1a2e]">{r.name}</span>
                     </div>
                     <div className="flex items-center gap-2">
@@ -642,7 +641,7 @@ export default function ReportsPage() {
                   <div key={r.id} className="flex items-center justify-between bg-[#f8f9fb] rounded-lg px-3 py-2">
                     <div className="flex items-center gap-2">
                       <span className={`text-[10px] font-black ${i === 0 ? "text-amber-500" : "text-[#8c919a]"}`}>{i + 1}.</span>
-                      <span className="text-[10px] font-black text-[#c4111d]">#{r.jerseyNumber}</span>
+                      <span className="text-[10px] font-black text-[#c4111d]">{getPositionAbbr(r.position)}</span>
                       <span className="text-xs font-medium text-[#1a1a2e]">{r.name}</span>
                     </div>
                     <SkillBadge value={r.tacticalAvg} />
@@ -670,7 +669,7 @@ export default function ReportsPage() {
                   <div key={r.id} className="flex items-center justify-between bg-[#f8f9fb] rounded-lg px-3 py-2">
                     <div className="flex items-center gap-2">
                       <span className={`text-[10px] font-black ${i === 0 ? "text-amber-500" : "text-[#8c919a]"}`}>{i + 1}.</span>
-                      <span className="text-[10px] font-black text-[#c4111d]">#{r.jerseyNumber}</span>
+                      <span className="text-[10px] font-black text-[#c4111d]">{getPositionAbbr(r.position)}</span>
                       <span className="text-xs font-medium text-[#1a1a2e]">{r.name}</span>
                     </div>
                     <SkillBadge value={r.athleticAvg} />
@@ -687,13 +686,13 @@ export default function ReportsPage() {
 
 /* ── Helper Components ── */
 
-function TopCard({ icon: Icon, iconColor, iconBg, title, name, jersey, value, unit, sub }: {
+function TopCard({ icon: Icon, iconColor, iconBg, title, name, position, value, unit, sub }: {
   icon: React.ElementType;
   iconColor: string;
   iconBg: string;
   title: string;
   name: string;
-  jersey: number;
+  position: string;
   value: string;
   unit?: string;
   sub: string;
@@ -706,7 +705,7 @@ function TopCard({ icon: Icon, iconColor, iconBg, title, name, jersey, value, un
       <div className="flex-1 min-w-0">
         <p className="text-[9px] font-semibold text-[#c4111d] uppercase tracking-wider">{title}</p>
         <div className="flex items-center gap-1.5 mt-0.5">
-          <span className="text-[9px] font-bold text-[#c4111d] bg-[#c4111d]/8 rounded px-1 py-0.5">#{jersey}</span>
+          <span className="text-[9px] font-bold text-[#c4111d] bg-[#c4111d]/8 rounded px-1 py-0.5">{getPositionAbbr(position)}</span>
           <span className="text-xs font-semibold text-[#1a1a2e] truncate">{name}</span>
         </div>
         <p className="text-[9px] text-[#8c919a] mt-0.5">{sub}</p>
