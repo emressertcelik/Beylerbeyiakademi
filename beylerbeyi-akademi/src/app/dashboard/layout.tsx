@@ -7,12 +7,13 @@ import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { AppDataProvider, useAppData } from "@/lib/app-data";
 import { ToastProvider } from "@/components/Toast";
-import { Users, LogOut, Home, Menu, X, ChevronRight, Shield, Settings, BarChart3, User } from "lucide-react";
+import { Users, LogOut, Home, Menu, X, ChevronRight, Shield, Settings, BarChart3, User, Binoculars } from "lucide-react";
 
 const NAV_ITEMS = [
   { href: "/dashboard", label: "Ana Sayfa", icon: Home },
   { href: "/dashboard/players", label: "Oyuncular", icon: Users },
   { href: "/dashboard/teams", label: "Takımlar", icon: Shield },
+  { href: "/dashboard/player-pool", label: "Oyuncu Havuzu", icon: Binoculars },
   { href: "/dashboard/reports", label: "Raporlar", icon: BarChart3 },
 ];
 
