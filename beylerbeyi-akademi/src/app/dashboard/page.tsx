@@ -8,6 +8,7 @@ import { Match } from "@/types/match";
 import MatchDetailModal from "@/components/MatchDetailModal";
 import MatchFormModal from "@/components/MatchFormModal";
 import { useToast } from "@/components/Toast";
+import TrainingScheduleWidget from "@/components/TrainingScheduleWidget";
 
 export default function DashboardPage() {
     // Yaş grubu renkleri
@@ -520,6 +521,9 @@ export default function DashboardPage() {
 
         </div>
       </div>
+
+      {/* ── Haftalık Antrenman Programı ── */}
+      <TrainingScheduleWidget />
 
       {/* ── Haftalık Maç Takvimi ── */}
       <div className="rounded-2xl bg-white border border-[#e2e5e9] overflow-hidden">

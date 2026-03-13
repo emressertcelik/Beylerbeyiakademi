@@ -7,15 +7,34 @@ import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { AppDataProvider, useAppData } from "@/lib/app-data";
 import { ToastProvider } from "@/components/Toast";
-import { Users, LogOut, Home, Menu, X, ChevronRight, Shield, Settings, BarChart3, User, Binoculars } from "lucide-react";
+import { Users, LogOut, Home, Menu, X, ChevronRight, Shield, Settings, BarChart3, User, Binoculars, CalendarDays } from "lucide-react";
 
 const NAV_ITEMS = [
   { href: "/dashboard", label: "Ana Sayfa", icon: Home },
   { href: "/dashboard/players", label: "Oyuncular", icon: Users },
   { href: "/dashboard/teams", label: "Takımlar", icon: Shield },
-  { href: "/dashboard/player-pool", label: "Oyuncu Havuzu", icon: Binoculars },
-  { href: "/dashboard/reports", label: "Raporlar", icon: BarChart3 },
 ];
+
+// Antrenör bölümünün alt sekmeler
+const ANTRENOR_SUB_ITEMS = [
+  { href: "/dashboard/antrenor/antrenman-programi", label: "Antrenman Programı", icon: CalendarDays },
+  { href: "/dashboard/antrenor/antrenman-raporu", label: "Antrenman Raporu", icon: BarChart3 },
+  { href: "/dashboard/player-pool", label: "Oyuncu İzleme", icon: Binoculars },
+  { href: "/dashboard/reports", label: "Oyuncu Raporları", icon: BarChart3 },
+];
+
+// Antrenör bölümü ana nav linki
+const ANTRENOR_HREF = "/dashboard/antrenor/antrenman-programi";
+
+// Antrenör bölümüne dahil path'ler (aktiflik kontrolü için)
+function isAntrenorPath(pathname: string | null): boolean {
+  return !!(
+    pathname?.startsWith("/dashboard/antrenor") ||
+    pathname?.startsWith("/dashboard/player-pool") ||
+    pathname?.startsWith("/dashboard/reports")
+  );
+}
+
 
 export default function DashboardLayout({
   children,
@@ -86,6 +105,7 @@ export default function DashboardLayout({
                   </Link>
                 );
               })}
+              <AntrenorNavTab pathname={pathname} />
             </nav>
           </div>
 
@@ -115,6 +135,9 @@ export default function DashboardLayout({
             </button>
           </div>
         </div>
+
+        {/* Antrenör Alt Navigasyon (Antrenör bölümündeyken göster) */}
+        <AntrenorSubNav pathname={pathname} />
 
         {/* Mobile menu */}
         {menuOpen && (
@@ -148,6 +171,7 @@ export default function DashboardLayout({
                   </Link>
                 );
               })}
+              <MobileAntrenorSection pathname={pathname} setMenuOpen={setMenuOpen} />
               <MobileSettingsMenuLink pathname={pathname} setMenuOpen={setMenuOpen} />
               <button
                 onClick={() => {
@@ -219,6 +243,19 @@ function MobileNavItems({ pathname }: { pathname: string | null }) {
           </Link>
         );
       })}
+      {/* Antrenör ikonu - sadece oyuncu dışı */}
+      {userRole?.role !== "oyuncu" && (
+        <Link
+          href={ANTRENOR_HREF}
+          className={`flex items-center justify-center w-9 h-9 rounded-lg transition-all duration-200 ${
+            isAntrenorPath(pathname)
+              ? "bg-[#c4111d] text-white shadow-sm shadow-[#c4111d]/25"
+              : "text-[#5a6170] hover:text-[#1a1a2e] hover:bg-[#f1f3f5]"
+          }`}
+        >
+          <CalendarDays size={18} />
+        </Link>
+      )}
       {/* Ayarlar sadece oyuncu dışı */}
       {userRole?.role !== "oyuncu" && (
         <Link
@@ -256,6 +293,118 @@ function MobileSettingsMenuLink({ pathname, setMenuOpen }: { pathname: string | 
       </div>
       <ChevronRight size={16} className="opacity-40" />
     </Link>
+  );
+}
+
+// Desktop'ta Antrenör nav sekmesi (sadece antrenör ve yönetici için)
+function AntrenorNavTab({ pathname }: { pathname: string | null }) {
+  const { userRole } = useAppData();
+  if (userRole?.role === "oyuncu") return null;
+  const isActive = isAntrenorPath(pathname);
+  return (
+    <Link
+      href={ANTRENOR_HREF}
+      className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+        isActive
+          ? "bg-[#c4111d] text-white shadow-sm shadow-[#c4111d]/25"
+          : "text-[#5a6170] hover:text-[#1a1a2e] hover:bg-[#f1f3f5]"
+      }`}
+    >
+      <CalendarDays size={18} />
+      Antrenör
+    </Link>
+  );
+}
+
+// Antrenör bölümü alt navigasyonu (ana nav'ın altında şerit olarak gösterilir)
+function AntrenorSubNav({ pathname }: { pathname: string | null }) {
+  const { userRole } = useAppData();
+  if (userRole?.role === "oyuncu") return null;
+  if (!isAntrenorPath(pathname)) return null;
+
+  return (
+    <div className="border-t border-[#e2e5e9] bg-[#fafbfc]">
+      <div className="max-w-7xl mx-auto px-4 md:px-6">
+        <div className="flex items-center gap-1 overflow-x-auto py-1.5 scrollbar-hide">
+          {ANTRENOR_SUB_ITEMS.map((item) => {
+            const isActive = pathname?.startsWith(item.href);
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-all duration-200 ${
+                  isActive
+                    ? "bg-[#c4111d]/10 text-[#c4111d] font-semibold"
+                    : "text-[#5a6170] hover:text-[#1a1a2e] hover:bg-[#f1f3f5]"
+                }`}
+              >
+                <item.icon size={13} />
+                {item.label}
+              </Link>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Mobile Antrenör bölümü (gruplandırılmış gösterim)
+function MobileAntrenorSection({
+  pathname,
+  setMenuOpen,
+}: {
+  pathname: string | null;
+  setMenuOpen: (v: boolean) => void;
+}) {
+  const { userRole } = useAppData();
+  if (userRole?.role === "oyuncu") return null;
+
+  const isAntrenorActive = isAntrenorPath(pathname);
+
+  return (
+    <div>
+      {/* Ana Antrenör başlığı */}
+      <Link
+        href={ANTRENOR_HREF}
+        onClick={() => setMenuOpen(false)}
+        className={`flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 ${
+          isAntrenorActive
+            ? "bg-[#c4111d] text-white"
+            : "text-[#5a6170] hover:bg-[#f1f3f5]"
+        }`}
+      >
+        <div className="flex items-center gap-3">
+          <CalendarDays size={20} />
+          Antrenör
+        </div>
+        <ChevronRight size={16} className="opacity-40" />
+      </Link>
+
+      {/* Alt sekmeler — Antrenör bölümündeyken görünür */}
+      {isAntrenorActive && (
+        <div className="ml-4 mt-1 space-y-0.5 border-l-2 border-[#c4111d]/20 pl-3">
+          {ANTRENOR_SUB_ITEMS.map((item) => {
+            const isActive = pathname?.startsWith(item.href);
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                onClick={() => setMenuOpen(false)}
+                className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-200 ${
+                  isActive
+                    ? "text-[#c4111d] bg-red-50 font-semibold"
+                    : "text-[#5a6170] hover:bg-[#f1f3f5]"
+                }`}
+              >
+                <item.icon size={14} />
+                {item.label}
+              </Link>
+            );
+          })}
+        </div>
+      )}
+    </div>
   );
 }
 
