@@ -7,7 +7,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { AppDataProvider, useAppData } from "@/lib/app-data";
 import { ToastProvider } from "@/components/Toast";
-import { Users, LogOut, Home, Menu, X, ChevronRight, Shield, Settings, BarChart3, User, Binoculars, CalendarDays } from "lucide-react";
+import { Users, LogOut, Home, Menu, X, ChevronRight, Shield, Settings, BarChart3, User, Binoculars, CalendarDays, ClipboardList } from "lucide-react";
 
 const NAV_ITEMS = [
   { href: "/dashboard", label: "Ana Sayfa", icon: Home },
@@ -253,7 +253,7 @@ function MobileNavItems({ pathname }: { pathname: string | null }) {
               : "text-[#5a6170] hover:text-[#1a1a2e] hover:bg-[#f1f3f5]"
           }`}
         >
-          <CalendarDays size={18} />
+          <ClipboardList size={18} />
         </Link>
       )}
       {/* Ayarlar sadece oyuncu dışı */}
@@ -310,7 +310,7 @@ function AntrenorNavTab({ pathname }: { pathname: string | null }) {
           : "text-[#5a6170] hover:text-[#1a1a2e] hover:bg-[#f1f3f5]"
       }`}
     >
-      <CalendarDays size={18} />
+      <ClipboardList size={18} />
       Antrenör
     </Link>
   );
@@ -375,7 +375,7 @@ function MobileAntrenorSection({
         }`}
       >
         <div className="flex items-center gap-3">
-          <CalendarDays size={20} />
+          <ClipboardList size={20} />
           Antrenör
         </div>
         <ChevronRight size={16} className="opacity-40" />

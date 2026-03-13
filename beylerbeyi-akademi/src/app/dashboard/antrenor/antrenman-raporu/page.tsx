@@ -9,6 +9,7 @@ import {
   fetchDetailItemsByScheduleIds,
   fetchPlayersByAgeGroupAndSeason,
   fetchAttendanceByScheduleId,
+  fetchTrainingWeekNumber,
 } from "@/lib/supabase/trainingSchedule";
 import {
   TrainingSchedule,
@@ -91,6 +92,7 @@ export default function AntrenmanRaporuPage() {
   const [loading, setLoading] = useState(false);
   const [days, setDays] = useState<DayData[]>([]);
   const [players, setPlayers] = useState<PlayerSummary[]>([]);
+  const [trainingWeekNum, setTrainingWeekNum] = useState<number | null>(null);
 
   const activeSeason = lookups.seasons.length > 0
     ? lookups.seasons[lookups.seasons.length - 1].value : "";
@@ -112,10 +114,12 @@ export default function AntrenmanRaporuPage() {
     try {
       const start = toISODate(weekStart);
       const end   = toISODate(weekDates[6]);
-      const [schedules, playerList] = await Promise.all([
+      const [schedules, playerList, trainingWeek] = await Promise.all([
         fetchSchedulesForWeek(activeSeason, start, end),
         fetchPlayersByAgeGroupAndSeason(selectedAgeGroup, activeSeason),
+        fetchTrainingWeekNumber(activeSeason, start),
       ]);
+      setTrainingWeekNum(trainingWeek);
       const filtered = schedules
         .filter(s => s.age_group === selectedAgeGroup)
         .sort((a, b) => a.training_date.localeCompare(b.training_date));
@@ -158,7 +162,7 @@ export default function AntrenmanRaporuPage() {
             </div>
             <div>
               <h1 className="text-sm font-bold text-[#1a1a2e]">Antrenman Raporu</h1>
-              <p className="text-[11px] text-[#6b7280]">{activeSeason} · {weekNum}. Hafta</p>
+              <p className="text-[11px] text-[#6b7280]">{activeSeason}{trainingWeekNum ? ` · ${trainingWeekNum}. Antrenman Haftası` : ` · ${weekNum}. Takvim Haftası`}</p>
             </div>
           </div>
 
@@ -184,8 +188,13 @@ export default function AntrenmanRaporuPage() {
               className="p-1.5 rounded-lg border border-[#e5e7eb] hover:bg-[#f9fafb] text-[#6b7280]">
               <ChevronLeft size={15} />
             </button>
-            <span className="px-2 text-xs font-medium text-[#6b7280]">
-              {fmtShort(weekDates[0])} – {fmtShort(weekDates[6])}
+            <span className="px-2 text-xs font-medium text-[#6b7280] text-center">
+              <span>{fmtShort(weekDates[0])} – {fmtShort(weekDates[6])}</span>
+              {trainingWeekNum && (
+                <span className="block text-[10px] font-semibold text-[#1b6e2a]">
+                  {trainingWeekNum}. Ant. Haftası
+                </span>
+              )}
             </span>
             <button onClick={() => setWeekStart(p => { const d = new Date(p); d.setDate(d.getDate()+7); return d; })}
               className="p-1.5 rounded-lg border border-[#e5e7eb] hover:bg-[#f9fafb] text-[#6b7280]">
@@ -227,7 +236,7 @@ export default function AntrenmanRaporuPage() {
                 Beylerbeyi Akademi · {selectedAgeGroup} Antrenman Raporu
               </h2>
               <p className="text-[11px] text-[#6b7280]">
-                {fmtLong(weekDates[0])} – {fmtLong(weekDates[6])} · {activeSeason} · {weekNum}. Hafta
+                {fmtLong(weekDates[0])} – {fmtLong(weekDates[6])} · {activeSeason}{trainingWeekNum ? ` · ${trainingWeekNum}. Antrenman Haftası` : ` · ${weekNum}. Takvim Haftası`}
               </p>
             </div>
           </div>

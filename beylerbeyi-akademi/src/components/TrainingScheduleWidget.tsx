@@ -2,8 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
-import Link from "next/link";
-import { ChevronLeft, ChevronRight, CalendarDays, ArrowRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, CalendarDays } from "lucide-react";
 import { useAppData } from "@/lib/app-data";
 import { fetchSchedulesForWeek, fetchTrainingWeekNumber, fetchNormalSessionsUpTo } from "@/lib/supabase/trainingSchedule";
 import { TrainingSchedule, ScheduleType } from "@/types/trainingSchedule";
@@ -160,12 +159,6 @@ export default function TrainingScheduleWidget() {
             <ChevronRight size={14} />
           </button>
 
-          <Link
-            href="/dashboard/antrenor/antrenman-programi"
-            className="flex items-center gap-1 ml-1 px-2.5 py-1.5 rounded-lg bg-[#1b6e2a] text-white text-[10px] font-semibold hover:bg-[#155a22] transition-colors"
-          >
-            Düzenle <ArrowRight size={11} />
-          </Link>
         </div>
       </div>
 

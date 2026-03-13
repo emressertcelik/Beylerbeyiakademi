@@ -1017,7 +1017,7 @@ function CellEditModal({
                             <span className="w-5 text-[10px] font-bold text-[#9aa3af] text-right shrink-0">
                               {player.jersey_number}
                             </span>
-                            <span className="flex-1 text-sm text-[#1a1a2e] truncate">
+                            <span className="flex-1 min-w-0 text-sm text-[#1a1a2e] break-words">
                               {player.first_name} {player.last_name}
                             </span>
                             {isSaving && (
