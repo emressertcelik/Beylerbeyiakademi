@@ -245,14 +245,16 @@ export default function AntrenmanProgramiPage() {
       document.body.removeChild(wrapper);
 
       const imgData = canvas.toDataURL("image/png");
-      const pdf = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
+      const imgW = canvas.width;
+      const imgH = canvas.height;
+      // Görsel oranına göre yatay/dikey otomatik seç
+      const orientation = imgW >= imgH ? "landscape" : "portrait";
+      const pdf = new jsPDF({ orientation, unit: "mm", format: "a4" });
       const pageW = pdf.internal.pageSize.getWidth();
       const pageH = pdf.internal.pageSize.getHeight();
       const margin = 8;
       const availW = pageW - margin * 2;
       const availH = pageH - margin * 2;
-      const imgW = canvas.width;
-      const imgH = canvas.height;
       const scale = Math.min(availW / imgW, availH / imgH);
 
       pdf.addImage(imgData, "PNG", margin, margin, imgW * scale, imgH * scale);
@@ -594,81 +596,34 @@ export default function AntrenmanProgramiPage() {
     <div className="space-y-3">
 
       {/* ── Üst başlık kartı ─────────────────────────────── */}
-      <div className="bg-white rounded-2xl border border-[#e5e7eb] shadow-sm px-4 py-3 flex flex-col sm:flex-row sm:items-center gap-3">
+      <div className="bg-white rounded-2xl border border-[#e5e7eb] shadow-sm px-4 py-3 space-y-3">
 
-        {/* Sol: başlık + sezon */}
-        <div className="flex-1 min-w-0">
-          <h1 className="text-lg font-black text-[#1a1a2e] leading-tight truncate">
-            Beylerbeyi Akademi — Haftalık Antrenman Programı
+        {/* Satır 1: Başlık + Sezon */}
+        <div className="flex items-center justify-between gap-2">
+          <h1 className="text-sm sm:text-base font-black text-[#1a1a2e] leading-tight">
+            Haftalık Antrenman Programı
           </h1>
-          {/* Sezon seçici — dropdown */}
-          <div className="flex items-center gap-2 mt-2">
-            <span className="text-[10px] font-bold uppercase tracking-widest text-[#6b7280]">Sezon</span>
-            <div className="relative">
-              <select
-                value={activeSeason}
-                onChange={(e) => setActiveSeason(e.target.value)}
-                className="appearance-none pl-3 pr-8 py-1.5 rounded-lg border border-[#e5e7eb] bg-white text-sm font-semibold text-[#1a1a2e] focus:outline-none focus:ring-2 focus:ring-[#c4111d]/20 focus:border-[#c4111d] cursor-pointer shadow-sm hover:border-[#c4111d]/40 transition-colors"
-              >
-                {lookups.seasons.map((s) => (
-                  <option key={s.id} value={s.value}>{s.value}</option>
-                ))}
-              </select>
-              <ChevronRight size={13} className="absolute right-2.5 top-1/2 -translate-y-1/2 rotate-90 text-[#9ca3af] pointer-events-none" />
-            </div>
+          <div className="relative shrink-0">
+            <select
+              value={activeSeason}
+              onChange={(e) => setActiveSeason(e.target.value)}
+              className="appearance-none pl-3 pr-7 py-1.5 rounded-lg border border-[#e5e7eb] bg-white text-xs font-semibold text-[#1a1a2e] focus:outline-none focus:ring-2 focus:ring-[#c4111d]/20 focus:border-[#c4111d] cursor-pointer"
+            >
+              {lookups.seasons.map((s) => (
+                <option key={s.id} value={s.value}>{s.value}</option>
+              ))}
+            </select>
+            <ChevronRight size={12} className="absolute right-2 top-1/2 -translate-y-1/2 rotate-90 text-[#9ca3af] pointer-events-none" />
           </div>
         </div>
 
-        {/* Sağ: kontroller */}
-        <div className="flex items-center gap-2 flex-wrap">
-
-          {/* PDF çıktı */}
-          <button
-            onClick={exportPDF}
-            disabled={pdfLoading || loading}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#e5e7eb] bg-white text-xs font-semibold text-[#6b7280] hover:bg-[#f9fafb] hover:text-[#c4111d] hover:border-[#c4111d]/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {pdfLoading ? (
-              <div className="w-3.5 h-3.5 border-2 border-[#c4111d] border-t-transparent rounded-full animate-spin" />
-            ) : (
-              <FileDown size={13} />
-            )}
-            PDF
-          </button>
-
-          <div className="w-px h-5 bg-[#e5e7eb]" />
-
-          {/* Çoklu seçim */}
-          <button
-            onClick={toggleMultiSelectMode}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-semibold transition-all ${
-              multiSelectMode
-                ? "bg-[#1a1a2e] text-white border-[#1a1a2e]"
-                : "bg-white text-[#6b7280] border-[#e5e7eb] hover:bg-[#f9fafb]"
-            }`}
-          >
-            <MousePointerClick size={13} />
-            {multiSelectMode ? "Seçim Modu" : "Çoklu Seç"}
-          </button>
-
-          {multiSelectMode && multiSelected.size > 0 && (
-            <button
-              onClick={openMultiModal}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#c4111d] text-white text-xs font-bold hover:bg-[#a50e18] transition-colors"
-            >
-              <CheckSquare size={13} />
-              {multiSelected.size} hücre
-            </button>
-          )}
-
-          <div className="w-px h-5 bg-[#e5e7eb]" />
-
-          {/* Hafta navigasyonu */}
-          <button onClick={() => navigateWeek(-1)} className="p-1.5 rounded-lg border border-[#e5e7eb] bg-white hover:bg-[#f9fafb] text-[#6b7280] transition-colors">
+        {/* Satır 2: Hafta navigasyonu */}
+        <div className="flex items-center gap-2">
+          <button onClick={() => navigateWeek(-1)} className="p-1.5 rounded-lg border border-[#e5e7eb] bg-white hover:bg-[#f9fafb] text-[#6b7280] transition-colors shrink-0">
             <ChevronLeft size={16} />
           </button>
 
-          <div className="flex items-center">
+          <div className="flex-1 flex items-center justify-center">
             {editingWeekNum ? (
               <div className="flex items-center gap-1 px-2 py-1 rounded-lg bg-[#1b6e2a]/10 border border-[#1b6e2a]/30">
                 <input
@@ -684,7 +639,7 @@ export default function AntrenmanProgramiPage() {
             ) : (
               <button
                 onClick={() => { if (userRole?.role === "oyuncu") return; setTempWeekNum(trainingWeekNumber?.toString() ?? ""); setEditingWeekNum(true); }}
-                className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-[10px] font-bold min-w-[120px] justify-center transition-colors ${
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-bold w-full justify-center transition-colors ${
                   trainingWeekNumber ? "bg-[#1b6e2a] text-white hover:bg-[#155a22]" : "bg-[#f3f4f6] text-[#9ca3af] hover:bg-[#e5e7eb]"
                 } ${userRole?.role === "oyuncu" ? "cursor-default" : "cursor-pointer"}`}
               >
@@ -693,13 +648,57 @@ export default function AntrenmanProgramiPage() {
             )}
           </div>
 
-          <button onClick={() => navigateWeek(1)} className="p-1.5 rounded-lg border border-[#e5e7eb] bg-white hover:bg-[#f9fafb] text-[#6b7280] transition-colors">
+          <button onClick={() => navigateWeek(1)} className="p-1.5 rounded-lg border border-[#e5e7eb] bg-white hover:bg-[#f9fafb] text-[#6b7280] transition-colors shrink-0">
             <ChevronRight size={16} />
           </button>
-          <button onClick={() => setWeekStart(getWeekStart(new Date()))} className="px-2.5 py-1.5 rounded-lg border border-[#e5e7eb] bg-white hover:bg-[#f9fafb] text-[#6b7280] text-xs font-medium transition-colors">
+          <button onClick={() => setWeekStart(getWeekStart(new Date()))} className="px-2.5 py-1.5 rounded-lg border border-[#e5e7eb] bg-white hover:bg-[#f9fafb] text-[#6b7280] text-xs font-medium transition-colors shrink-0">
             Bu hafta
           </button>
         </div>
+
+        {/* Satır 3: Aksiyon butonları */}
+        {userRole?.role !== "oyuncu" && (
+          <div className="flex items-center gap-2 pt-1 border-t border-[#f3f4f6]">
+            {/* PDF */}
+            <button
+              onClick={exportPDF}
+              disabled={pdfLoading || loading}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#e5e7eb] bg-white text-xs font-semibold text-[#6b7280] hover:bg-[#f9fafb] hover:text-[#c4111d] hover:border-[#c4111d]/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {pdfLoading ? (
+                <div className="w-3.5 h-3.5 border-2 border-[#c4111d] border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <FileDown size={13} />
+              )}
+              PDF
+            </button>
+
+            <div className="w-px h-5 bg-[#e5e7eb]" />
+
+            {/* Çoklu seçim */}
+            <button
+              onClick={toggleMultiSelectMode}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-semibold transition-all ${
+                multiSelectMode
+                  ? "bg-[#1a1a2e] text-white border-[#1a1a2e]"
+                  : "bg-white text-[#6b7280] border-[#e5e7eb] hover:bg-[#f9fafb]"
+              }`}
+            >
+              <MousePointerClick size={13} />
+              {multiSelectMode ? "Seçim Modu" : "Çoklu Seç"}
+            </button>
+
+            {multiSelectMode && multiSelected.size > 0 && (
+              <button
+                onClick={openMultiModal}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#c4111d] text-white text-xs font-bold hover:bg-[#a50e18] transition-colors"
+              >
+                <CheckSquare size={13} />
+                {multiSelected.size} hücre
+              </button>
+            )}
+          </div>
+        )}
       </div>
 
       {/* ── Hata mesajı ────────────────────────────────── */}
