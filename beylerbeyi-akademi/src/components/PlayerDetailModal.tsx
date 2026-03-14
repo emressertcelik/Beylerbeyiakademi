@@ -211,7 +211,7 @@ export default function PlayerDetailModal({ player, onClose, onEdit, onDelete, u
         dribbling: "Dribling", heading: "Kafa Vuruşu", tackling: "Top Kesme",
         marking: "Markaj", gameReading: "Oyun Okuma",
       }).map(([k, label]) => {
-        const val = (player.tactical as Record<string, number>)[k] ?? 0;
+        const val = (player.tactical as unknown as Record<string, number>)[k] ?? 0;
         const c = val >= 8 ? "#22c55e" : val >= 6 ? "#f59e0b" : val >= 4 ? "#f97316" : "#ef4444";
         return `<tr><td style="padding:3px 6px;font-size:11px;color:#5a6170;width:120px;">${label}</td><td style="padding:3px 6px;"><div style="display:flex;align-items:center;gap:6px;"><div style="flex:1;height:5px;background:#e2e5e9;border-radius:3px;overflow:hidden;"><div style="height:100%;width:${val*10}%;background:${c};border-radius:3px;"></div></div><span style="font-size:11px;font-weight:700;color:#1a1a2e;min-width:14px;text-align:right;">${val}</span></div></td></tr>`;
       }).join("") : "";
@@ -220,7 +220,7 @@ export default function PlayerDetailModal({ player, onClose, onEdit, onDelete, u
         speed: "Hız", strength: "Güç", stamina: "Dayanıklılık", agility: "Çeviklik",
         jumping: "Sıçrama", balance: "Denge", flexibility: "Esneklik",
       }).map(([k, label]) => {
-        const val = (player.athletic as Record<string, number>)[k] ?? 0;
+        const val = (player.athletic as unknown as Record<string, number>)[k] ?? 0;
         const c = val >= 8 ? "#22c55e" : val >= 6 ? "#f59e0b" : val >= 4 ? "#f97316" : "#ef4444";
         return `<tr><td style="padding:3px 6px;font-size:11px;color:#5a6170;width:120px;">${label}</td><td style="padding:3px 6px;"><div style="display:flex;align-items:center;gap:6px;"><div style="flex:1;height:5px;background:#e2e5e9;border-radius:3px;overflow:hidden;"><div style="height:100%;width:${val*10}%;background:${c};border-radius:3px;"></div></div><span style="font-size:11px;font-weight:700;color:#1a1a2e;min-width:14px;text-align:right;">${val}</span></div></td></tr>`;
       }).join("") : "";

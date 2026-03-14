@@ -302,7 +302,7 @@ export default function PlayerReportPage() {
         dribbling: "Dribling", heading: "Kafa Vuruşu", tackling: "Top Kesme",
         marking: "Markaj", gameReading: "Oyun Okuma",
       }).map(([k, label]) => {
-        const val = (player.tactical as Record<string, number>)[k] ?? 0;
+        const val = (player.tactical as unknown as Record<string, number>)[k] ?? 0;
         const barColor = val >= 8 ? "#22c55e" : val >= 6 ? "#f59e0b" : val >= 4 ? "#f97316" : "#ef4444";
         return `<tr>
           <td style="padding:4px 8px;font-size:11px;color:#5a6170;width:130px;">${label}</td>
@@ -321,7 +321,7 @@ export default function PlayerReportPage() {
         speed: "Hız", strength: "Güç", stamina: "Dayanıklılık", agility: "Çeviklik",
         jumping: "Sıçrama", balance: "Denge", flexibility: "Esneklik",
       }).map(([k, label]) => {
-        const val = (player.athletic as Record<string, number>)[k] ?? 0;
+        const val = (player.athletic as unknown as Record<string, number>)[k] ?? 0;
         const barColor = val >= 8 ? "#22c55e" : val >= 6 ? "#f59e0b" : val >= 4 ? "#f97316" : "#ef4444";
         return `<tr>
           <td style="padding:4px 8px;font-size:11px;color:#5a6170;width:130px;">${label}</td>
