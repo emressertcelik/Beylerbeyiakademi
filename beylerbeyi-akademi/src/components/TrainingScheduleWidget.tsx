@@ -4,7 +4,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight, CalendarDays } from "lucide-react";
 import { useAppData } from "@/lib/app-data";
-import { fetchSchedulesForWeek, fetchTrainingWeekNumber, fetchNormalSessionsUpTo } from "@/lib/supabase/trainingSchedule";
+import { fetchSchedulesForWeek, fetchTrainingWeekNumber, fetchNormalSessionsUpTo, fetchSessionOffsets } from "@/lib/supabase/trainingSchedule";
 import { TrainingSchedule, ScheduleType } from "@/types/trainingSchedule";
 
 // ─── helpers ────────────────────────────────────────────────
@@ -41,13 +41,15 @@ function fmtDate(d: Date) {
 function scheduleKey(ag: string, date: string) { return `${ag}__${date}`; }
 
 function buildSessionCountMap(
-  sessions: Array<{ age_group: string; training_date: string }>
+  sessions: Array<{ age_group: string; training_date: string }>,
+  offsets: Record<string, number> = {}
 ): Record<string, number> {
   const countByGroup: Record<string, number> = {};
   const map: Record<string, number> = {};
   sessions.forEach(s => {
     countByGroup[s.age_group] = (countByGroup[s.age_group] ?? 0) + 1;
-    map[scheduleKey(s.age_group, s.training_date)] = countByGroup[s.age_group];
+    map[scheduleKey(s.age_group, s.training_date)] =
+      countByGroup[s.age_group] + (offsets[s.age_group] ?? 0);
   });
   return map;
 }
@@ -99,17 +101,18 @@ export default function TrainingScheduleWidget() {
       endDate.setDate(endDate.getDate() + 6);
       const endStr = toISODate(endDate);
 
-      const [rows, weekCfg, normalSessions] = await Promise.all([
+      const [rows, weekCfg, normalSessions, offsets] = await Promise.all([
         fetchSchedulesForWeek(season, startStr, endStr),
         fetchTrainingWeekNumber(season, startStr),
         fetchNormalSessionsUpTo(season, endStr),
+        fetchSessionOffsets(season),
       ]);
 
       const map: Record<string, TrainingSchedule> = {};
       rows.forEach(r => { map[scheduleKey(r.age_group, r.training_date)] = r; });
       setSchedules(map);
       setTrainingWeekNum(weekCfg);
-      setSessionCounts(buildSessionCountMap(normalSessions));
+      setSessionCounts(buildSessionCountMap(normalSessions, offsets));
     } catch (e) {
       console.error(e);
     } finally {

@@ -5,6 +5,8 @@ import { Player, SkillLog, BodyLog } from "@/types/player";
 import { Match } from "@/types/match";
 import { fetchSkillLogs, fetchBodyLogs } from "@/lib/supabase/players";
 import { fetchMatchesByPlayer } from "@/lib/supabase/matches";
+import { fetchPlayerAttendanceStats } from "@/lib/supabase/trainingSchedule";
+import { useAppData } from "@/lib/app-data";
 import { X, Edit3, Trash2, TrendingUp, TrendingDown, ArrowUp, ArrowDown, Ruler, Weight, ChevronDown, Clock, Star, AlertTriangle, Ban, Users } from "lucide-react";
 import { getPositionColors } from "@/lib/positions";
 
@@ -56,9 +58,13 @@ function SkillBar({ label, value, max = 10 }: { label: string; value: number; ma
 
 export default function PlayerDetailModal({ player, onClose, onEdit, onDelete, userRole }: PlayerDetailModalProps) {
   const isGoalkeeper = player.position === "Kaleci";
+  const { lookups } = useAppData();
+  const activeSeason = lookups.seasons.length > 0 ? lookups.seasons[lookups.seasons.length - 1].value : "";
+
   const [skillLogs, setSkillLogs] = useState<SkillLog[]>([]);
   const [bodyLogs, setBodyLogs] = useState<BodyLog[]>([]);
   const [logsLoading, setLogsLoading] = useState(true);
+  const [attendanceStats, setAttendanceStats] = useState<{ total: number; geldi: number; gelmedi: number; izinli: number; sakat: number } | null>(null);
   const [tacticalOpen, setTacticalOpen] = useState(false);
   const [athleticOpen, setAthleticOpen] = useState(false);
   const [physicalOpen, setPhysicalOpen] = useState(false);
@@ -94,6 +100,13 @@ export default function PlayerDetailModal({ player, onClose, onEdit, onDelete, u
     loadLogs();
     return () => { cancelled = true; };
   }, [player.id]);
+
+  useEffect(() => {
+    if (!activeSeason || !player.ageGroup) return;
+    fetchPlayerAttendanceStats(player.id, player.ageGroup, activeSeason)
+      .then(setAttendanceStats)
+      .catch(() => {});
+  }, [player.id, player.ageGroup, activeSeason]);
 
   // Sezon listesi (maçlardan türet)
   const availableSeasons = useMemo(() => {
@@ -229,6 +242,7 @@ export default function PlayerDetailModal({ player, onClose, onEdit, onDelete, u
         </div>
 
         <div className="p-4 sm:p-6 space-y-4 sm:space-y-5">
+
           {/* Genel Bilgiler */}
           <Section title="Genel Bilgiler">
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
@@ -575,6 +589,40 @@ export default function PlayerDetailModal({ player, onClose, onEdit, onDelete, u
               )}
             </div>
           </section>
+
+          {/* Antrenman Katılım İstatistikleri */}
+          {attendanceStats && attendanceStats.total > 0 && (
+            <div className="bg-[#f8f9fb] rounded-xl p-3 border border-[#e2e5e9]">
+              <p className="text-[11px] text-[#8c919a] font-semibold uppercase tracking-wider mb-2.5">
+                Antrenman Katılımı · {activeSeason}
+              </p>
+              <div className="grid grid-cols-5 gap-1.5">
+                {[
+                  { label: "Toplam", value: attendanceStats.total, color: "bg-[#1a1a2e] text-white" },
+                  { label: "Geldi", value: attendanceStats.geldi, color: "bg-[#1b6e2a] text-white" },
+                  { label: "Gelmedi", value: attendanceStats.gelmedi, color: "bg-[#c4111d] text-white" },
+                  { label: "İzinli", value: attendanceStats.izinli, color: "bg-[#2563eb] text-white" },
+                  { label: "Sakat", value: attendanceStats.sakat, color: "bg-[#d97706] text-white" },
+                ].map(({ label, value, color }) => (
+                  <div key={label} className="flex flex-col items-center gap-0.5">
+                    <span className={`w-full text-center text-base font-black rounded-lg py-1.5 ${color}`}>{value}</span>
+                    <span className="text-[10px] text-[#8c919a] font-medium">{label}</span>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-2.5">
+                <div className="flex h-2 rounded-full overflow-hidden gap-0.5">
+                  {attendanceStats.geldi > 0 && <div className="bg-[#1b6e2a] rounded-full" style={{ width: `${(attendanceStats.geldi / attendanceStats.total) * 100}%` }} />}
+                  {attendanceStats.gelmedi > 0 && <div className="bg-[#c4111d] rounded-full" style={{ width: `${(attendanceStats.gelmedi / attendanceStats.total) * 100}%` }} />}
+                  {attendanceStats.izinli > 0 && <div className="bg-[#2563eb] rounded-full" style={{ width: `${(attendanceStats.izinli / attendanceStats.total) * 100}%` }} />}
+                  {attendanceStats.sakat > 0 && <div className="bg-[#d97706] rounded-full" style={{ width: `${(attendanceStats.sakat / attendanceStats.total) * 100}%` }} />}
+                </div>
+                <p className="text-[10px] text-[#8c919a] mt-1 text-right">
+                  %{Math.round((attendanceStats.geldi / attendanceStats.total) * 100)} katılım oranı
+                </p>
+              </div>
+            </div>
+          )}
 
           {/* Taktik Değerler */}
           {userRole?.role !== "oyuncu" && (

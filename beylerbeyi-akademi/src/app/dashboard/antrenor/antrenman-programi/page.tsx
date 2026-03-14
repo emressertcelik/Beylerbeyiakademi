@@ -19,6 +19,7 @@ import {
   Check,
 } from "lucide-react";
 import { useAppData } from "@/lib/app-data";
+import { getPositionAbbr, getPositionColors, comparePositions } from "@/lib/positions";
 import {
   fetchSchedulesForWeek,
   fetchDetailItemsByScheduleIds,
@@ -28,6 +29,7 @@ import {
   fetchTrainingWeekNumber,
   upsertTrainingWeekNumber,
   fetchNormalSessionsUpTo,
+  fetchSessionOffsets,
   fetchPlayersByAgeGroupAndSeason,
   fetchAttendanceByScheduleId,
   upsertAttendance,
@@ -156,13 +158,15 @@ function getCellContent(schedule: TrainingSchedule): { time: string | null; labe
 
 /** Normal antrenmanları sıra numarasına çevirir: key → N */
 function buildSessionCountMap(
-  sessions: Array<{ age_group: string; training_date: string }>
+  sessions: Array<{ age_group: string; training_date: string }>,
+  offsets: Record<string, number> = {}
 ): Record<string, number> {
   const counters: Record<string, number> = {};
   const result: Record<string, number> = {};
   for (const s of sessions) {
     counters[s.age_group] = (counters[s.age_group] ?? 0) + 1;
-    result[scheduleKey(s.age_group, s.training_date)] = counters[s.age_group];
+    result[scheduleKey(s.age_group, s.training_date)] =
+      counters[s.age_group] + (offsets[s.age_group] ?? 0);
   }
   return result;
 }
@@ -233,10 +237,11 @@ export default function AntrenmanProgramiPage() {
       endDate.setDate(endDate.getDate() + 6);
       const endStr = toISODate(endDate);
 
-      const [rows, weekCfg, normalSessions] = await Promise.all([
+      const [rows, weekCfg, normalSessions, offsets] = await Promise.all([
         fetchSchedulesForWeek(season, startStr, endStr),
         fetchTrainingWeekNumber(season, startStr),
         fetchNormalSessionsUpTo(season, endStr),
+        fetchSessionOffsets(season),
       ]);
 
       // Haftalık program map'i
@@ -263,7 +268,7 @@ export default function AntrenmanProgramiPage() {
       setEditingWeekNum(false);
 
       // Antrenman sıra sayaçları
-      setSessionCounts(buildSessionCountMap(normalSessions));
+      setSessionCounts(buildSessionCountMap(normalSessions, offsets));
     } catch (e) {
       setError("Program verisi yüklenirken hata oluştu.");
       console.error(e);
@@ -376,8 +381,11 @@ export default function AntrenmanProgramiPage() {
 
       // Sayaçları yenile
       const endStr = toISODate(weekDates[6]);
-      const normalSessions = await fetchNormalSessionsUpTo(activeSeason, endStr);
-      setSessionCounts(buildSessionCountMap(normalSessions));
+      const [normalSessions, offsets] = await Promise.all([
+        fetchNormalSessionsUpTo(activeSeason, endStr),
+        fetchSessionOffsets(activeSeason),
+      ]);
+      setSessionCounts(buildSessionCountMap(normalSessions, offsets));
 
       closeModal();
     } catch (e) {
@@ -432,8 +440,11 @@ export default function AntrenmanProgramiPage() {
 
       // Sayaçları yenile
       const endStr = toISODate(weekDates[6]);
-      const normalSessions = await fetchNormalSessionsUpTo(activeSeason, endStr);
-      setSessionCounts(buildSessionCountMap(normalSessions));
+      const [normalSessions, offsets] = await Promise.all([
+        fetchNormalSessionsUpTo(activeSeason, endStr),
+        fetchSessionOffsets(activeSeason),
+      ]);
+      setSessionCounts(buildSessionCountMap(normalSessions, offsets));
 
       // Seçimi temizle ama mod açık kalsın
       setMultiSelected(new Set());
@@ -832,7 +843,7 @@ function CellEditModal({
       fetchPlayersByAgeGroupAndSeason(cell.age_group, season),
       fetchAttendanceByScheduleId(existingScheduleId),
     ]).then(([playerList, attendanceList]) => {
-      setPlayers(playerList);
+      setPlayers([...playerList].sort((a, b) => comparePositions(a.position ?? "", b.position ?? "")));
       const map: Record<string, AttendanceStatus> = {};
       attendanceList.forEach(a => { map[a.player_id] = a.status; });
       setAttendanceMap(map);
@@ -1013,11 +1024,11 @@ function CellEditModal({
                         const status = attendanceMap[player.id];
                         const isSaving = savingPlayer === player.id;
                         return (
-                          <div key={player.id} className="flex items-center gap-2 py-1.5 px-1 rounded-lg hover:bg-[#f8f9fb]">
-                            <span className="w-5 text-[10px] font-bold text-[#9aa3af] text-right shrink-0">
-                              {player.jersey_number}
+                          <div key={player.id} className="flex items-center gap-2.5 py-1.5 px-2 rounded-lg hover:bg-[#f1f5f9] transition-colors">
+                            <span className={`shrink-0 w-8 h-6 rounded flex items-center justify-center text-[10px] font-black text-white ${getPositionColors(player.position ?? "").bg}`}>
+                              {getPositionAbbr(player.position ?? "")}
                             </span>
-                            <span className="flex-1 min-w-0 text-sm text-[#1a1a2e] break-words">
+                            <span className="flex-1 min-w-0 text-[13px] font-medium text-[#1a1a2e] break-words">
                               {player.first_name} {player.last_name}
                             </span>
                             {isSaving && (

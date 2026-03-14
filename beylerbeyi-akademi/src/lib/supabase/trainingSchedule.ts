@@ -176,6 +176,26 @@ export async function fetchNormalSessionsUpTo(
 }
 
 // ─────────────────────────────────────────────────────────────
+// Antrenman sayacı offset
+// ─────────────────────────────────────────────────────────────
+
+/** Sezon bazında yaş grubu offset'lerini döner */
+export async function fetchSessionOffsets(
+  season: string
+): Promise<Record<string, number>> {
+  const { data, error } = await getClient()
+    .from("training_session_offsets")
+    .select("age_group, offset")
+    .eq("season", season);
+  if (error) throw error;
+  const map: Record<string, number> = {};
+  (data ?? []).forEach((row: { age_group: string; offset: number }) => {
+    map[row.age_group] = row.offset;
+  });
+  return map;
+}
+
+// ─────────────────────────────────────────────────────────────
 // Yoklama (training_attendance)
 // ─────────────────────────────────────────────────────────────
 
@@ -218,6 +238,87 @@ export async function upsertAttendance(
       { onConflict: "schedule_id,player_id" }
     );
   if (error) throw error;
+}
+
+/** Oyuncunun sezon bazlı antrenman katılım istatistiklerini döner */
+export async function fetchPlayerAttendanceStats(
+  playerId: string,
+  ageGroup: string,
+  season: string
+): Promise<{ total: number; geldi: number; gelmedi: number; izinli: number; sakat: number }> {
+  const client = getClient();
+
+  const { data: schedules, error: sErr } = await client
+    .from("training_schedules")
+    .select("id")
+    .eq("season", season)
+    .eq("age_group", ageGroup)
+    .eq("schedule_type", "normal");
+
+  if (sErr) throw sErr;
+  const ids = (schedules ?? []).map((s: { id: string }) => s.id);
+  const total = ids.length;
+
+  if (total === 0) return { total: 0, geldi: 0, gelmedi: 0, izinli: 0, sakat: 0 };
+
+  const { data: att, error: aErr } = await client
+    .from("training_attendance")
+    .select("status")
+    .eq("player_id", playerId)
+    .in("schedule_id", ids);
+
+  if (aErr) throw aErr;
+
+  const counts = { geldi: 0, gelmedi: 0, izinli: 0, sakat: 0 };
+  (att ?? []).forEach((r: { status: string }) => {
+    if (r.status in counts) counts[r.status as keyof typeof counts]++;
+  });
+
+  return { total, ...counts };
+}
+
+/** Sezon bazında tüm oyuncuların antrenman katılım özetini döner (toplu sorgu) */
+export async function fetchSeasonAttendanceSummary(
+  season: string
+): Promise<{
+  totalByAgeGroup: Record<string, number>;
+  playerStats: Record<string, { geldi: number; gelmedi: number; izinli: number; sakat: number }>;
+}> {
+  const client = getClient();
+
+  const { data: schedules, error: sErr } = await client
+    .from("training_schedules")
+    .select("id, age_group")
+    .eq("season", season)
+    .eq("schedule_type", "normal");
+
+  if (sErr) throw sErr;
+  if (!schedules || schedules.length === 0)
+    return { totalByAgeGroup: {}, playerStats: {} };
+
+  const totalByAgeGroup: Record<string, number> = {};
+  const scheduleIds: string[] = [];
+  schedules.forEach((s: { id: string; age_group: string }) => {
+    totalByAgeGroup[s.age_group] = (totalByAgeGroup[s.age_group] ?? 0) + 1;
+    scheduleIds.push(s.id);
+  });
+
+  const { data: att, error: aErr } = await client
+    .from("training_attendance")
+    .select("player_id, status")
+    .in("schedule_id", scheduleIds);
+
+  if (aErr) throw aErr;
+
+  const playerStats: Record<string, { geldi: number; gelmedi: number; izinli: number; sakat: number }> = {};
+  (att ?? []).forEach((r: { player_id: string; status: string }) => {
+    if (!playerStats[r.player_id])
+      playerStats[r.player_id] = { geldi: 0, gelmedi: 0, izinli: 0, sakat: 0 };
+    const s = r.status as keyof (typeof playerStats)[string];
+    if (s in playerStats[r.player_id]) playerStats[r.player_id][s]++;
+  });
+
+  return { totalByAgeGroup, playerStats };
 }
 
 /** Oyuncunun yoklama kaydını sil (durumu sıfırla) */

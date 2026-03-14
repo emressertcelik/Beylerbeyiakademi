@@ -1,6 +1,6 @@
 "use client";
 import * as React from "react";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import Link from "next/link";
 import { useAppData } from "@/lib/app-data";
 import {
@@ -9,6 +9,7 @@ import {
   Award, Zap, BarChart3, Handshake, ShieldCheck, Search,
 } from "lucide-react";
 import { getPositionAbbr } from "@/lib/positions";
+import { fetchSeasonAttendanceSummary } from "@/lib/supabase/trainingSchedule";
 
 type SortField =
   | "matches" | "goals" | "assists" | "minutesPlayed"
@@ -45,6 +46,11 @@ interface PlayerReport {
 export default function ReportsPage() {
   // ...existing code...
   const { players, matches, lookups, loading, userRole } = useAppData();
+  const activeSeason = lookups.seasons.length > 0 ? lookups.seasons[lookups.seasons.length - 1].value : "";
+  const [attSummary, setAttSummary] = useState<{
+    totalByAgeGroup: Record<string, number>;
+    playerStats: Record<string, { geldi: number; gelmedi: number; izinli: number; sakat: number }>;
+  }>({ totalByAgeGroup: {}, playerStats: {} });
 
   // Oyuncu rolünde raporlar sekmesi gizlensin
   if (userRole?.role === "oyuncu") {
@@ -64,6 +70,12 @@ export default function ReportsPage() {
 
   const [selectedAgeGroup, setSelectedAgeGroup] = useState<string>("all");
   const [selectedSeason, setSelectedSeason] = useState<string>("all");
+
+  const attSeason = selectedSeason !== "all" ? selectedSeason : activeSeason;
+  useEffect(() => {
+    if (!attSeason) return;
+    fetchSeasonAttendanceSummary(attSeason).then(setAttSummary).catch(() => {});
+  }, [attSeason]);
   const [sortField, setSortField] = useState<SortField>("goals");
   const [sortAsc, setSortAsc] = useState(false);
   const [positionFilter, setPositionFilter] = useState<string>("all");
@@ -496,6 +508,7 @@ export default function ReportsPage() {
                   <th className="px-2 py-2.5"><SortHeader field="rating" label="Puan" /></th>
                   <th className="px-2 py-2.5"><SortHeader field="tacticalAvg" label="TAK" /></th>
                   <th className="px-2 py-2.5"><SortHeader field="athleticAvg" label="ATL" /></th>
+                  <th className="px-2 py-2.5 text-[10px] font-semibold text-[#8c919a] uppercase tracking-wider" title="Antrenman Katılım %">ANT%</th>
                 </tr>
               </thead>
               <tbody>
@@ -568,6 +581,21 @@ export default function ReportsPage() {
                     </td>
                     <td className="px-2 py-2.5 text-center">
                       <SkillBadge value={r.athleticAvg} />
+                    </td>
+                    <td className="px-2 py-2.5 text-center">
+                      {(() => {
+                        const ps = attSummary.playerStats[r.id];
+                        const total = attSummary.totalByAgeGroup[r.ageGroup] ?? 0;
+                        if (!ps || total === 0) return <span className="text-[10px] text-[#8c919a]">—</span>;
+                        const pct = Math.round((ps.geldi / total) * 100);
+                        return (
+                          <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
+                            pct >= 85 ? "bg-emerald-50 text-emerald-700" :
+                            pct >= 65 ? "bg-amber-50 text-amber-700" :
+                            "bg-red-50 text-red-700"
+                          }`}>%{pct}</span>
+                        );
+                      })()}
                     </td>
                   </tr>
                 ))}

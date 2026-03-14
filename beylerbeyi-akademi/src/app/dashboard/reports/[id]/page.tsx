@@ -6,6 +6,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useAppData } from "@/lib/app-data";
 import { fetchSkillLogs, fetchBodyLogs } from "@/lib/supabase/players";
+import { fetchPlayerAttendanceStats } from "@/lib/supabase/trainingSchedule";
 import { SkillLog, BodyLog } from "@/types/player";
 import {
   ArrowLeft, Trophy, Target, Clock, Star, Activity,
@@ -115,13 +116,13 @@ export default function PlayerReportPage() {
   const params = useParams();
   const router = useRouter();
   const playerId = params?.id as string;
-  const { players, matches, loading, userRole } = useAppData();
+  const { players, matches, loading, userRole, lookups } = useAppData();
+  const activeSeason = lookups.seasons.length > 0 ? lookups.seasons[lookups.seasons.length - 1].value : "";
 
   const [skillLogs, setSkillLogs] = useState<SkillLog[]>([]);
   const [bodyLogs, setBodyLogs] = useState<BodyLog[]>([]);
   const [logsLoading, setLogsLoading] = useState(true);
-
-  const player = useMemo(() => players.find((p) => p.id === playerId), [players, playerId]);
+  const [attStats, setAttStats] = useState<{ total: number; geldi: number; gelmedi: number; izinli: number; sakat: number } | null>(null);
 
   useEffect(() => {
     if (!playerId) return;
@@ -130,6 +131,15 @@ export default function PlayerReportPage() {
       .then(([sl, bl]) => { setSkillLogs(sl); setBodyLogs(bl); })
       .finally(() => setLogsLoading(false));
   }, [playerId]);
+
+  const player = useMemo(() => players.find((p) => p.id === playerId), [players, playerId]);
+
+  useEffect(() => {
+    if (!playerId || !player?.ageGroup || !activeSeason) return;
+    fetchPlayerAttendanceStats(playerId, player.ageGroup, activeSeason)
+      .then(setAttStats)
+      .catch(() => {});
+  }, [playerId, player?.ageGroup, activeSeason]);
 
   /* ── Played matches ── */
   const playerMatches = useMemo(() => {
@@ -445,6 +455,25 @@ export default function PlayerReportPage() {
               <div className="flex items-center justify-between px-3 py-2.5">
                 <span className="text-[10px] font-semibold text-[#8c919a]">Gole Kapatan</span>
                 <span className="text-[11px] font-black text-cyan-600">{matchStats.cleanSheets}</span>
+              </div>
+            )}
+            {/* Antrenman Katılımı */}
+            {attStats && attStats.total > 0 && (
+              <div className="flex items-center justify-between px-3 py-2.5">
+                <span className="text-[10px] font-semibold text-[#8c919a]">Antrenman Katılımı</span>
+                <div className="flex items-center gap-2">
+                  <span className="text-[11px] font-black text-[#1b6e2a]">{attStats.geldi}/{attStats.total}</span>
+                  <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded ${
+                    attStats.geldi / attStats.total >= 0.85 ? "bg-emerald-50 text-emerald-700" :
+                    attStats.geldi / attStats.total >= 0.65 ? "bg-amber-50 text-amber-700" :
+                    "bg-red-50 text-red-700"
+                  }`}>
+                    %{Math.round((attStats.geldi / attStats.total) * 100)}
+                  </span>
+                  {attStats.gelmedi > 0 && <span className="text-[9px] text-red-500 font-semibold">{attStats.gelmedi} gelmedi</span>}
+                  {attStats.izinli > 0 && <span className="text-[9px] text-blue-500 font-semibold">{attStats.izinli} izinli</span>}
+                  {attStats.sakat > 0 && <span className="text-[9px] text-amber-500 font-semibold">{attStats.sakat} sakat</span>}
+                </div>
               </div>
             )}
           </div>
