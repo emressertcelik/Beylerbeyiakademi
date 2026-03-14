@@ -25,6 +25,8 @@ import {
   Zap,
   LayoutDashboard,
   ArrowRight,
+  FileDown,
+  Layers,
 } from "lucide-react";
 import { fetchAgeGroups } from "@/lib/supabase/lookups";
 
@@ -289,7 +291,7 @@ export default function TanitimPage() {
             <StatCard icon={Users} value={ageGroupCount} label="Yaş Grubu" />
             <StatCard icon={Shield} value={playerCount} label="Kayıtlı Oyuncu" suffix="+" />
             <StatCard icon={Calendar} value={matchCount} label="Maç Kaydı" suffix="+" />
-            <StatCard icon={BarChart3} value={12} label="İstatistik Kategorisi" />
+            <StatCard icon={FileDown} value={5} label="PDF Çıktı Noktası" />
           </div>
         </div>
 
@@ -346,6 +348,12 @@ export default function TanitimPage() {
               color="bg-rose-500"
             />
             <FeatureCard
+              icon={FileDown}
+              title="PDF Çıktı Alma"
+              description="Antrenman programı, oyuncu havuzu, istatistik tablosu ve bireysel oyuncu raporlarını tek tıkla PDF olarak indirin."
+              color="bg-teal-500"
+            />
+            <FeatureCard
               icon={Smartphone}
               title="Cebinizde Taşıyın"
               description="Telefonunuza kurun, saha kenarından maç bilgilerine ve istatistiklere anında ulaşın."
@@ -364,7 +372,7 @@ export default function TanitimPage() {
             </span>
             <h2 className="text-2xl sm:text-3xl font-black text-[#1a1a2e] mb-3">Sistemin İçinden</h2>
             <p className="text-[#5a6170] text-sm sm:text-base max-w-xl mx-auto">
-              Beylerbeyi akademisinin günlük işleyişini kolaylaştıran 5 ana ekran.
+              Beylerbeyi akademisinin günlük işleyişini kolaylaştıran 7 ana ekran.
             </p>
           </div>
 
@@ -406,6 +414,25 @@ export default function TanitimPage() {
                 { icon: BarChart3, label: "İstatistik Tablosu & Sıralama" },
                 { icon: Award, label: "En İyi Performans Kartları" },
                 { icon: TrendingUp, label: "Bireysel Oyuncu Raporu" },
+                { icon: FileDown, label: "PDF Çıktı Alma" },
+              ]}
+            />
+            <ScreenPreview
+              title="Antrenman Programı"
+              description="Haftalık antrenman planlaması"
+              items={[
+                { icon: Calendar, label: "Haftalık Grid (Pzt–Paz)" },
+                { icon: Layers, label: "Çoklu Seçim & Toplu Giriş" },
+                { icon: FileDown, label: "PDF Çıktı Alma" },
+              ]}
+            />
+            <ScreenPreview
+              title="Oyuncu Havuzu"
+              description="Scouting ve deneme takibi"
+              items={[
+                { icon: Eye, label: "İzlenen Oyuncular" },
+                { icon: UserCheck, label: "Deneme Oyuncuları & Sezon Filtresi" },
+                { icon: FileDown, label: "PDF Çıktı Alma" },
               ]}
             />
             <ScreenPreview

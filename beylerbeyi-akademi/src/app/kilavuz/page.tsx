@@ -28,6 +28,9 @@ import {
   XCircle,
   AlertCircle,
   Lock,
+  FileDown,
+  ClipboardList,
+  Layers,
 } from "lucide-react";
 
 type Role = "yonetici" | "antrenor" | "oyuncu";
@@ -285,11 +288,18 @@ export default function KilavuzPage() {
               Karta tıkladığınızda <strong>Oyuncu Detay</strong> modalı açılır.
             </p>
 
+            <h3 className="text-xs font-bold text-[#1a1a2e] uppercase tracking-wider mt-4 mb-2">Oyuncu Sayacı</h3>
+            <p className="text-xs text-[#5a6170]">
+              Sayfa başlığında <strong>Aktif</strong> ve <strong>Pasif</strong> oyuncu sayısı ayrı ayrı gösterilir.
+              Pasif oyuncular kırmızıyla işaretlenmiş şekilde listede görünür.
+            </p>
+
             <h3 className="text-xs font-bold text-[#1a1a2e] uppercase tracking-wider mt-4 mb-2">Oyuncu Detay Modalı</h3>
             <p className="text-xs text-[#5a6170]">
               Oyuncunun genel bilgileri, taktik ve atletik becerileri (1-10 arası çubuk grafikler),
               vücut ölçüleri geçmişi ve maç bazlı istatistikleri bu ekranda görüntülenir.
               <strong> Rapor</strong> bağlantısı ile detaylı oyuncu rapor sayfasına gidilir.
+              <strong> PDF butonu</strong> ile oyuncu kartını (genel bilgiler, maç istatistikleri, beceri barları) PDF olarak indirebilirsiniz.
             </p>
 
             <h3 className="text-xs font-bold text-[#1a1a2e] uppercase tracking-wider mt-4 mb-2">Oyuncu Formu (Ekleme / Düzenleme)</h3>
@@ -374,17 +384,28 @@ export default function KilavuzPage() {
             <p className="text-xs text-[#5a6170]">
               Tüm oyuncuların detaylı istatistikleri: maç sayısı (İlk 11 / Yedek), süre, gol, asist, sarı/kırmızı kart,
               gol yememe, performans puanı. Sütun başlıklarına tıklayarak sıralama yapılabilir.
+              <strong> Skt, Czl, KYok, SüreYok</strong> sütunları da tıklanarak sıralanabilir.
+              Tablonun sağ üstündeki <strong>PDF butonuyla</strong> tüm istatistik tablosunu PDF olarak indirebilirsiniz.
+              Tablo başlığında <strong>Aktif / Pasif</strong> oyuncu sayısı ayrı ayrı gösterilir.
+            </p>
+
+            <h3 className="text-xs font-bold text-[#1a1a2e] uppercase tracking-wider mt-4 mb-2">Maç Sayısı Mantığı</h3>
+            <p className="text-xs text-[#5a6170]">
+              Bir oyuncu için maç sayısına şunlar girer: <strong>Ana Kadro</strong>, <strong>Sonradan Girdi</strong> ve <strong>Süre Almadı</strong> (kadroda yer aldı, oynamadı).
+              <strong> Sakat, Cezalı ve Kadroda Yok</strong> maç sayısına girmez; bu oyuncular o maçta sahada bulunmamıştır.
             </p>
 
             <h3 className="text-xs font-bold text-[#1a1a2e] uppercase tracking-wider mt-4 mb-2">Bireysel Oyuncu Raporu</h3>
             <p className="text-xs text-[#5a6170]">
               Oyuncu detay modalından veya tablodan erişilebilir. Beceri geçmişi grafikleri, vücut ölçümü geçmişi
               ve maç bazlı detaylı istatistikler bu sayfada yer alır.
+              Sayfanın sağ üst köşesindeki <strong>PDF butonuyla</strong> bireysel oyuncu raporunu (maç istatistikleri + beceri barları) PDF olarak indirebilirsiniz.
             </p>
 
             <AccessTable rows={[
               { feature: "Raporları görüntüleme", yonetici: true, antrenor: true, oyuncu: false },
               { feature: "Bireysel rapor", yonetici: true, antrenor: true, oyuncu: false },
+              { feature: "PDF çıktı alma", yonetici: true, antrenor: true, oyuncu: false },
             ]} />
 
             <div className="bg-red-50 border border-red-200 rounded-lg px-4 py-3 mt-2">
@@ -395,6 +416,58 @@ export default function KilavuzPage() {
                 </p>
               </div>
             </div>
+          </div>
+        </Section>
+
+        {/* Antrenman Programı */}
+        <Section title="Antrenman Programı" icon={ClipboardList} defaultOpen={false}>
+          <div className="space-y-3 mt-3">
+            <p className="text-sm text-[#3a3f4b]">
+              Antrenör menüsünde yer alan haftalık antrenman programı sayfasıdır. Her hücreye antrenman içeriği girilir.
+            </p>
+
+            <h3 className="text-xs font-bold text-[#1a1a2e] uppercase tracking-wider mt-4 mb-2">Özellikler</h3>
+            <FeatureRow icon={Calendar} title="Haftalık Grid" description="Pazartesi'den Pazar'a sütunlar; sabah, öğle, akşam satırları. Her hücreye antrenman içeriği girilir." />
+            <FeatureRow icon={Filter} title="Hafta Navigasyonu" description="← → okları ile haftalar arasında geçiş yapılır. 'Bu Hafta' butonu ile mevcut haftaya dönülür." />
+            <FeatureRow icon={Calendar} title="Sezon Filtresi" description="Aktif sezonlar arasında filtreleme yapılabilir." />
+            <FeatureRow icon={Layers} title="Çoklu Seçim" description="Birden fazla hücre seçilerek aynı içerik toplu olarak girilebilir." />
+            <FeatureRow icon={FileDown} title="PDF Çıktı" description="Haftanın antrenman programını tek tıkla PDF olarak indir. Dosya adı '34.Hafta Programı.pdf' formatındadır." />
+
+            <AccessTable rows={[
+              { feature: "Antrenman Programı görüntüleme", yonetici: true, antrenor: true, oyuncu: false },
+              { feature: "Program düzenleme", yonetici: true, antrenor: true, oyuncu: false },
+              { feature: "PDF çıktı alma", yonetici: true, antrenor: true, oyuncu: false },
+            ]} />
+          </div>
+        </Section>
+
+        {/* Oyuncu Havuzu */}
+        <Section title="Oyuncu Havuzu" icon={Users} defaultOpen={false}>
+          <div className="space-y-3 mt-3">
+            <p className="text-sm text-[#3a3f4b]">
+              Akademiye kayıtlı olmayan ama takip edilen oyuncuların yönetildiği sayfadır. İki sekme içerir.
+            </p>
+
+            <h3 className="text-xs font-bold text-[#1a1a2e] uppercase tracking-wider mt-4 mb-2">İzlenen Oyuncular</h3>
+            <p className="text-xs text-[#5a6170]">
+              Scouting amacıyla takip edilen oyuncuların listesidir. Ad soyad, doğum tarihi, mevcut takım, mevki, referans kişi ve notlar kaydedilir.
+              <strong> PDF butonu</strong> ile tüm izlenen oyuncular listesi PDF olarak indirilebilir.
+            </p>
+
+            <h3 className="text-xs font-bold text-[#1a1a2e] uppercase tracking-wider mt-4 mb-2">Deneme Oyuncuları</h3>
+            <p className="text-xs text-[#5a6170]">
+              Deneme antrenmanına çıkan oyuncuların listesidir. İzlenen oyuncu bilgilerine ek olarak <strong>sezon</strong>,
+              yaş grubu, deneme tarihi ve sonuç durumu (Olumlu / Olumsuz / Beklemede) kaydedilir.
+              Sezon bazlı filtre ile kayıtlar daraltılabilir.
+              <strong> PDF butonu</strong> ile tüm deneme oyuncuları listesi PDF olarak indirilebilir.
+            </p>
+
+            <AccessTable rows={[
+              { feature: "Oyuncu Havuzu görüntüleme", yonetici: true, antrenor: true, oyuncu: false },
+              { feature: "Oyuncu ekleme / düzenleme", yonetici: true, antrenor: true, oyuncu: false },
+              { feature: "Oyuncu silme", yonetici: true, antrenor: false, oyuncu: false },
+              { feature: "PDF çıktı alma", yonetici: true, antrenor: true, oyuncu: false },
+            ]} />
           </div>
         </Section>
 
@@ -449,48 +522,27 @@ export default function KilavuzPage() {
             <AccessTable rows={[
               { feature: "Ana Sayfa — Görüntüleme", yonetici: true, antrenor: true, oyuncu: true },
               { feature: "Ana Sayfa — Maç düzenleme", yonetici: true, antrenor: "Kendi yaş grubu", oyuncu: false },
-              { feature: "Ana Sayfa — Maç silme", yonetici: true, antrenor: false, oyuncu: false },
               { feature: "Oyuncular — Görüntüleme", yonetici: "Tümü", antrenor: "Kendi yaş grubu", oyuncu: "Kendi yaş grubu" },
-              { feature: "Oyuncular — Ekleme", yonetici: true, antrenor: "Kendi yaş grubu", oyuncu: false },
-              { feature: "Oyuncular — Düzenleme", yonetici: "Tümü", antrenor: "Kendi yaş grubu", oyuncu: false },
-              { feature: "Oyuncular — Silme", yonetici: true, antrenor: false, oyuncu: false },
+              { feature: "Oyuncular — Ekleme / Düzenleme", yonetici: true, antrenor: "Kendi yaş grubu", oyuncu: false },
+              { feature: "Oyuncular — PDF çıktı (modal)", yonetici: true, antrenor: true, oyuncu: false },
               { feature: "Takımlar — Görüntüleme", yonetici: "Tümü", antrenor: "Kendi yaş grubu", oyuncu: "Kendi yaş grubu" },
-              { feature: "Takımlar — Maç ekleme", yonetici: true, antrenor: "Kendi yaş grubu", oyuncu: false },
-              { feature: "Takımlar — Maç düzenleme", yonetici: "Tümü", antrenor: "Kendi yaş grubu", oyuncu: false },
-              { feature: "Takımlar — Maç silme", yonetici: true, antrenor: false, oyuncu: false },
-              { feature: "Raporlar", yonetici: true, antrenor: true, oyuncu: false },
+              { feature: "Takımlar — Maç ekleme / düzenleme", yonetici: true, antrenor: "Kendi yaş grubu", oyuncu: false },
+              { feature: "Raporlar — İstatistik tablosu", yonetici: true, antrenor: true, oyuncu: false },
+              { feature: "Raporlar — Bireysel rapor + PDF", yonetici: true, antrenor: true, oyuncu: false },
+              { feature: "Antrenman Programı", yonetici: true, antrenor: true, oyuncu: false },
+              { feature: "Antrenman Programı — PDF çıktı", yonetici: true, antrenor: true, oyuncu: false },
+              { feature: "Oyuncu Havuzu", yonetici: true, antrenor: true, oyuncu: false },
+              { feature: "Oyuncu Havuzu — PDF çıktı", yonetici: true, antrenor: true, oyuncu: false },
               { feature: "Ayarlar", yonetici: true, antrenor: false, oyuncu: false },
               { feature: "Kullanıcı yönetimi", yonetici: true, antrenor: false, oyuncu: false },
             ]} />
           </div>
         </Section>
 
-        {/* PWA */}
-        <Section title="Telefona Uygulama Kurulumu (PWA)" icon={MapPin} defaultOpen={false}>
-          <div className="space-y-3 mt-3">
-            <h3 className="text-xs font-bold text-[#1a1a2e] uppercase tracking-wider mb-2">Android</h3>
-            <ol className="text-xs text-[#5a6170] space-y-1.5 list-decimal list-inside">
-              <li>Chrome tarayıcıda siteyi açın ve giriş yapın</li>
-              <li>Tarayıcı adres çubuğunda veya menüde <strong>&quot;Ana Ekrana Ekle&quot;</strong> veya <strong>&quot;Uygulamayı Yükle&quot;</strong> seçeneğine tıklayın</li>
-              <li>Onaylayın — uygulama ana ekranınıza eklenecektir</li>
-              <li>Artık normal bir uygulama gibi açabilirsiniz</li>
-            </ol>
-
-            <h3 className="text-xs font-bold text-[#1a1a2e] uppercase tracking-wider mt-4 mb-2">iPhone / iPad</h3>
-            <ol className="text-xs text-[#5a6170] space-y-1.5 list-decimal list-inside">
-              <li>Safari tarayıcıda siteyi açın ve giriş yapın</li>
-              <li>Alt kısımdaki <strong>Paylaş</strong> (kutu + ok) butonuna dokunun</li>
-              <li><strong>&quot;Ana Ekrana Ekle&quot;</strong> seçeneğini bulun ve dokunun</li>
-              <li><strong>&quot;Ekle&quot;</strong> butonuna dokunarak onaylayın</li>
-              <li>Uygulama ana ekranınızda görünecektir</li>
-            </ol>
-          </div>
-        </Section>
-
         {/* Footer */}
         <div className="text-center py-8">
           <p className="text-xs text-[#8c919a]">Beylerbeyi Akademi Yönetim Sistemi © 2026</p>
-          <p className="text-[10px] text-[#b0b5bd] mt-1">Son güncelleme: Şubat 2026</p>
+          <p className="text-[10px] text-[#b0b5bd] mt-1">Son güncelleme: Mart 2026</p>
         </div>
       </div>
     </div>

@@ -24,6 +24,7 @@ interface DbScoutedPlayer {
 interface DbTrialPlayer extends DbScoutedPlayer {
   trial_age_group: string | null;
   trial_date: string | null;
+  trial_season: string | null;
   status: TrialStatus;
 }
 
@@ -56,6 +57,7 @@ function mapDbToTrial(db: DbTrialPlayer): TrialPlayer {
     notes: db.notes || undefined,
     trialAgeGroup: db.trial_age_group || undefined,
     trialDate: db.trial_date || undefined,
+    trialSeason: db.trial_season || undefined,
     status: db.status || "beklemede",
     createdAt: db.created_at,
     updatedAt: db.updated_at,
@@ -181,6 +183,7 @@ export async function createTrialPlayer(
       notes: player.notes || null,
       trial_age_group: player.trialAgeGroup || null,
       trial_date: player.trialDate || null,
+      trial_season: player.trialSeason || null,
       status: player.status,
     })
     .select()
@@ -211,6 +214,7 @@ export async function updateTrialPlayer(
       notes: player.notes || null,
       trial_age_group: player.trialAgeGroup || null,
       trial_date: player.trialDate || null,
+      trial_season: player.trialSeason || null,
       status: player.status,
     })
     .eq("id", player.id)

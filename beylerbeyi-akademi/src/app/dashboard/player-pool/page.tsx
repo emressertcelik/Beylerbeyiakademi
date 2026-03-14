@@ -26,6 +26,7 @@ import {
   XCircle,
   Clock,
   ChevronDown,
+  FileDown,
 } from "lucide-react";
 
 // ============================================================
@@ -82,7 +83,7 @@ function emptyScoutedPlayer(): Omit<ScoutedPlayer, "id" | "createdAt" | "updated
   };
 }
 
-function emptyTrialPlayer(): Omit<TrialPlayer, "id" | "createdAt" | "updatedAt"> {
+function emptyTrialPlayer(defaultSeason = ""): Omit<TrialPlayer, "id" | "createdAt" | "updatedAt"> {
   return {
     firstName: "",
     lastName: "",
@@ -94,6 +95,7 @@ function emptyTrialPlayer(): Omit<TrialPlayer, "id" | "createdAt" | "updatedAt">
     notes: "",
     trialAgeGroup: "",
     trialDate: "",
+    trialSeason: defaultSeason,
     status: "beklemede",
   };
 }
@@ -245,12 +247,14 @@ function ScoutedFormModal({
 function TrialFormModal({
   initial,
   ageGroups,
+  seasons,
   onClose,
   onSave,
   saving,
 }: {
   initial: Omit<TrialPlayer, "id" | "createdAt" | "updatedAt"> & { id?: string };
   ageGroups: string[];
+  seasons: string[];
   onClose: () => void;
   onSave: (data: typeof initial) => void;
   saving: boolean;
@@ -298,6 +302,24 @@ function TrialFormModal({
         {/* Denemeye özgü alanlar */}
         <div className="border-t border-[#e2e5e9] pt-4 mt-2">
           <p className="text-xs font-bold text-[#c4111d] uppercase tracking-wide mb-3">Deneme Bilgileri</p>
+          <div className="mb-4">
+            <Field label="Sezon" required>
+              <div className="relative">
+                <select
+                  className={inputCls + " appearance-none pr-8"}
+                  value={form.trialSeason || ""}
+                  onChange={set("trialSeason")}
+                  required
+                >
+                  <option value="">Sezon seçiniz</option>
+                  {seasons.map((s) => (
+                    <option key={s} value={s}>{s}</option>
+                  ))}
+                </select>
+                <ChevronDown size={14} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#8c919a] pointer-events-none" />
+              </div>
+            </Field>
+          </div>
           <div className="grid grid-cols-2 gap-4">
             <Field label="Yaş Grubu">
               <div className="relative">
@@ -463,6 +485,9 @@ function TrialDetailModal({
         {/* Deneme bilgileri */}
         <div className="bg-[#f8f9fb] rounded-xl p-4 space-y-3">
           <p className="text-[10px] font-bold text-[#c4111d] uppercase tracking-wide">Deneme Bilgileri</p>
+          {player.trialSeason && (
+            <DetailRow label="Sezon" value={player.trialSeason} />
+          )}
           <div className="grid grid-cols-3 gap-4">
             <DetailRow label="Yaş Grubu" value={player.trialAgeGroup} />
             <DetailRow label="Deneme Tarihi" value={formatDate(player.trialDate)} />
@@ -608,10 +633,21 @@ export default function PlayerPoolPage() {
   const [trialSaving, setTrialSaving] = useState(false);
   const [trialDeleting, setTrialDeleting] = useState(false);
   const [statusFilter, setStatusFilter] = useState<TrialStatus | "ALL">("ALL");
+  const [seasonFilter, setSeasonFilter] = useState<string>("ALL");
 
   const ageGroups = useMemo(
     () => lookups.ageGroups.filter((a) => a.isActive).map((a) => a.value),
     [lookups.ageGroups]
+  );
+
+  const seasons = useMemo(
+    () => lookups.seasons.filter((s) => s.isActive).map((s) => s.value),
+    [lookups.seasons]
+  );
+
+  const activeSeason = useMemo(
+    () => lookups.seasons.length > 0 ? lookups.seasons[lookups.seasons.length - 1].value : "",
+    [lookups.seasons]
   );
 
   const canEdit = true;
@@ -662,6 +698,7 @@ export default function PlayerPoolPage() {
 
   const filteredTrial = useMemo(() => {
     let list = trialPlayers;
+    if (seasonFilter !== "ALL") list = list.filter((p) => p.trialSeason === seasonFilter);
     if (statusFilter !== "ALL") list = list.filter((p) => p.status === statusFilter);
     if (search) {
       const q = search.toLowerCase();
@@ -674,7 +711,7 @@ export default function PlayerPoolPage() {
       );
     }
     return list;
-  }, [trialPlayers, statusFilter, search]);
+  }, [trialPlayers, statusFilter, seasonFilter, search]);
 
   // ---- Scouted handlers ----
 
@@ -750,6 +787,120 @@ export default function PlayerPoolPage() {
     }
   };
 
+  // ---- PDF Export ----
+
+  const [pdfLoading, setPdfLoading] = useState(false);
+
+  async function exportPDF() {
+    setPdfLoading(true);
+    try {
+      const html2canvas = (await import("html2canvas-pro")).default;
+      const { jsPDF } = await import("jspdf");
+
+      const isScouted = activeTab === "scouted";
+      const title = isScouted ? "İzlenen Oyuncular Raporu" : "Deneme Oyuncuları Raporu";
+      const now = new Date().toLocaleDateString("tr-TR");
+
+      // Tablo satırlarını oluştur
+      const rowsHtml = isScouted
+        ? filteredScouted.map((p, i) => `
+            <tr style="background:${i % 2 === 0 ? "#ffffff" : "#f8f9fb"}">
+              <td style="padding:7px 10px;font-weight:600;color:#1a1a2e;">${p.firstName} ${p.lastName}</td>
+              <td style="padding:7px 10px;color:#5a6170;">${formatDate(p.birthDate)} <span style="color:#9ca3af;font-size:11px;">(${calcAge(p.birthDate)} yaş)</span></td>
+              <td style="padding:7px 10px;color:#5a6170;">${p.currentTeam || "-"}</td>
+              <td style="padding:7px 10px;color:#5a6170;">${p.position || "-"}</td>
+              <td style="padding:7px 10px;color:#5a6170;">${p.referencePerson || "-"}</td>
+              <td style="padding:7px 10px;color:#5a6170;">${p.recordedBy || "-"}</td>
+              <td style="padding:7px 10px;color:#8c919a;font-size:11px;">${formatDate(p.createdAt)}</td>
+              <td style="padding:7px 10px;color:#5a6170;font-size:11px;max-width:160px;white-space:pre-wrap;">${p.notes || "-"}</td>
+            </tr>`).join("")
+        : filteredTrial.map((p, i) => {
+            const statusBg: Record<TrialStatus, string> = { olumlu: "#dcfce7", olumsuz: "#fee2e2", beklemede: "#fef9c3" };
+            const statusColor: Record<TrialStatus, string> = { olumlu: "#15803d", olumsuz: "#b91c1c", beklemede: "#92400e" };
+            return `
+            <tr style="background:${i % 2 === 0 ? "#ffffff" : "#f8f9fb"}">
+              <td style="padding:7px 10px;font-weight:600;color:#1a1a2e;">${p.firstName} ${p.lastName}</td>
+              <td style="padding:7px 10px;color:#5a6170;">${formatDate(p.birthDate)} <span style="color:#9ca3af;font-size:11px;">(${calcAge(p.birthDate)} yaş)</span></td>
+              <td style="padding:7px 10px;color:#5a6170;">${p.currentTeam || "-"}</td>
+              <td style="padding:7px 10px;color:#5a6170;">${p.position || "-"}</td>
+              <td style="padding:7px 10px;font-weight:700;color:#c4111d;font-size:11px;">${p.trialSeason || "-"}</td>
+              <td style="padding:7px 10px;font-weight:600;color:#1a1a2e;">${p.trialAgeGroup || "-"}</td>
+              <td style="padding:7px 10px;color:#5a6170;">${formatDate(p.trialDate)}</td>
+              <td style="padding:7px 10px;color:#5a6170;">${p.referencePerson || "-"}</td>
+              <td style="padding:7px 10px;">
+                <span style="display:inline-block;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:700;background:${statusBg[p.status]};color:${statusColor[p.status]};">
+                  ${STATUS_LABELS[p.status]}
+                </span>
+              </td>
+              <td style="padding:7px 10px;color:#5a6170;font-size:11px;max-width:140px;white-space:pre-wrap;">${p.notes || "-"}</td>
+            </tr>`;
+          }).join("");
+
+      const headerCells = isScouted
+        ? ["Ad Soyad", "Doğum Tarihi", "Takım", "Mevki", "Referans", "Kayıt Alan", "Kayıt Tarihi", "Not"]
+        : ["Ad Soyad", "Doğum Tarihi", "Takım", "Mevki", "Sezon", "Yaş Grubu", "Deneme Tarihi", "Referans", "Durum", "Not"];
+
+      const wrapper = document.createElement("div");
+      wrapper.style.cssText = "background:#fff;width:1100px;min-width:1100px;padding:20px 24px;font-family:sans-serif;";
+      wrapper.innerHTML = `
+        <!-- Header -->
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;">
+          <div>
+            <div style="font-size:9px;font-weight:700;color:#c4111d;letter-spacing:2px;text-transform:uppercase;margin-bottom:2px;">BEYLERBEYİ AKADEMİ</div>
+            <div style="font-size:17px;font-weight:800;color:#1a1a2e;">${title}</div>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-size:11px;color:#8c919a;">Oluşturulma: ${now}</div>
+            <div style="font-size:12px;font-weight:700;color:#1a1a2e;margin-top:2px;">${isScouted ? filteredScouted.length : filteredTrial.length} kayıt</div>
+          </div>
+        </div>
+        <div style="height:2px;background:linear-gradient(to right,#c4111d,#1a1a2e);border-radius:2px;margin-bottom:14px;"></div>
+        <!-- Tablo -->
+        <table style="width:100%;border-collapse:collapse;font-size:12px;">
+          <thead>
+            <tr style="background:#1a1a2e;">
+              ${headerCells.map(h => `<th style="padding:8px 10px;text-align:left;font-size:10px;font-weight:700;color:rgba(255,255,255,0.8);letter-spacing:0.5px;white-space:nowrap;">${h}</th>`).join("")}
+            </tr>
+          </thead>
+          <tbody>
+            ${rowsHtml || `<tr><td colspan="${headerCells.length}" style="padding:20px;text-align:center;color:#8c919a;">Kayıt bulunamadı</td></tr>`}
+          </tbody>
+        </table>
+        <!-- Footer -->
+        <div style="margin-top:14px;padding-top:8px;border-top:1px solid #e2e5e9;display:flex;justify-content:space-between;align-items:center;">
+          <div style="font-size:10px;color:#9ca3af;">Beylerbeyi Akademi — Oyuncu Havuzu</div>
+          <div style="font-size:10px;color:#9ca3af;">${now}</div>
+        </div>
+      `;
+
+      document.body.appendChild(wrapper);
+      const canvas = await html2canvas(wrapper, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: "#ffffff",
+        logging: false,
+      });
+      document.body.removeChild(wrapper);
+
+      const imgW = canvas.width;
+      const imgH = canvas.height;
+      const orientation = imgW >= imgH ? "landscape" : "portrait";
+      const pdf = new jsPDF({ orientation, unit: "mm", format: "a4" });
+      const pageW = pdf.internal.pageSize.getWidth();
+      const pageH = pdf.internal.pageSize.getHeight();
+      const margin = 8;
+      const scale = Math.min((pageW - margin * 2) / imgW, (pageH - margin * 2) / imgH);
+      pdf.addImage(canvas.toDataURL("image/png"), "PNG", margin, margin, imgW * scale, imgH * scale);
+
+      const fileName = isScouted ? "izlenen-oyuncular.pdf" : "deneme-oyunculari.pdf";
+      pdf.save(fileName);
+    } catch (e) {
+      console.error("PDF oluşturulamadı:", e);
+    } finally {
+      setPdfLoading(false);
+    }
+  }
+
   // ============================================================
   // Render
   // ============================================================
@@ -764,19 +915,34 @@ export default function PlayerPoolPage() {
             İzlenen ve denemeye çıkarılan oyuncuların takibi
           </p>
         </div>
-        {canEdit && (
+        <div className="flex items-center gap-2">
           <button
-            onClick={() =>
-              activeTab === "scouted"
-                ? setScoutedForm(emptyScoutedPlayer())
-                : setTrialForm(emptyTrialPlayer())
-            }
-            className="flex items-center gap-2 px-4 py-2.5 bg-[#c4111d] hover:bg-[#9b0d16] text-white text-sm font-semibold rounded-xl transition-all duration-200 shadow-sm shadow-[#c4111d]/25"
+            onClick={exportPDF}
+            disabled={pdfLoading}
+            className="flex items-center gap-2 px-4 py-2.5 bg-white border border-[#e2e5e9] hover:border-[#c4111d]/30 hover:text-[#c4111d] text-[#5a6170] text-sm font-semibold rounded-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <Plus size={18} />
-            {activeTab === "scouted" ? "İzlenen Oyuncu Ekle" : "Deneme Oyuncusu Ekle"}
+            {pdfLoading ? (
+              <div className="w-4 h-4 border-2 border-[#c4111d] border-t-transparent rounded-full animate-spin" />
+            ) : (
+              <FileDown size={16} />
+            )}
+            <span className="hidden sm:inline">PDF</span>
           </button>
-        )}
+          {canEdit && (
+            <button
+              onClick={() =>
+                activeTab === "scouted"
+                  ? setScoutedForm(emptyScoutedPlayer())
+                  : setTrialForm(emptyTrialPlayer(activeSeason))
+              }
+              className="flex items-center gap-2 px-4 py-2.5 bg-[#c4111d] hover:bg-[#9b0d16] text-white text-sm font-semibold rounded-xl transition-all duration-200 shadow-sm shadow-[#c4111d]/25"
+            >
+              <Plus size={18} />
+              <span className="hidden sm:inline">{activeTab === "scouted" ? "İzlenen Oyuncu Ekle" : "Deneme Oyuncusu Ekle"}</span>
+              <span className="sm:hidden">Ekle</span>
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Tabs + Filtreler */}
@@ -811,20 +977,37 @@ export default function PlayerPoolPage() {
 
         {/* Filtre satırı */}
         <div className="flex flex-col sm:flex-row gap-3">
-          {/* Durum filtresi - sadece deneme tab */}
+          {/* Sezon + Durum filtresi - sadece deneme tab */}
           {activeTab === "trial" && (
-            <div className="flex gap-1 bg-[#f1f3f5] rounded-lg p-1">
-              {(["ALL", "olumlu", "olumsuz", "beklemede"] as const).map((s) => (
-                <button
-                  key={s}
-                  onClick={() => setStatusFilter(s)}
-                  className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-all duration-200 whitespace-nowrap ${
-                    statusFilter === s ? "bg-white text-[#c4111d] shadow-sm" : "text-[#5a6170] hover:text-[#1a1a2e]"
-                  }`}
+            <div className="flex flex-wrap gap-2">
+              {/* Sezon filtresi */}
+              <div className="relative">
+                <select
+                  value={seasonFilter}
+                  onChange={(e) => setSeasonFilter(e.target.value)}
+                  className="appearance-none pl-3 pr-7 py-1.5 rounded-lg border border-[#e2e5e9] bg-white text-xs font-semibold text-[#1a1a2e] focus:outline-none focus:ring-2 focus:ring-[#c4111d]/20 cursor-pointer"
                 >
-                  {s === "ALL" ? "Tümü" : STATUS_LABELS[s]}
-                </button>
-              ))}
+                  <option value="ALL">Tüm Sezonlar</option>
+                  {seasons.map((s) => (
+                    <option key={s} value={s}>{s}</option>
+                  ))}
+                </select>
+                <ChevronDown size={12} className="absolute right-2 top-1/2 -translate-y-1/2 text-[#8c919a] pointer-events-none" />
+              </div>
+              {/* Durum filtresi */}
+              <div className="flex gap-1 bg-[#f1f3f5] rounded-lg p-1">
+                {(["ALL", "olumlu", "olumsuz", "beklemede"] as const).map((s) => (
+                  <button
+                    key={s}
+                    onClick={() => setStatusFilter(s)}
+                    className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-all duration-200 whitespace-nowrap ${
+                      statusFilter === s ? "bg-white text-[#c4111d] shadow-sm" : "text-[#5a6170] hover:text-[#1a1a2e]"
+                    }`}
+                  >
+                    {s === "ALL" ? "Tümü" : STATUS_LABELS[s]}
+                  </button>
+                ))}
+              </div>
             </div>
           )}
           {/* Arama */}
@@ -927,7 +1110,7 @@ export default function PlayerPoolPage() {
               <table className="w-full">
                 <thead>
                   <tr className="bg-[#f8f9fb] border-b border-[#e2e5e9]">
-                    {["Ad Soyad", "Doğum Tarihi", "Takım", "Mevki", "Yaş Grubu", "Deneme Tarihi", "Referans", "Durum"].map((h) => (
+                    {["Ad Soyad", "Doğum Tarihi", "Takım", "Mevki", "Sezon", "Yaş Grubu", "Deneme Tarihi", "Referans", "Durum"].map((h) => (
                       <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-[#8c919a] uppercase tracking-wide whitespace-nowrap">
                         {h}
                       </th>
@@ -944,6 +1127,7 @@ export default function PlayerPoolPage() {
                         <span className="text-[#5a6170]">{formatDate(p.birthDate)}<span className="text-[#8c919a] text-xs ml-1">({calcAge(p.birthDate)} yaş)</span></span>,
                         <span className="text-[#5a6170]">{p.currentTeam || "-"}</span>,
                         <span className="text-[#5a6170]">{p.position || "-"}</span>,
+                        <span className="font-medium text-[#c4111d] text-xs">{p.trialSeason || "-"}</span>,
                         <span className="font-medium text-[#1a1a2e]">{p.trialAgeGroup || "-"}</span>,
                         <span className="text-[#5a6170]">{formatDate(p.trialDate)}</span>,
                         <span className="text-[#5a6170]">{p.referencePerson || "-"}</span>,
@@ -1003,6 +1187,7 @@ export default function PlayerPoolPage() {
         <TrialFormModal
           initial={trialForm}
           ageGroups={ageGroups}
+          seasons={seasons}
           onClose={() => setTrialForm(null)}
           onSave={handleSaveTrial}
           saving={trialSaving}

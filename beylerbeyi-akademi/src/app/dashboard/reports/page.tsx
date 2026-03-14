@@ -1,6 +1,7 @@
 "use client";
 import * as React from "react";
 import { useMemo, useState, useEffect } from "react";
+import { FileDown } from "lucide-react";
 import Link from "next/link";
 import { useAppData } from "@/lib/app-data";
 import {
@@ -84,6 +85,126 @@ export default function ReportsPage() {
   const [sortAsc, setSortAsc] = useState(false);
   const [positionFilter, setPositionFilter] = useState<string>("all");
   const [playerSearch, setPlayerSearch] = useState<string>("");
+  const [pdfLoading, setPdfLoading] = useState(false);
+
+  async function exportPDF() {
+    setPdfLoading(true);
+    try {
+      const html2canvas = (await import("html2canvas-pro")).default;
+      const { jsPDF } = await import("jspdf");
+      const now = new Date().toLocaleDateString("tr-TR");
+      const seasonLabel = selectedSeason !== "all" ? selectedSeason : activeSeason;
+      const ageGroupLabel = selectedAgeGroup !== "all" ? selectedAgeGroup : "Tüm Yaş Grupları";
+
+      const rows = sortedReports.map((r, idx) => {
+        const ps = attSummary.playerStats[r.id];
+        const total = attSummary.totalByAgeGroup[r.ageGroup] ?? 0;
+        const attPct = ps && total > 0 ? `%${Math.round((ps.geldi / total) * 100)}` : "—";
+        const attColor = ps && total > 0
+          ? (Math.round((ps.geldi / total) * 100) >= 85 ? "#15803d" : Math.round((ps.geldi / total) * 100) >= 65 ? "#92400e" : "#b91c1c")
+          : "#8c919a";
+        const statusColor = r.status === "passive" ? "#c4111d" : "#1a1a2e";
+        return `<tr style="border-bottom:1px solid #f0f1f3;${r.status === "passive" ? "background:#fff1f1;" : ""}">
+          <td style="padding:7px 6px;font-size:11px;color:#8c919a;text-align:center;">${idx + 1}</td>
+          <td style="padding:7px 6px;font-size:11px;font-weight:600;color:${statusColor};">${r.name}<br/><span style="font-size:10px;color:#8c919a;font-weight:400;">${r.position} · ${r.ageGroup}</span></td>
+          <td style="padding:7px 6px;font-size:12px;font-weight:700;color:#1a1a2e;text-align:center;">${r.matches}</td>
+          <td style="padding:7px 6px;font-size:10px;text-align:center;"><span style="color:#15803d;font-weight:700;">${r.starts}</span>/<span style="color:#1d4ed8;font-weight:700;">${r.sub}</span></td>
+          <td style="padding:7px 6px;font-size:11px;text-align:center;color:#5a6170;">${r.sakat}</td>
+          <td style="padding:7px 6px;font-size:11px;text-align:center;color:#5a6170;">${r.cezali}</td>
+          <td style="padding:7px 6px;font-size:11px;text-align:center;color:#5a6170;">${r.kadroYok}</td>
+          <td style="padding:7px 6px;font-size:11px;text-align:center;color:#5a6170;">${r.sureAlmadi}</td>
+          <td style="padding:7px 6px;font-size:11px;text-align:center;color:#5a6170;">${r.minutesPlayed}</td>
+          <td style="padding:7px 6px;font-size:12px;font-weight:700;text-align:center;color:${r.goals > 0 ? "#16a34a" : "#8c919a"};">${r.goals}</td>
+          <td style="padding:7px 6px;font-size:12px;font-weight:700;text-align:center;color:${r.assists > 0 ? "#2563eb" : "#8c919a"};">${r.assists}</td>
+          <td style="padding:7px 6px;font-size:11px;text-align:center;color:${r.goalsPerMatch > 0 ? "#16a34a" : "#8c919a"};">${r.goalsPerMatch.toFixed(2)}</td>
+          <td style="padding:7px 6px;font-size:11px;text-align:center;color:${r.yellowCards > 0 ? "#ca8a04" : "#8c919a"};">${r.yellowCards}</td>
+          <td style="padding:7px 6px;font-size:11px;text-align:center;color:${r.redCards > 0 ? "#dc2626" : "#8c919a"};">${r.redCards}</td>
+          <td style="padding:7px 6px;font-size:11px;text-align:center;color:${r.goalsConceded > 0 ? "#ea580c" : "#8c919a"};">${r.goalsConceded}</td>
+          <td style="padding:7px 6px;font-size:11px;text-align:center;color:${r.cleanSheets > 0 ? "#16a34a" : "#8c919a"};">${r.cleanSheets}</td>
+          <td style="padding:7px 6px;font-size:11px;text-align:center;color:${r.ratingCount > 0 ? "#7c3aed" : "#8c919a"};">${r.ratingCount > 0 ? r.avgRating.toFixed(1) : "—"}</td>
+          <td style="padding:7px 6px;font-size:11px;text-align:center;color:${r.tacticalAvg >= 7 ? "#16a34a" : r.tacticalAvg >= 5 ? "#ca8a04" : "#8c919a"};">${r.tacticalAvg > 0 ? r.tacticalAvg.toFixed(1) : "—"}</td>
+          <td style="padding:7px 6px;font-size:11px;text-align:center;color:${r.athleticAvg >= 7 ? "#16a34a" : r.athleticAvg >= 5 ? "#ca8a04" : "#8c919a"};">${r.athleticAvg > 0 ? r.athleticAvg.toFixed(1) : "—"}</td>
+          <td style="padding:7px 6px;font-size:11px;text-align:center;color:${attColor};">${attPct}</td>
+        </tr>`;
+      }).join("");
+
+      const wrapper = document.createElement("div");
+      wrapper.style.cssText = "background:#fff;width:1050px;min-width:1050px;padding:24px;font-family:sans-serif;";
+      wrapper.innerHTML = `
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;padding-bottom:12px;border-bottom:2px solid #e2e5e9;">
+          <div>
+            <div style="font-size:16px;font-weight:900;color:#1a1a2e;">Oyuncu İstatistikleri</div>
+            <div style="font-size:11px;color:#8c919a;margin-top:3px;">${ageGroupLabel} · ${seasonLabel}</div>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-size:9px;font-weight:700;color:#c4111d;letter-spacing:2px;text-transform:uppercase;">BEYLERBEYİ AKADEMİ</div>
+            <div style="font-size:10px;color:#8c919a;margin-top:2px;">Detaylı Performans Raporu · ${now}</div>
+            <div style="margin-top:4px;font-size:10px;">
+              <span style="color:#16a34a;font-weight:700;">${sortedReports.filter(r => (r.status ?? "active") === "active").length} Aktif</span>
+              <span style="color:#8c919a;margin:0 6px;">·</span>
+              <span style="color:#c4111d;font-weight:700;">${sortedReports.filter(r => r.status === "passive").length} Pasif</span>
+            </div>
+          </div>
+        </div>
+        <table style="width:100%;border-collapse:collapse;">
+          <thead>
+            <tr style="background:#1a1a2e;">
+              <th style="padding:6px;font-size:9px;color:rgba(255,255,255,0.6);text-align:center;font-weight:600;">#</th>
+              <th style="padding:6px;font-size:9px;color:rgba(255,255,255,0.6);text-align:left;font-weight:600;">Oyuncu</th>
+              <th style="padding:6px;font-size:9px;color:rgba(255,255,255,0.6);text-align:center;font-weight:600;">Maç</th>
+              <th style="padding:6px;font-size:9px;color:rgba(255,255,255,0.6);text-align:center;font-weight:600;">İ11/Y</th>
+              <th style="padding:6px;font-size:9px;color:rgba(255,255,255,0.6);text-align:center;font-weight:600;">Skt</th>
+              <th style="padding:6px;font-size:9px;color:rgba(255,255,255,0.6);text-align:center;font-weight:600;">Czl</th>
+              <th style="padding:6px;font-size:9px;color:rgba(255,255,255,0.6);text-align:center;font-weight:600;">KYok</th>
+              <th style="padding:6px;font-size:9px;color:rgba(255,255,255,0.6);text-align:center;font-weight:600;">SüreYok</th>
+              <th style="padding:6px;font-size:9px;color:rgba(255,255,255,0.6);text-align:center;font-weight:600;">DK</th>
+              <th style="padding:6px;font-size:9px;color:rgba(255,255,255,0.6);text-align:center;font-weight:600;">Gol</th>
+              <th style="padding:6px;font-size:9px;color:rgba(255,255,255,0.6);text-align:center;font-weight:600;">Ast</th>
+              <th style="padding:6px;font-size:9px;color:rgba(255,255,255,0.6);text-align:center;font-weight:600;">G/M</th>
+              <th style="padding:6px;font-size:9px;color:rgba(255,255,255,0.6);text-align:center;font-weight:600;">SK</th>
+              <th style="padding:6px;font-size:9px;color:rgba(255,255,255,0.6);text-align:center;font-weight:600;">KK</th>
+              <th style="padding:6px;font-size:9px;color:rgba(255,255,255,0.6);text-align:center;font-weight:600;">YG</th>
+              <th style="padding:6px;font-size:9px;color:rgba(255,255,255,0.6);text-align:center;font-weight:600;">GK</th>
+              <th style="padding:6px;font-size:9px;color:rgba(255,255,255,0.6);text-align:center;font-weight:600;">Puan</th>
+              <th style="padding:6px;font-size:9px;color:rgba(255,255,255,0.6);text-align:center;font-weight:600;">TAK</th>
+              <th style="padding:6px;font-size:9px;color:rgba(255,255,255,0.6);text-align:center;font-weight:600;">ATL</th>
+              <th style="padding:6px;font-size:9px;color:rgba(255,255,255,0.6);text-align:center;font-weight:600;">ANT%</th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+        <div style="margin-top:12px;padding-top:8px;border-top:1px solid #e2e5e9;display:flex;justify-content:space-between;">
+          <div style="font-size:9px;color:#9ca3af;">Beylerbeyi Akademi — Oyuncu İstatistik Raporu</div>
+          <div style="font-size:9px;color:#9ca3af;">${now}</div>
+        </div>
+      `;
+
+      document.body.appendChild(wrapper);
+      const canvas = await html2canvas(wrapper, { scale: 2, useCORS: true, backgroundColor: "#ffffff", logging: false });
+      document.body.removeChild(wrapper);
+
+      const imgW = canvas.width;
+      const imgH = canvas.height;
+      const pdf = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
+      const pageW = pdf.internal.pageSize.getWidth();
+      const pageH = pdf.internal.pageSize.getHeight();
+      const margin = 6;
+      const imgData = canvas.toDataURL("image/png");
+      const pdfImgW = pageW - margin * 2;
+      const pdfImgH = imgH * (pdfImgW / imgW);
+      const pageContentH = pageH - margin * 2;
+      const totalPages = Math.ceil(pdfImgH / pageContentH);
+      for (let i = 0; i < totalPages; i++) {
+        if (i > 0) pdf.addPage();
+        pdf.addImage(imgData, "PNG", margin, margin - i * pageContentH, pdfImgW, pdfImgH);
+      }
+      pdf.save(`Oyuncu İstatistikleri ${seasonLabel}.pdf`);
+    } catch (e) {
+      console.error("PDF oluşturulamadı:", e);
+    } finally {
+      setPdfLoading(false);
+    }
+  }
 
   // En güncel maçlar önce olacak şekilde sıralama
   const sortedMatches = useMemo(() => {
@@ -132,8 +253,8 @@ export default function ReportsPage() {
         if (isCezali) playerStatsById[ps.playerId].cezali++;
         if (isKadroYok) playerStatsById[ps.playerId].kadroYok++;
         if (isSureAlmadi) playerStatsById[ps.playerId].sureAlmadi++;
-        // Maç sayısı ve istatistikler sadece fiilen sahada olan oyuncular için (İlk 11 veya yedek olarak girdi)
-        if (isStart || isSub) {
+        // Maç sayısı: İlk 11, yedek ve süre almadı (kadroda bulundu)
+        if (isStart || isSub || isSureAlmadi) {
           playerStatsById[ps.playerId].matches++;
           playerStatsById[ps.playerId].psList.push(ps);
         }
@@ -488,6 +609,18 @@ export default function ReportsPage() {
                 <span className="text-red-400 font-bold">{sortedReports.filter(r => r.status === "passive").length}</span>
                 <span className="ml-1">Pasif</span>
               </span>
+              <button
+                onClick={exportPDF}
+                disabled={pdfLoading}
+                className="p-1.5 rounded-lg hover:bg-white/10 transition-colors text-white/70 hover:text-white disabled:opacity-40"
+                title="PDF İndir"
+              >
+                {pdfLoading ? (
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                ) : (
+                  <FileDown size={16} />
+                )}
+              </button>
             </div>
           </div>
         </div>

@@ -32,6 +32,7 @@ export interface TrialPlayer {
   notes?: string;
   trialAgeGroup?: string;     // Hangi yaş grubu ile denemeye çıktığı
   trialDate?: string;         // Denemeye çıkış tarihi
+  trialSeason?: string;       // Hangi sezonda denemeye çıktığı
   status: TrialStatus;        // olumlu / olumsuz / beklemede
   createdAt: string;
   updatedAt: string;

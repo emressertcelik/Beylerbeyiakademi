@@ -204,7 +204,33 @@ export async function updateMatch(match: Match): Promise<Match> {
 
   if (matchErr) throw matchErr;
 
-  // 2) Eski istatistikleri sil, yenilerini ekle (replace strategy)
+  // 2) Oyuncu istatistiklerini güvenli şekilde güncelle
+  // Strateji: Önce mevcut veriyi yedekle, sil, yaz. Yazma başarısız olursa yedeği geri yükle.
+  const { data: oldStats } = await supabase
+    .from("match_player_stats")
+    .select("*")
+    .eq("match_id", match.id);
+
+  // Geçerli player_id olmayan satırları filtrele (foreign key hatasını önler)
+  const validStats = match.playerStats.filter((s) => s.playerId && typeof s.playerId === "string" && s.playerId.trim() !== "");
+
+  const statsRows = validStats.map((s) => ({
+    match_id: match.id,
+    player_id: s.playerId,
+    player_name: s.playerName,
+    jersey_number: s.jerseyNumber ?? 0,
+    position: s.position,
+    participation_status: s.participationStatus || null,
+    minutes_played: s.minutesPlayed,
+    goals: s.goals,
+    assists: s.assists,
+    yellow_cards: s.yellowCards,
+    red_cards: s.redCards,
+    goals_conceded: s.goalsConceded,
+    clean_sheet: s.cleanSheet,
+    rating: s.rating ?? null,
+  }));
+
   const { error: delErr } = await supabase
     .from("match_player_stats")
     .delete()
@@ -212,29 +238,19 @@ export async function updateMatch(match: Match): Promise<Match> {
 
   if (delErr) throw delErr;
 
-  if (match.playerStats.length > 0) {
-    const statsRows = match.playerStats.map((s) => ({
-      match_id: match.id,
-      player_id: s.playerId,
-      player_name: s.playerName,
-      jersey_number: s.jerseyNumber ?? 0,
-      position: s.position,
-      participation_status: s.participationStatus || null,
-      minutes_played: s.minutesPlayed,
-      goals: s.goals,
-      assists: s.assists,
-      yellow_cards: s.yellowCards,
-      red_cards: s.redCards,
-      goals_conceded: s.goalsConceded,
-      clean_sheet: s.cleanSheet,
-      rating: s.rating ?? null,
-    }));
-
+  if (statsRows.length > 0) {
     const { error: statsErr } = await supabase
       .from("match_player_stats")
       .insert(statsRows);
 
-    if (statsErr) throw statsErr;
+    if (statsErr) {
+      // Insert başarısız — eski veriyi geri yükle
+      if (oldStats && oldStats.length > 0) {
+        const restoreRows = oldStats.map(({ id: _id, ...rest }: Record<string, unknown>) => rest);
+        await supabase.from("match_player_stats").insert(restoreRows);
+      }
+      throw statsErr;
+    }
   }
 
   // 3) Tam maçı geri getir

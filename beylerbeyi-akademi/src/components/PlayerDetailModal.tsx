@@ -7,7 +7,7 @@ import { fetchSkillLogs, fetchBodyLogs } from "@/lib/supabase/players";
 import { fetchMatchesByPlayer } from "@/lib/supabase/matches";
 import { fetchPlayerAttendanceStats } from "@/lib/supabase/trainingSchedule";
 import { useAppData } from "@/lib/app-data";
-import { X, Edit3, Trash2, TrendingUp, TrendingDown, ArrowUp, ArrowDown, Ruler, Weight, ChevronDown, Clock, Star, AlertTriangle, Ban, Users } from "lucide-react";
+import { X, Edit3, Trash2, TrendingUp, TrendingDown, ArrowUp, ArrowDown, Ruler, Weight, ChevronDown, Clock, Star, AlertTriangle, Ban, Users, FileDown } from "lucide-react";
 import { getPositionColors } from "@/lib/positions";
 
 interface PlayerDetailModalProps {
@@ -72,6 +72,7 @@ export default function PlayerDetailModal({ player, onClose, onEdit, onDelete, u
   const [playerMatches, setPlayerMatches] = useState<Match[]>([]);
   const [selectedSeason, setSelectedSeason] = useState<string>("ALL");
   const [selectedAgeGroup, setSelectedAgeGroup] = useState<string>("ALL");
+  const [pdfLoading, setPdfLoading] = useState(false);
 
   const { from: gradFrom, to: gradTo } = getPositionColors(player.position);
   const initials = `${player.firstName.charAt(0)}${player.lastName.charAt(0)}`;
@@ -163,7 +164,8 @@ export default function PlayerDetailModal({ player, onClose, onEdit, onDelete, u
       if (!ps) return;
       const status = (ps.participationStatus || "").toLowerCase();
       // Oyuncunun maça katıldığı durumlar: ana kadro, sonradan girdi, veya status boş ama dakika > 0
-      const isPlayed = status === "ana kadro" || status === "sonradan girdi" || (!status && ps.minutesPlayed > 0);
+      const isSureAlmadi = status.includes("süre almadı") || status.includes("süre yok");
+      const isPlayed = status === "ana kadro" || status === "sonradan girdi" || isSureAlmadi || (!status && ps.minutesPlayed > 0);
       if (isPlayed) {
         s.matches++;
         s.minutesPlayed += ps.minutesPlayed || 0;
@@ -190,6 +192,213 @@ export default function PlayerDetailModal({ player, onClose, onEdit, onDelete, u
         playerStat: match.playerStats.find(ps => ps.playerId === player.id),
       }));
   }, [filteredMatches, player.id]);
+
+  async function exportPDF() {
+    setPdfLoading(true);
+    try {
+      const html2canvas = (await import("html2canvas-pro")).default;
+      const { jsPDF } = await import("jspdf");
+      const now = new Date().toLocaleDateString("tr-TR");
+      const age = player.birthDate ? Math.floor((Date.now() - new Date(player.birthDate).getTime()) / (365.25 * 24 * 60 * 60 * 1000)) : "";
+      const passiveLabel = player.passiveReason === "gonderildi" ? "Gönderildi" :
+                           player.passiveReason === "ayrildi"    ? "Ayrıldı" :
+                           player.passiveReason === "transfer"   ? "Transfer Oldu" : "";
+
+      const attPct = attendanceStats && attendanceStats.total > 0 ? Math.round((attendanceStats.geldi / attendanceStats.total) * 100) : null;
+
+      const tacticalRows = userRole?.role !== "oyuncu" ? Object.entries({
+        positioning: "Pozisyon Alma", passing: "Pas", crossing: "Orta", shooting: "Şut",
+        dribbling: "Dribling", heading: "Kafa Vuruşu", tackling: "Top Kesme",
+        marking: "Markaj", gameReading: "Oyun Okuma",
+      }).map(([k, label]) => {
+        const val = (player.tactical as Record<string, number>)[k] ?? 0;
+        const c = val >= 8 ? "#22c55e" : val >= 6 ? "#f59e0b" : val >= 4 ? "#f97316" : "#ef4444";
+        return `<tr><td style="padding:3px 6px;font-size:11px;color:#5a6170;width:120px;">${label}</td><td style="padding:3px 6px;"><div style="display:flex;align-items:center;gap:6px;"><div style="flex:1;height:5px;background:#e2e5e9;border-radius:3px;overflow:hidden;"><div style="height:100%;width:${val*10}%;background:${c};border-radius:3px;"></div></div><span style="font-size:11px;font-weight:700;color:#1a1a2e;min-width:14px;text-align:right;">${val}</span></div></td></tr>`;
+      }).join("") : "";
+
+      const athleticRows = userRole?.role !== "oyuncu" ? Object.entries({
+        speed: "Hız", strength: "Güç", stamina: "Dayanıklılık", agility: "Çeviklik",
+        jumping: "Sıçrama", balance: "Denge", flexibility: "Esneklik",
+      }).map(([k, label]) => {
+        const val = (player.athletic as Record<string, number>)[k] ?? 0;
+        const c = val >= 8 ? "#22c55e" : val >= 6 ? "#f59e0b" : val >= 4 ? "#f97316" : "#ef4444";
+        return `<tr><td style="padding:3px 6px;font-size:11px;color:#5a6170;width:120px;">${label}</td><td style="padding:3px 6px;"><div style="display:flex;align-items:center;gap:6px;"><div style="flex:1;height:5px;background:#e2e5e9;border-radius:3px;overflow:hidden;"><div style="height:100%;width:${val*10}%;background:${c};border-radius:3px;"></div></div><span style="font-size:11px;font-weight:700;color:#1a1a2e;min-width:14px;text-align:right;">${val}</span></div></td></tr>`;
+      }).join("") : "";
+
+      const prevTeamsHtml = player.previousTeams && player.previousTeams.length > 0
+        ? player.previousTeams.map(pt => `<span style="font-size:10px;background:#f1f3f5;color:#5a6170;padding:2px 7px;border-radius:4px;margin-right:4px;">${pt.team} (${pt.years})</span>`).join("")
+        : "<span style='font-size:10px;color:#8c919a;'>—</span>";
+
+      const wrapper = document.createElement("div");
+      wrapper.style.cssText = "background:#fff;width:800px;min-width:800px;padding:24px;font-family:sans-serif;";
+      wrapper.innerHTML = `
+        <!-- Header -->
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;padding-bottom:12px;border-bottom:2px solid #e2e5e9;">
+          <div style="display:flex;align-items:center;gap:12px;">
+            <div style="width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,#1a1a2e,#2d2d4e);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:900;color:#fff;">${initials}</div>
+            <div>
+              <div style="font-size:18px;font-weight:900;color:${player.status === "passive" ? "#c4111d" : "#1a1a2e"};">
+                ${player.firstName} ${player.lastName}
+                ${player.status === "passive" ? `<span style="font-size:9px;background:#c4111d;color:#fff;padding:2px 7px;border-radius:4px;margin-left:6px;vertical-align:middle;">PASİF${passiveLabel ? " · " + passiveLabel : ""}</span>` : ""}
+              </div>
+              <div style="margin-top:3px;font-size:11px;color:#8c919a;">${player.position} · ${player.ageGroup} · ${age} yaş · ${player.foot} ayak</div>
+            </div>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-size:9px;font-weight:700;color:#c4111d;letter-spacing:2px;text-transform:uppercase;">BEYLERBEYİ AKADEMİ</div>
+            <div style="font-size:10px;color:#8c919a;margin-top:2px;">Oyuncu Kartı · ${now}</div>
+          </div>
+        </div>
+
+        <!-- 2 Sütun -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+
+          <!-- SOL SÜTUN -->
+          <div>
+            <!-- Genel Bilgiler -->
+            <div style="margin-bottom:12px;">
+              <div style="font-size:9px;font-weight:700;color:#c4111d;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px;">Genel Bilgiler</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:6px;">
+                <div style="background:#f8f9fb;border:1px solid #e2e5e9;border-radius:8px;padding:7px 10px;">
+                  <div style="font-size:9px;color:#8c919a;text-transform:uppercase;letter-spacing:0.5px;">Doğum Tarihi</div>
+                  <div style="font-size:12px;font-weight:600;color:#1a1a2e;margin-top:2px;">${new Date(player.birthDate).toLocaleDateString("tr-TR")}</div>
+                </div>
+                <div style="background:#f8f9fb;border:1px solid #e2e5e9;border-radius:8px;padding:7px 10px;">
+                  <div style="font-size:9px;color:#8c919a;text-transform:uppercase;letter-spacing:0.5px;">Boy / Kilo</div>
+                  <div style="font-size:12px;font-weight:600;color:#1a1a2e;margin-top:2px;">${player.height} cm / ${player.weight} kg</div>
+                </div>
+              </div>
+              ${(player.phone || player.parentPhone) ? `
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:6px;">
+                ${player.phone ? `<div style="background:#f8f9fb;border:1px solid #e2e5e9;border-radius:8px;padding:7px 10px;"><div style="font-size:9px;color:#8c919a;">Telefon</div><div style="font-size:11px;font-weight:600;color:#1a1a2e;margin-top:2px;">${player.phone}</div></div>` : ""}
+                ${player.parentPhone ? `<div style="background:#f8f9fb;border:1px solid #e2e5e9;border-radius:8px;padding:7px 10px;"><div style="font-size:9px;color:#8c919a;">Veli Telefonu</div><div style="font-size:11px;font-weight:600;color:#1a1a2e;margin-top:2px;">${player.parentPhone}</div></div>` : ""}
+              </div>` : ""}
+              <div style="background:#f8f9fb;border:1px solid #e2e5e9;border-radius:8px;padding:7px 10px;margin-bottom:6px;">
+                <div style="font-size:9px;color:#8c919a;margin-bottom:4px;">Önceki Takımlar</div>
+                <div>${prevTeamsHtml}</div>
+              </div>
+              ${player.notes ? `<div style="background:#f8f9fb;border:1px solid #e2e5e9;border-radius:8px;padding:7px 10px;"><div style="font-size:9px;color:#8c919a;margin-bottom:3px;">Notlar</div><div style="font-size:11px;color:#1a1a2e;line-height:1.4;">${player.notes}</div></div>` : ""}
+            </div>
+
+            <!-- Maç İstatistikleri -->
+            <div style="margin-bottom:12px;">
+              <div style="font-size:9px;font-weight:700;color:#c4111d;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px;">Maç İstatistikleri</div>
+              <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-bottom:6px;">
+                <div style="background:#1a1a2e;border-radius:8px;padding:8px;text-align:center;">
+                  <div style="font-size:7px;color:rgba(255,255,255,0.5);text-transform:uppercase;">Maç</div>
+                  <div style="font-size:20px;font-weight:900;color:#fff;">${seasonStats.matches}</div>
+                </div>
+                <div style="background:#f8f9fb;border:1px solid #e2e5e9;border-radius:8px;padding:8px;text-align:center;">
+                  <div style="font-size:7px;color:#8c919a;text-transform:uppercase;">Dakika</div>
+                  <div style="font-size:16px;font-weight:900;color:#1a1a2e;">${seasonStats.minutesPlayed}</div>
+                </div>
+                ${isGoalkeeper ? `
+                <div style="background:#f8f9fb;border:1px solid #e2e5e9;border-radius:8px;padding:8px;text-align:center;">
+                  <div style="font-size:7px;color:#8c919a;text-transform:uppercase;">Yenilen</div>
+                  <div style="font-size:16px;font-weight:900;color:#ea580c;">${seasonStats.goalsConceded}</div>
+                </div>
+                <div style="background:#f8f9fb;border:1px solid #e2e5e9;border-radius:8px;padding:8px;text-align:center;">
+                  <div style="font-size:7px;color:#8c919a;text-transform:uppercase;">Clean Sheet</div>
+                  <div style="font-size:16px;font-weight:900;color:#16a34a;">${seasonStats.cleanSheets}</div>
+                </div>` : `
+                <div style="background:#f8f9fb;border:1px solid #e2e5e9;border-radius:8px;padding:8px;text-align:center;">
+                  <div style="font-size:7px;color:#8c919a;text-transform:uppercase;">Gol</div>
+                  <div style="font-size:16px;font-weight:900;color:#16a34a;">${seasonStats.goals}</div>
+                </div>
+                <div style="background:#f8f9fb;border:1px solid #e2e5e9;border-radius:8px;padding:8px;text-align:center;">
+                  <div style="font-size:7px;color:#8c919a;text-transform:uppercase;">Asist</div>
+                  <div style="font-size:16px;font-weight:900;color:#2563eb;">${seasonStats.assists}</div>
+                </div>`}
+              </div>
+              <!-- Katılım -->
+              <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:4px;margin-bottom:6px;">
+                ${[
+                  {label:"İlk 11",val:participationStats.ilk11,c:"#16a34a"},
+                  {label:"Yedek",val:participationStats.yedek,c:"#2563eb"},
+                  {label:"Süre Yok",val:participationStats.sureAlmadi,c:"#ca8a04"},
+                  {label:"Kad. Yok",val:participationStats.kadroYok,c:"#8c919a"},
+                  {label:"Sakat",val:participationStats.sakat,c:"#ea580c"},
+                  {label:"Cezalı",val:participationStats.cezali,c:"#c4111d"},
+                ].map(x=>`<div style="background:#f8f9fb;border:1px solid #e2e5e9;border-radius:6px;padding:5px 3px;text-align:center;"><div style="font-size:13px;font-weight:700;color:${x.c};">${x.val}</div><div style="font-size:8px;color:#8c919a;">${x.label}</div></div>`).join("")}
+              </div>
+              <!-- Kartlar -->
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;">
+                <div style="background:#f8f9fb;border:1px solid #e2e5e9;border-radius:8px;padding:8px;display:flex;align-items:center;gap:8px;">
+                  <div style="width:14px;height:18px;background:#fbbf24;border-radius:2px;"></div>
+                  <div><div style="font-size:14px;font-weight:700;color:#1a1a2e;">${seasonStats.yellowCards}</div><div style="font-size:9px;color:#8c919a;">Sarı Kart</div></div>
+                </div>
+                <div style="background:#f8f9fb;border:1px solid #e2e5e9;border-radius:8px;padding:8px;display:flex;align-items:center;gap:8px;">
+                  <div style="width:14px;height:18px;background:#ef4444;border-radius:2px;"></div>
+                  <div><div style="font-size:14px;font-weight:700;color:#1a1a2e;">${seasonStats.redCards}</div><div style="font-size:9px;color:#8c919a;">Kırmızı Kart</div></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Antrenman Katılımı -->
+            ${attendanceStats && attendanceStats.total > 0 ? `
+            <div>
+              <div style="font-size:9px;font-weight:700;color:#c4111d;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px;">Antrenman Katılımı</div>
+              <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:4px;">
+                ${[
+                  {label:"Toplam",val:attendanceStats.total,c:"#1a1a2e"},
+                  {label:"Geldi",val:attendanceStats.geldi,c:"#1b6e2a"},
+                  {label:"Gelmedi",val:attendanceStats.gelmedi,c:"#c4111d"},
+                  {label:"İzinli",val:attendanceStats.izinli,c:"#2563eb"},
+                  {label:"Sakat",val:attendanceStats.sakat,c:"#d97706"},
+                ].map(x=>`<div style="text-align:center;"><div style="background:${x.c};color:#fff;font-size:14px;font-weight:900;border-radius:6px;padding:4px 0;">${x.val}</div><div style="font-size:8px;color:#8c919a;margin-top:2px;">${x.label}</div></div>`).join("")}
+              </div>
+              <div style="font-size:10px;color:#8c919a;margin-top:4px;text-align:right;">%${attPct} katılım · ${activeSeason}</div>
+            </div>` : ""}
+          </div>
+
+          <!-- SAĞ SÜTUN: Beceriler -->
+          <div>
+            ${userRole?.role !== "oyuncu" ? `
+            <div style="margin-bottom:12px;">
+              <div style="font-size:9px;font-weight:700;color:#c4111d;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px;">Taktik Beceriler</div>
+              <table style="width:100%;border-collapse:collapse;">${tacticalRows}</table>
+            </div>
+            <div>
+              <div style="font-size:9px;font-weight:700;color:#c4111d;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px;">Atletik Beceriler</div>
+              <table style="width:100%;border-collapse:collapse;">${athleticRows}</table>
+            </div>` : `<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#8c919a;font-size:12px;">Beceri verileri gizlenmiştir.</div>`}
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <div style="margin-top:14px;padding-top:8px;border-top:1px solid #e2e5e9;display:flex;justify-content:space-between;">
+          <div style="font-size:9px;color:#9ca3af;">Beylerbeyi Akademi — Oyuncu Kartı</div>
+          <div style="font-size:9px;color:#9ca3af;">${now}</div>
+        </div>
+      `;
+
+      document.body.appendChild(wrapper);
+      const canvas = await html2canvas(wrapper, { scale: 2, useCORS: true, backgroundColor: "#ffffff", logging: false });
+      document.body.removeChild(wrapper);
+
+      const imgW = canvas.width;
+      const imgH = canvas.height;
+      const orientation = imgW >= imgH ? "landscape" : "portrait";
+      const pdf = new jsPDF({ orientation, unit: "mm", format: "a4" });
+      const pageW = pdf.internal.pageSize.getWidth();
+      const pageH = pdf.internal.pageSize.getHeight();
+      const margin = 8;
+      const pdfImgW = pageW - margin * 2;
+      const pdfImgH = imgH * (pdfImgW / imgW);
+      const pageContentH = pageH - margin * 2;
+      const totalPages = Math.ceil(pdfImgH / pageContentH);
+      const imgData = canvas.toDataURL("image/png");
+      for (let i = 0; i < totalPages; i++) {
+        if (i > 0) pdf.addPage();
+        pdf.addImage(imgData, "PNG", margin, margin - i * pageContentH, pdfImgW, pdfImgH);
+      }
+      pdf.save(`${player.firstName}-${player.lastName}-kart.pdf`);
+    } catch (e) {
+      console.error("PDF oluşturulamadı:", e);
+    } finally {
+      setPdfLoading(false);
+    }
+  }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-fade-in">
@@ -239,6 +448,19 @@ export default function PlayerDetailModal({ player, onClose, onEdit, onDelete, u
               <span>Sil</span>
             </button>
           )}
+          <button
+            onClick={exportPDF}
+            disabled={pdfLoading}
+            className="flex items-center gap-1 px-3 py-1.5 bg-white hover:bg-[#f1f3f5] text-[#1a1a2e] text-[11px] font-semibold rounded-lg transition-all border border-[#e2e5e9] shadow-sm disabled:opacity-50 ml-auto"
+            title="PDF İndir"
+          >
+            {pdfLoading ? (
+              <div className="w-3 h-3 border-2 border-[#e2e5e9] border-t-[#1a1a2e] rounded-full animate-spin" />
+            ) : (
+              <FileDown size={12} />
+            )}
+            <span>PDF</span>
+          </button>
         </div>
 
         <div className="p-4 sm:p-6 space-y-4 sm:space-y-5">

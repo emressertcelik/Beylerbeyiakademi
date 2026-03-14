@@ -145,8 +145,15 @@ export default function TeamsPage() {
       setSelectedMatch(null);
       showToast("success", isEdit ? "Maç başarıyla güncellendi" : "Maç başarıyla kaydedildi");
     } catch (err) {
-      console.error("Maç kaydedilemedi:", err);
-      showToast("error", "Maç kaydedilemedi. Lütfen tekrar deneyin.");
+      const e = err as Record<string, unknown>;
+      console.error("Maç kaydedilemedi — detay:", {
+        message: e?.message,
+        code: e?.code,
+        details: e?.details,
+        hint: e?.hint,
+        raw: JSON.stringify(err),
+      });
+      showToast("error", `Maç kaydedilemedi: ${e?.message || e?.details || "Bilinmeyen hata"}`);
     } finally {
       setSaving(false);
     }
