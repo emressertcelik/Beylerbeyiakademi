@@ -41,6 +41,9 @@ interface PlayerReport {
   assistsPerMatch: number;
   tacticalAvg: number;
   athleticAvg: number;
+  status?: string;
+  passiveReason?: string;
+  passiveNote?: string;
 }
 
 export default function ReportsPage() {
@@ -466,7 +469,15 @@ export default function ReportsPage() {
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-[11px] font-bold text-white bg-[#c4111d] px-3 py-1.5 rounded-full shadow-sm">{sortedReports.length} oyuncu</span>
+              <span className="text-[11px] font-bold text-white/70 px-2 py-1 rounded-full">
+                <span className="text-emerald-400 font-bold">{sortedReports.filter(r => (r.status ?? "active") === "active").length}</span>
+                <span className="ml-1">Aktif</span>
+              </span>
+              <span className="text-white/30">·</span>
+              <span className="text-[11px] font-bold text-white/70 px-2 py-1 rounded-full">
+                <span className="text-red-400 font-bold">{sortedReports.filter(r => r.status === "passive").length}</span>
+                <span className="ml-1">Pasif</span>
+              </span>
             </div>
           </div>
         </div>
@@ -515,23 +526,32 @@ export default function ReportsPage() {
                 {sortedReports.map((r, idx) => (
                   <tr
                     key={r.id}
-                    className="border-b border-[#f0f1f3] last:border-b-0 hover:bg-[#fafbfc] transition-colors"
+                    className={`border-b border-[#f0f1f3] last:border-b-0 transition-colors ${r.status === "passive" ? "bg-red-50 hover:bg-red-100" : "hover:bg-[#fafbfc]"}`}
                   >
                     <td className="px-3 py-2.5 text-xs text-[#8c919a] font-medium">{idx + 1}</td>
                     <td className="px-3 py-2.5">
                       <div className="flex items-center gap-2">
-                        <span className="w-7 h-7 rounded-md bg-[#c4111d]/10 flex items-center justify-center text-[10px] font-black text-[#c4111d] shrink-0">
+                        <span className={`w-7 h-7 rounded-md flex items-center justify-center text-[10px] font-black shrink-0 ${r.status === "passive" ? "bg-[#c4111d]/15 text-[#c4111d]" : "bg-[#c4111d]/10 text-[#c4111d]"}`}>
                           {getPositionAbbr(r.position)}
                         </span>
                         <div className="min-w-0">
-                          <Link href={`/dashboard/reports/${r.id}`} className="text-xs font-semibold text-[#1a1a2e] truncate hover:text-[#c4111d] transition-colors cursor-pointer block">
+                          <Link href={`/dashboard/reports/${r.id}`} className={`text-xs font-semibold truncate hover:text-[#c4111d] transition-colors cursor-pointer block ${r.status === "passive" ? "text-[#c4111d]" : "text-[#1a1a2e]"}`}>
                             {r.name}
                           </Link>
-                          <div className="flex items-center gap-1">
-                            <span className="text-[9px] text-[#8c919a]">{r.position}</span>
-                            <span className="text-[8px] text-[#8c919a]">·</span>
-                            <span className="text-[9px] text-[#8c919a]">{r.ageGroup}</span>
-                          </div>
+                          {r.status === "passive" ? (
+                            <span className="text-[9px] font-bold text-[#c4111d]">
+                              {r.passiveReason === "gonderildi" ? "Gönderildi" :
+                               r.passiveReason === "ayrildi"    ? "Ayrıldı" :
+                               r.passiveReason === "transfer"   ? "Transfer Oldu" : "Pasif"}
+                              {r.passiveNote ? ` · ${r.passiveNote}` : ""}
+                            </span>
+                          ) : (
+                            <div className="flex items-center gap-1">
+                              <span className="text-[9px] text-[#8c919a]">{r.position}</span>
+                              <span className="text-[8px] text-[#8c919a]">·</span>
+                              <span className="text-[9px] text-[#8c919a]">{r.ageGroup}</span>
+                            </div>
+                          )}
                         </div>
                       </div>
                     </td>

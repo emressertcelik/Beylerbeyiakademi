@@ -128,7 +128,11 @@ export default function PlayersPage() {
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-xl font-bold text-[#1a1a2e]">Oyuncular</h1>
-          <div className="text-sm text-[#8c919a] font-medium mt-1">{filteredPlayers.length} oyuncu</div>
+          <div className="text-sm text-[#8c919a] font-medium mt-1 flex items-center gap-2">
+              <span>{filteredPlayers.filter(p => (p.status ?? "active") === "active").length} <span className="text-emerald-600 font-semibold">Aktif</span></span>
+              <span className="text-[#d0d3d8]">·</span>
+              <span>{filteredPlayers.filter(p => p.status === "passive").length} <span className="text-[#c4111d] font-semibold">Pasif</span></span>
+            </div>
         </div>
         {canAddPlayer && (
           <button

@@ -275,9 +275,9 @@ export default function PlayerReportPage() {
   return (
     <div className="space-y-5 max-w-4xl mx-auto">
       {/* ═══ Header Card ═══ */}
-      <div className="bg-white rounded-2xl border border-[#e2e5e9] shadow-sm overflow-hidden">
+      <div className={`rounded-2xl shadow-sm overflow-hidden ${player.status === "passive" ? "bg-red-50 border border-[#c4111d]/30" : "bg-white border border-[#e2e5e9]"}`}>
         {/* Top gradient bar */}
-        <div className={`bg-gradient-to-r ${getPositionColors(player.position).from} ${getPositionColors(player.position).to} px-4 py-3 flex items-center justify-between`}>
+        <div className={`bg-gradient-to-r ${player.status === "passive" ? "from-[#c4111d] to-[#7f0d14]" : `${getPositionColors(player.position).from} ${getPositionColors(player.position).to}`} px-4 py-3 flex items-center justify-between`}>
           <button onClick={() => router.push("/dashboard/reports")} className="p-1.5 rounded-lg hover:bg-white/15 transition-colors text-white">
             <ArrowLeft size={16} />
           </button>
@@ -286,22 +286,44 @@ export default function PlayerReportPage() {
         {/* Player info */}
         <div className="px-5 py-4">
           <div className="flex items-center gap-4">
-            <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${getPositionColors(player.position).from} ${getPositionColors(player.position).to} flex items-center justify-center text-xl font-black text-white shadow-md shrink-0`}>
+            <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${player.status === "passive" ? "from-[#c4111d] to-[#7f0d14]" : `${getPositionColors(player.position).from} ${getPositionColors(player.position).to}`} flex items-center justify-center text-xl font-black text-white shadow-md shrink-0`}>
               {getPositionAbbr(player.position)}
             </div>
             <div className="flex-1 min-w-0">
-              <h1 className="text-lg font-black text-[#1a1a2e] tracking-tight">
-                {player.firstName} {player.lastName}
-              </h1>
-              <div className="flex items-center gap-1.5 mt-1 flex-wrap">
-                <span className={`text-[9px] font-bold bg-white border px-2 py-0.5 rounded-md ${getPositionColors(player.position).text}`}>{player.position}</span>
-                <span className="text-[9px] font-bold bg-[#1a1a2e]/8 text-[#5a6170] px-2 py-0.5 rounded-md">{player.ageGroup}</span>
-                <span className="text-[10px] text-[#8c919a]">{age} yaş</span>
-                <span className="text-[10px] text-[#d1d5db]">·</span>
-                <span className="text-[10px] text-[#8c919a]">{player.foot}</span>
-                <span className="text-[10px] text-[#d1d5db]">·</span>
-                <span className="text-[10px] text-[#8c919a]">{player.height}cm · {player.weight}kg</span>
+              <div className="flex items-center gap-2 flex-wrap">
+                <h1 className={`text-lg font-black tracking-tight ${player.status === "passive" ? "text-[#c4111d]" : "text-[#1a1a2e]"}`}>
+                  {player.firstName} {player.lastName}
+                </h1>
+                {player.status === "passive" && (
+                  <span className="text-[9px] font-black uppercase tracking-wider bg-[#c4111d] text-white px-2 py-0.5 rounded-md">
+                    PASİF
+                  </span>
+                )}
               </div>
+              {player.status === "passive" ? (
+                <div className="flex items-center gap-1.5 mt-1 flex-wrap">
+                  <span className="text-[10px] font-bold text-[#c4111d]">
+                    {player.passiveReason === "gonderildi" ? "Gönderildi" :
+                     player.passiveReason === "ayrildi"    ? "Ayrıldı" :
+                     player.passiveReason === "transfer"   ? "Transfer Oldu" : "Pasif"}
+                  </span>
+                  {player.passiveNote && (
+                    <><span className="text-[10px] text-[#c4111d]/50">·</span>
+                    <span className="text-[10px] text-[#c4111d]/70">{player.passiveNote}</span></>
+                  )}
+                  <span className="text-[10px] text-[#8c919a]">· {player.ageGroup} · {age} yaş</span>
+                </div>
+              ) : (
+                <div className="flex items-center gap-1.5 mt-1 flex-wrap">
+                  <span className={`text-[9px] font-bold bg-white border px-2 py-0.5 rounded-md ${getPositionColors(player.position).text}`}>{player.position}</span>
+                  <span className="text-[9px] font-bold bg-[#1a1a2e]/8 text-[#5a6170] px-2 py-0.5 rounded-md">{player.ageGroup}</span>
+                  <span className="text-[10px] text-[#8c919a]">{age} yaş</span>
+                  <span className="text-[10px] text-[#d1d5db]">·</span>
+                  <span className="text-[10px] text-[#8c919a]">{player.foot}</span>
+                  <span className="text-[10px] text-[#d1d5db]">·</span>
+                  <span className="text-[10px] text-[#8c919a]">{player.height}cm · {player.weight}kg</span>
+                </div>
+              )}
             </div>
           </div>
           {/* Skill Rings - redesigned as inline badges */}

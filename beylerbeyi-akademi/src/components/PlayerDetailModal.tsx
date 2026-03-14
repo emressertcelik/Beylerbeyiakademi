@@ -245,6 +245,21 @@ export default function PlayerDetailModal({ player, onClose, onEdit, onDelete, u
 
           {/* Genel Bilgiler */}
           <Section title="Genel Bilgiler">
+            {player.status === "passive" && (
+              <div className="flex items-center gap-2.5 bg-red-50 border border-[#c4111d]/20 rounded-xl px-4 py-3 mb-3">
+                <span className="text-[9px] font-black uppercase tracking-wider bg-[#c4111d] text-white px-2 py-0.5 rounded shrink-0">PASİF</span>
+                <div className="min-w-0">
+                  <span className="text-xs font-bold text-[#c4111d]">
+                    {player.passiveReason === "gonderildi" ? "Gönderildi" :
+                     player.passiveReason === "ayrildi"    ? "Ayrıldı" :
+                     player.passiveReason === "transfer"   ? "Transfer Oldu" : "—"}
+                  </span>
+                  {player.passiveNote && (
+                    <span className="text-xs text-[#c4111d]/70 ml-1.5">· {player.passiveNote}</span>
+                  )}
+                </div>
+              </div>
+            )}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
               <InfoBox label="Doğum Tarihi" value={new Date(player.birthDate).toLocaleDateString("tr-TR")} />
               <InfoBox label="Boy" value={`${player.height} cm`} />

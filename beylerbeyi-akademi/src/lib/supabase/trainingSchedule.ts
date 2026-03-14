@@ -208,6 +208,7 @@ export async function fetchPlayersByAgeGroupAndSeason(
     .from("players")
     .select("id, first_name, last_name, jersey_number, position")
     .eq("age_group", ageGroup)
+    .eq("status", "active")
     .order("jersey_number", { ascending: true });
   if (error) throw error;
   return (data ?? []) as PlayerSummary[];

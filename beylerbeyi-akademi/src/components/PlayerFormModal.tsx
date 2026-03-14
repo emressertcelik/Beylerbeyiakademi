@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Player, AgeGroup, Position, Foot } from "@/types/player";
+import { Player, AgeGroup, Position, Foot, PlayerStatus, PassiveReason } from "@/types/player";
 import { useAppData } from "@/lib/app-data";
 import { X, Plus, Trash2, Loader2 } from "lucide-react";
 
@@ -38,6 +38,9 @@ export default function PlayerFormModal({ player, saving, onClose, onSave }: Pla
     notes: "",
     seasons: SEASONS.length > 0 ? [SEASONS[0]] : [] as string[],
     previousTeams: [] as { team: string; years: string }[],
+    status: "active" as PlayerStatus,
+    passiveReason: undefined as PassiveReason | undefined,
+    passiveNote: "",
     stats: { ...defaultStats },
     tactical: { ...defaultTactical },
     athletic: { ...defaultAthletic },
@@ -61,6 +64,9 @@ export default function PlayerFormModal({ player, saving, onClose, onSave }: Pla
         notes: player.notes || "",
         seasons: [...player.seasons],
         previousTeams: player.previousTeams ? [...player.previousTeams] : [],
+        status: player.status || "active",
+        passiveReason: player.passiveReason,
+        passiveNote: player.passiveNote || "",
         stats: { ...player.stats },
         tactical: { ...player.tactical },
         athletic: { ...player.athletic },
@@ -75,6 +81,8 @@ export default function PlayerFormModal({ player, saving, onClose, onSave }: Pla
       id: player?.id || crypto.randomUUID(),
       ...form,
       photo: player?.photo,
+      passiveReason: form.status === "passive" ? form.passiveReason : undefined,
+      passiveNote: form.status === "passive" ? (form.passiveNote || undefined) : undefined,
       createdAt: player?.createdAt || now,
       updatedAt: now,
     };
@@ -244,6 +252,65 @@ export default function PlayerFormModal({ player, saving, onClose, onSave }: Pla
                   className="w-full px-3 py-2.5 bg-white border border-[#e2e5e9] rounded-lg text-[#1a1a2e] text-sm focus:outline-none focus:border-[#c4111d] focus:ring-2 focus:ring-[#c4111d]/10 transition-all duration-200 resize-none"
                 />
               </div>
+
+              {/* Durum */}
+              {isEdit && (
+                <div className={`rounded-xl border p-4 space-y-3 ${form.status === "passive" ? "bg-red-50 border-red-200" : "bg-[#f8f9fb] border-[#e2e5e9]"}`}>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-semibold text-[#5a6170]">Oyuncu Durumu</span>
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        onClick={() => updateField("status", "active")}
+                        className={`px-3 py-1 rounded-lg text-xs font-bold border transition-all ${form.status === "active" ? "bg-[#1b6e2a] text-white border-[#1b6e2a]" : "bg-white text-[#6b7280] border-[#e2e5e9] hover:border-[#1b6e2a]"}`}
+                      >
+                        Aktif
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => updateField("status", "passive")}
+                        className={`px-3 py-1 rounded-lg text-xs font-bold border transition-all ${form.status === "passive" ? "bg-[#c4111d] text-white border-[#c4111d]" : "bg-white text-[#6b7280] border-[#e2e5e9] hover:border-[#c4111d]"}`}
+                      >
+                        Pasif
+                      </button>
+                    </div>
+                  </div>
+
+                  {form.status === "passive" && (
+                    <div className="space-y-3 pt-1">
+                      <div>
+                        <label className="block text-xs font-medium text-[#5a6170] mb-1.5">Pasif Nedeni</label>
+                        <div className="flex gap-2 flex-wrap">
+                          {([
+                            { value: "gonderildi", label: "Gönderildi" },
+                            { value: "ayrildi",    label: "Ayrıldı" },
+                            { value: "transfer",   label: "Transfer Oldu" },
+                          ] as { value: PassiveReason; label: string }[]).map(({ value, label }) => (
+                            <button
+                              key={value}
+                              type="button"
+                              onClick={() => updateField("passiveReason", value)}
+                              className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all ${form.passiveReason === value ? "bg-[#c4111d] text-white border-[#c4111d]" : "bg-white text-[#6b7280] border-[#e2e5e9] hover:border-[#c4111d]"}`}
+                            >
+                              {label}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-[#5a6170] mb-1.5">Açıklama (opsiyonel)</label>
+                        <input
+                          type="text"
+                          value={form.passiveNote}
+                          onChange={(e) => updateField("passiveNote", e.target.value)}
+                          placeholder="Örn: Başka kulüple anlaşıldı"
+                          className="w-full px-3 py-2 bg-white border border-[#e2e5e9] rounded-lg text-sm text-[#1a1a2e] focus:outline-none focus:border-[#c4111d] focus:ring-2 focus:ring-[#c4111d]/10"
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           )}
 

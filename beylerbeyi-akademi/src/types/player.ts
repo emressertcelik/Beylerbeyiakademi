@@ -39,6 +39,9 @@ export interface AthleticSkills {
   flexibility: number;     // Esneklik (1-10)
 }
 
+export type PlayerStatus = "active" | "passive";
+export type PassiveReason = "gonderildi" | "ayrildi" | "transfer";
+
 export interface Player {
   id: string;
   firstName: string;
@@ -56,6 +59,9 @@ export interface Player {
   phone?: string;
   parentPhone?: string;
   notes?: string;
+  status: PlayerStatus;
+  passiveReason?: PassiveReason;
+  passiveNote?: string;
   stats: PlayerStats;
   tactical: TacticalSkills;
   athletic: AthleticSkills;

@@ -1024,17 +1024,21 @@ function CellEditModal({
                         const status = attendanceMap[player.id];
                         const isSaving = savingPlayer === player.id;
                         return (
-                          <div key={player.id} className="flex items-center gap-2.5 py-1.5 px-2 rounded-lg hover:bg-[#f1f5f9] transition-colors">
-                            <span className={`shrink-0 w-8 h-6 rounded flex items-center justify-center text-[10px] font-black text-white ${getPositionColors(player.position ?? "").bg}`}>
-                              {getPositionAbbr(player.position ?? "")}
-                            </span>
-                            <span className="flex-1 min-w-0 text-[13px] font-medium text-[#1a1a2e] break-words">
-                              {player.first_name} {player.last_name}
-                            </span>
-                            {isSaving && (
-                              <div className="w-3 h-3 border-2 border-[#1b6e2a] border-t-transparent rounded-full animate-spin shrink-0" />
-                            )}
-                            <div className="flex gap-1 shrink-0">
+                          <div key={player.id} className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2.5 py-2 px-2 rounded-lg hover:bg-[#f1f5f9] transition-colors border-b border-[#f0f1f3] last:border-b-0">
+                            {/* Üst satır: mevki + isim + spinner */}
+                            <div className="flex items-center gap-2 min-w-0 flex-1">
+                              <span className={`shrink-0 w-8 h-6 rounded flex items-center justify-center text-[10px] font-black text-white ${getPositionColors(player.position ?? "").bg}`}>
+                                {getPositionAbbr(player.position ?? "")}
+                              </span>
+                              <span className="flex-1 min-w-0 text-[13px] font-medium text-[#1a1a2e] truncate">
+                                {player.first_name} {player.last_name}
+                              </span>
+                              {isSaving && (
+                                <div className="w-3 h-3 border-2 border-[#1b6e2a] border-t-transparent rounded-full animate-spin shrink-0" />
+                              )}
+                            </div>
+                            {/* Alt satır (mobil) / sağ taraf (desktop): seçenek butonları */}
+                            <div className="flex gap-1 shrink-0 sm:flex-none">
                               {([
                                 { s: "geldi",   label: "Geldi",   active: "bg-[#1b6e2a] text-white border-[#1b6e2a]",  inactive: "text-[#1b6e2a] border-[#1b6e2a]" },
                                 { s: "gelmedi", label: "Gelmedi", active: "bg-[#c4111d] text-white border-[#c4111d]",  inactive: "text-[#c4111d] border-[#c4111d]" },
@@ -1045,7 +1049,7 @@ function CellEditModal({
                                   key={s}
                                   disabled={!canEdit || isSaving}
                                   onClick={() => handleAttendance(player.id, s)}
-                                  className={`px-2 h-6 rounded text-[10px] font-semibold border transition-all ${
+                                  className={`flex-1 sm:flex-none px-2 h-7 sm:h-6 rounded text-[10px] font-semibold border transition-all ${
                                     status === s ? active : `bg-white ${inactive} opacity-40 hover:opacity-90`
                                   } disabled:cursor-default`}
                                 >

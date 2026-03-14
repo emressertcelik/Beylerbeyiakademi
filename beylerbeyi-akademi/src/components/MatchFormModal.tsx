@@ -128,10 +128,10 @@ export default function MatchFormModal({ match, players, saving, onClose, onSave
 
   // Filter players by selected age group and season
   const ageGroupPlayers = players.filter(
-    (p) => p.ageGroup === form.ageGroup && p.seasons.includes(form.season)
+    (p) => p.ageGroup === form.ageGroup && p.seasons.includes(form.season) && (p.status ?? "active") === "active"
   );
   const otherAgeGroupPlayers = players.filter(
-    (p) => p.ageGroup !== form.ageGroup && p.seasons.includes(form.season)
+    (p) => p.ageGroup !== form.ageGroup && p.seasons.includes(form.season) && (p.status ?? "active") === "active"
   );
   const availablePlayers = [...ageGroupPlayers, ...otherAgeGroupPlayers];
 

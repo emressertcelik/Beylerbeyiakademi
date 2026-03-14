@@ -1,5 +1,5 @@
 import { createClient } from "./client";
-import { Player, SkillLog, BodyLog } from "@/types/player";
+import { Player, SkillLog, BodyLog, PlayerStatus, PassiveReason } from "@/types/player";
 
 // Her çağrıda taze client oluştur (auth state güncel kalsın)
 function getClient() {
@@ -34,6 +34,9 @@ interface DbPlayer {
   phone: string | null;
   parent_phone: string | null;
   notes: string | null;
+  status: string;
+  passive_reason: string | null;
+  passive_note: string | null;
   created_at: string;
   updated_at: string;
   player_previous_teams: { id: string; team_name: string; years: string; sort_order: number }[] | { id: string; team_name: string; years: string; sort_order: number };
@@ -70,6 +73,9 @@ function mapDbToPlayer(db: DbPlayer): Player {
     phone: db.phone || undefined,
     parentPhone: db.parent_phone || undefined,
     notes: db.notes || undefined,
+    status: (db.status as PlayerStatus) || "active",
+    passiveReason: (db.passive_reason as PassiveReason) || undefined,
+    passiveNote: db.passive_note || undefined,
     previousTeams: prevTeams
       .sort((a, b) => a.sort_order - b.sort_order)
       .map((pt) => ({ team: pt.team_name, years: pt.years })),
@@ -123,6 +129,9 @@ export async function createPlayer(player: Player): Promise<Player> {
       phone: player.phone || null,
       parent_phone: player.parentPhone || null,
       notes: player.notes || null,
+      status: player.status || "active",
+      passive_reason: player.passiveReason || null,
+      passive_note: player.passiveNote || null,
     })
     .select()
     .single();
@@ -205,6 +214,9 @@ export async function updatePlayer(player: Player): Promise<Player> {
       phone: player.phone || null,
       parent_phone: player.parentPhone || null,
       notes: player.notes || null,
+      status: player.status || "active",
+      passive_reason: player.passiveReason || null,
+      passive_note: player.passiveNote || null,
     })
     .eq("id", player.id);
 
