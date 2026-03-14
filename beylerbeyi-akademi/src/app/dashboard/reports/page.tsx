@@ -14,7 +14,8 @@ import { fetchSeasonAttendanceSummary } from "@/lib/supabase/trainingSchedule";
 type SortField =
   | "matches" | "goals" | "assists" | "minutesPlayed"
   | "yellowCards" | "redCards" | "goalsConceded" | "cleanSheets"
-  | "rating" | "goalsPerMatch" | "tacticalAvg" | "athleticAvg";
+  | "rating" | "goalsPerMatch" | "tacticalAvg" | "athleticAvg"
+  | "sakat" | "cezali" | "kadroYok" | "sureAlmadi";
 
 interface PlayerReport {
   id: string;
@@ -107,7 +108,11 @@ export default function ReportsPage() {
         const statusRaw = ps.participationStatus;
         const status = (statusRaw || "").trim().toLowerCase();
         let isStart = false, isSub = false, isSakat = false, isCezali = false, isKadroYok = false, isSureAlmadi = false;
-        if (status.includes("ana kadro")) {
+        if (!status) {
+          isStart = true; // Boş veri → Excel'den gelmiş, oynadı say
+        } else if (status.includes("süre almadı") || status.includes("süre yok")) {
+          isSureAlmadi = true;
+        } else if (status.includes("ana kadro")) {
           isStart = true;
         } else if (status.includes("yedek") || status.includes("sonradan")) {
           isSub = true;
@@ -117,8 +122,6 @@ export default function ReportsPage() {
           isCezali = true;
         } else if (status.includes("kadroda yok") || status.includes("kadro yok")) {
           isKadroYok = true;
-        } else if (status.includes("süre almadı") || status.includes("süre yok")) {
-          isSureAlmadi = true;
         }
         if (!playerStatsById[ps.playerId]) {
           playerStatsById[ps.playerId] = { starts: 0, sub: 0, sakat: 0, cezali: 0, kadroYok: 0, sureAlmadi: 0, matches: 0, psList: [] };
@@ -129,8 +132,11 @@ export default function ReportsPage() {
         if (isCezali) playerStatsById[ps.playerId].cezali++;
         if (isKadroYok) playerStatsById[ps.playerId].kadroYok++;
         if (isSureAlmadi) playerStatsById[ps.playerId].sureAlmadi++;
-        playerStatsById[ps.playerId].matches++;
-        playerStatsById[ps.playerId].psList.push(ps);
+        // Maç sayısı ve istatistikler sadece fiilen sahada olan oyuncular için (İlk 11 veya yedek olarak girdi)
+        if (isStart || isSub) {
+          playerStatsById[ps.playerId].matches++;
+          playerStatsById[ps.playerId].psList.push(ps);
+        }
       }
     }
 
@@ -220,6 +226,10 @@ export default function ReportsPage() {
       goalsPerMatch: "goalsPerMatch",
       tacticalAvg: "tacticalAvg",
       athleticAvg: "athleticAvg",
+      sakat: "sakat",
+      cezali: "cezali",
+      kadroYok: "kadroYok",
+      sureAlmadi: "sureAlmadi",
     };
     const key = fieldMap[sortField];
     sorted.sort((a, b) => {
@@ -504,10 +514,10 @@ export default function ReportsPage() {
                   <th className="px-3 py-2.5 text-[10px] font-semibold text-[#8c919a] uppercase tracking-wider min-w-[140px]">Oyuncu</th>
                   <th className="px-2 py-2.5"><SortHeader field="matches" label="Maç" /></th>
                   <th className="px-2 py-2.5 text-[10px] font-semibold text-[#8c919a] uppercase tracking-wider" title="İlk 11 / Yedek">İ11/Y</th>
-                  <th className="px-2 py-2.5 text-[10px] font-semibold text-[#8c919a] uppercase tracking-wider" title="Sakat">Skt</th>
-                  <th className="px-2 py-2.5 text-[10px] font-semibold text-[#8c919a] uppercase tracking-wider" title="Cezalı">Czl</th>
-                  <th className="px-2 py-2.5 text-[10px] font-semibold text-[#8c919a] uppercase tracking-wider" title="Kadroda Yok">KYok</th>
-                  <th className="px-2 py-2.5 text-[10px] font-semibold text-[#8c919a] uppercase tracking-wider" title="Süre Almadı">SüreYok</th>
+                  <th className="px-2 py-2.5" title="Sakat"><SortHeader field="sakat" label="Skt" /></th>
+                  <th className="px-2 py-2.5" title="Cezalı"><SortHeader field="cezali" label="Czl" /></th>
+                  <th className="px-2 py-2.5" title="Kadroda Yok"><SortHeader field="kadroYok" label="KYok" /></th>
+                  <th className="px-2 py-2.5" title="Süre Almadı"><SortHeader field="sureAlmadi" label="SüreYok" /></th>
                   <th className="px-2 py-2.5"><SortHeader field="minutesPlayed" label="DK" /></th>
                   <th className="px-2 py-2.5"><SortHeader field="goals" label="Gol" /></th>
                   <th className="px-2 py-2.5"><SortHeader field="assists" label="Ast" /></th>

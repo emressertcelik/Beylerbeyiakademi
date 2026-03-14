@@ -153,6 +153,7 @@ export default function PlayerReportPage() {
     let starts = 0, subs = 0, anaKadro = 0, yedek = 0, totalMin = 0, goals = 0, assists = 0;
     let yellowCards = 0, redCards = 0, goalsConceded = 0, cleanSheets = 0;
     let ratingSum = 0, ratingCount = 0;
+    let playedCount = 0; // Sadece sahaya çıktığı maçlar (İlk11 veya yedek olarak girdi)
     const monthlyGoals = new Map<string, number>();
     const monthlyAssists = new Map<string, number>();
     const monthlyMatches = new Map<string, number>();
@@ -161,14 +162,19 @@ export default function PlayerReportPage() {
       const ps = match.playerStats.find((p) => p.playerId === playerId);
       if (!ps) continue;
       const sl = (ps.participationStatus || "").toLowerCase();
-      if (sl.includes("ana kadro")) anaKadro++;
-      if (sl.includes("yedek") || sl.includes("sonradan")) yedek++;
-      if (sl.includes("ilk")) starts++;
-      if (
-        sl.includes("yedek") ||
-        sl.includes("sonradan girdi") ||
-        sl.includes("sonradan")
-      ) subs++;
+      const isEmpty = !sl.trim();
+      const isSureAlmadi = !isEmpty && (sl.includes("süre almadı") || sl.includes("süre yok"));
+      const isAnaKadro = isEmpty || (!isSureAlmadi && sl.includes("ana kadro"));
+      const isYedek = !isEmpty && !isSureAlmadi && (sl.includes("yedek") || sl.includes("sonradan"));
+      const isPlayed = isAnaKadro || isYedek;
+
+      if (isAnaKadro) { anaKadro++; starts++; }
+      if (isYedek) { yedek++; subs++; }
+
+      // Maç bazı istatistikler yalnızca sahaya çıktığı maçlar için
+      if (!isPlayed) continue;
+
+      playedCount++;
       totalMin += ps.minutesPlayed;
       goals += ps.goals;
       assists += ps.assists;
@@ -184,11 +190,11 @@ export default function PlayerReportPage() {
     }
 
     return {
-      total: playerMatches.length, starts, subs, anaKadro, yedek, totalMin, goals, assists,
+      total: playedCount, starts, subs, anaKadro, yedek, totalMin, goals, assists,
       yellowCards, redCards, goalsConceded, cleanSheets,
       avgRating: ratingCount > 0 ? ratingSum / ratingCount : 0, ratingCount,
-      goalsPerMatch: playerMatches.length > 0 ? goals / playerMatches.length : 0,
-      assistsPerMatch: playerMatches.length > 0 ? assists / playerMatches.length : 0,
+      goalsPerMatch: playedCount > 0 ? goals / playedCount : 0,
+      assistsPerMatch: playedCount > 0 ? assists / playedCount : 0,
       monthlyGoals, monthlyAssists, monthlyMatches,
     };
   }, [playerMatches, playerId]);

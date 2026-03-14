@@ -1,7 +1,6 @@
 "use client";
 import { useMemo, useState, useEffect } from "react";
-import { Users, TrendingUp, Calendar, Award, Trophy, Target, Shield, MapPin, Star, Clock } from "lucide-react";
-import Link from "next/link";
+import { TrendingUp, Calendar, Award, Trophy, Target, MapPin, Star, Clock } from "lucide-react";
 import Image from "next/image";
 import { useAppData } from "@/lib/app-data";
 import { Match } from "@/types/match";
@@ -152,6 +151,9 @@ export default function DashboardPage() {
     const map = new Map<string, { name: string; goals: number; matches: number }>();
     for (const match of playedMatches) {
       for (const ps of match.playerStats) {
+        const sl = (ps.participationStatus || "").trim().toLowerCase();
+        const isPlayed = !sl || (!sl.includes("süre almadı") && !sl.includes("süre yok") && (sl.includes("ana kadro") || sl.includes("yedek") || sl.includes("sonradan")));
+        if (!isPlayed) continue;
         const prev = map.get(ps.playerId) || { name: ps.playerName, goals: 0, matches: 0 };
         prev.goals += ps.goals;
         prev.matches += 1;
@@ -171,6 +173,9 @@ export default function DashboardPage() {
     const map = new Map<string, { name: string; assists: number; matches: number }>();
     for (const match of playedMatches) {
       for (const ps of match.playerStats) {
+        const sl = (ps.participationStatus || "").trim().toLowerCase();
+        const isPlayed = !sl || (!sl.includes("süre almadı") && !sl.includes("süre yok") && (sl.includes("ana kadro") || sl.includes("yedek") || sl.includes("sonradan")));
+        if (!isPlayed) continue;
         const prev = map.get(ps.playerId) || { name: ps.playerName, assists: 0, matches: 0 };
         prev.assists += ps.assists;
         prev.matches += 1;
@@ -745,50 +750,6 @@ export default function DashboardPage() {
               ))}
             </div>
           )}
-        </div>
-      </div>
-
-      {/* Modules Grid */}
-      <div>
-        <h2 className="text-lg font-semibold text-[#1a1a2e] mb-4">Modüller</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          <Link
-            href="/dashboard/players"
-            className="group bg-white border border-[#e2e5e9] rounded-xl p-6 hover:border-[#c4111d]/30 hover:shadow-lg hover:shadow-[#c4111d]/5 transition-all duration-200"
-          >
-            <div className="flex items-start gap-4">
-              <div className="w-12 h-12 rounded-xl bg-red-50 flex items-center justify-center shrink-0 group-hover:bg-[#c4111d]/15 transition-colors">
-                <Users size={24} className="text-[#c4111d]" />
-              </div>
-              <div className="min-w-0">
-                <h3 className="text-base font-semibold text-[#1a1a2e] group-hover:text-[#c4111d] transition-colors">
-                  Oyuncular
-                </h3>
-                <p className="text-sm text-[#5a6170] mt-1">
-                  Tüm oyuncuları görüntüle, ekle ve düzenle
-                </p>
-              </div>
-            </div>
-          </Link>
-
-          <Link
-            href="/dashboard/teams"
-            className="group bg-white border border-[#e2e5e9] rounded-xl p-6 hover:border-[#c4111d]/30 hover:shadow-lg hover:shadow-[#c4111d]/5 transition-all duration-200"
-          >
-            <div className="flex items-start gap-4">
-              <div className="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center shrink-0 group-hover:bg-blue-100 transition-colors">
-                <Shield size={24} className="text-blue-600" />
-              </div>
-              <div className="min-w-0">
-                <h3 className="text-base font-semibold text-[#1a1a2e] group-hover:text-[#c4111d] transition-colors">
-                  Takımlar & Maçlar
-                </h3>
-                <p className="text-sm text-[#5a6170] mt-1">
-                  Maç sonuçları ve takım istatistikleri
-                </p>
-              </div>
-            </div>
-          </Link>
         </div>
       </div>
 
