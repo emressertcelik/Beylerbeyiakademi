@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import Image from "next/image";
 import {
   ChevronLeft,
@@ -17,6 +17,7 @@ import {
   CheckSquare,
   Pencil,
   Check,
+  FileDown,
 } from "lucide-react";
 import { useAppData } from "@/lib/app-data";
 import { getPositionAbbr, getPositionColors, comparePositions } from "@/lib/positions";
@@ -190,6 +191,82 @@ export default function AntrenmanProgramiPage() {
 
   // Haftanın başlangıç günü (Pazartesi)
   const [weekStart, setWeekStart] = useState<Date>(() => getWeekStart(new Date()));
+
+  // PDF ref
+  const tableRef = useRef<HTMLDivElement>(null);
+  const [pdfLoading, setPdfLoading] = useState(false);
+
+  async function exportPDF() {
+    if (!tableRef.current) return;
+    setPdfLoading(true);
+    try {
+      const html2canvas = (await import("html2canvas-pro")).default;
+      const { jsPDF } = await import("jspdf");
+
+      const weekEnd = new Date(weekStart);
+      weekEnd.setDate(weekEnd.getDate() + 6);
+      const weekLabel = trainingWeekNumber
+        ? `${trainingWeekNumber}. Hafta Programı`
+        : `${formatDisplayDate(weekStart)} - ${formatDisplayDate(weekEnd)}`;
+
+      // Başlık HTML'i geçici olarak DOM'a ekle, birlikte yakala
+      const wrapper = document.createElement("div");
+      wrapper.style.cssText = "background:#fff;padding:12px 16px 0 16px;font-family:sans-serif;";
+
+      const header = document.createElement("div");
+      header.style.cssText = "display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;";
+      header.innerHTML = `
+        <div>
+          <div style="font-size:14px;font-weight:700;color:#1a1a2e;">Beylerbeyi Akademi Antrenman Programı</div>
+          <div style="font-size:10px;color:#8c919a;margin-top:2px;">${activeSeason} &nbsp;|&nbsp; ${formatDisplayDate(weekStart)} - ${formatDisplayDate(weekEnd)}</div>
+        </div>
+        <div style="font-size:13px;font-weight:800;color:#c4111d;white-space:nowrap;">${weekLabel}</div>
+      `;
+
+      const divider = document.createElement("div");
+      divider.style.cssText = "height:1px;background:#e2e5e9;margin-bottom:8px;";
+
+      const tableClone = tableRef.current.cloneNode(true) as HTMLElement;
+      tableClone.style.cssText = "border-radius:0;box-shadow:none;overflow:visible;";
+
+      wrapper.appendChild(header);
+      wrapper.appendChild(divider);
+      wrapper.appendChild(tableClone);
+
+      document.body.appendChild(wrapper);
+
+      const canvas = await html2canvas(wrapper, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: "#ffffff",
+        logging: false,
+      });
+
+      document.body.removeChild(wrapper);
+
+      const imgData = canvas.toDataURL("image/png");
+      const pdf = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
+      const pageW = pdf.internal.pageSize.getWidth();
+      const pageH = pdf.internal.pageSize.getHeight();
+      const margin = 8;
+      const availW = pageW - margin * 2;
+      const availH = pageH - margin * 2;
+      const imgW = canvas.width;
+      const imgH = canvas.height;
+      const scale = Math.min(availW / imgW, availH / imgH);
+
+      pdf.addImage(imgData, "PNG", margin, margin, imgW * scale, imgH * scale);
+
+      const fileName = trainingWeekNumber
+        ? `${trainingWeekNumber}.Hafta Programı.pdf`
+        : `Antrenman Programı ${formatDisplayDate(weekStart)}.pdf`;
+      pdf.save(fileName);
+    } catch (e) {
+      console.error("PDF oluşturulamadı:", e);
+    } finally {
+      setPdfLoading(false);
+    }
+  }
 
   // Programlar: key → TrainingSchedule
   const [schedules, setSchedules] = useState<Record<string, TrainingSchedule>>({});
@@ -545,6 +622,22 @@ export default function AntrenmanProgramiPage() {
         {/* Sağ: kontroller */}
         <div className="flex items-center gap-2 flex-wrap">
 
+          {/* PDF çıktı */}
+          <button
+            onClick={exportPDF}
+            disabled={pdfLoading || loading}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#e5e7eb] bg-white text-xs font-semibold text-[#6b7280] hover:bg-[#f9fafb] hover:text-[#c4111d] hover:border-[#c4111d]/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {pdfLoading ? (
+              <div className="w-3.5 h-3.5 border-2 border-[#c4111d] border-t-transparent rounded-full animate-spin" />
+            ) : (
+              <FileDown size={13} />
+            )}
+            PDF
+          </button>
+
+          <div className="w-px h-5 bg-[#e5e7eb]" />
+
           {/* Çoklu seçim */}
           <button
             onClick={toggleMultiSelectMode}
@@ -618,7 +711,7 @@ export default function AntrenmanProgramiPage() {
       )}
 
       {/* ── Grid tablosu ───────────────────────────────── */}
-      <div className="overflow-x-auto rounded-2xl border border-[#d1d5db] shadow-md bg-white">
+      <div ref={tableRef} className="overflow-x-auto rounded-2xl border border-[#d1d5db] shadow-md bg-white">
         <table className="w-full border-collapse table-fixed" style={{ minWidth: 640 }}>
 
           {/* ── Başlık satırı ── */}
