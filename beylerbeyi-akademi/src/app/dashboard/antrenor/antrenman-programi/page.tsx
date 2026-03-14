@@ -211,7 +211,7 @@ export default function AntrenmanProgramiPage() {
 
       // Başlık HTML'i geçici olarak DOM'a ekle, birlikte yakala
       const wrapper = document.createElement("div");
-      wrapper.style.cssText = "background:#fff;padding:12px 16px 0 16px;font-family:sans-serif;";
+      wrapper.style.cssText = "background:#fff;padding:12px 16px 0 16px;font-family:sans-serif;width:1100px;min-width:1100px;";
 
       const header = document.createElement("div");
       header.style.cssText = "display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;";
@@ -247,9 +247,7 @@ export default function AntrenmanProgramiPage() {
       const imgData = canvas.toDataURL("image/png");
       const imgW = canvas.width;
       const imgH = canvas.height;
-      // Görsel oranına göre yatay/dikey otomatik seç
-      const orientation = imgW >= imgH ? "landscape" : "portrait";
-      const pdf = new jsPDF({ orientation, unit: "mm", format: "a4" });
+      const pdf = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
       const pageW = pdf.internal.pageSize.getWidth();
       const pageH = pdf.internal.pageSize.getHeight();
       const margin = 8;
